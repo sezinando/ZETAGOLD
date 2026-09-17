@@ -2,6 +2,10 @@
 #define EAGOLD_MODULARIZATION_PANEL_MQH
 
 string EAGOLD_MOD_PANEL_PREFIX="EAGOLD_MOD_";
+double g_modPanelMinProfit=0.0;
+double g_modPanelMaxProfit=0.0;
+double g_modPanelMaxLots=0.0;
+bool g_modPanelInitialized=false;
 
 void EAGOLD_ModPanelLabel(string id,string text,int row,color clr)
 {
