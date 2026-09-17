@@ -14,6 +14,8 @@ string EA_NAME="EAGOLD";string R10_MARKER_PREFIX="EAGOLD_R10_MARKER_";string ENG
 #include "../Engines/EAGOLD_R10_Reconciliation.mqh"
 #include "../Engines/EAGOLD_Engine1_LifecycleRecovery_v0116.mqh"
 #include "../Engines/EAGOLD_Engine2_Exposure_v0116.mqh"
+#include "../Core/EAGOLD_R1_AtomicAdmission.mqh"
+#include "../Core/EAGOLD_R7_KeepAlive.mqh"
 double PointsToPrice(double points){return(points*Point);}double NormalizePrice(double price){return(NormalizeDouble(price,Digits));}double NormalizeLot(double lot){if(lot<Lot)lot=Lot;if(MaxOpenLot>0.0&&lot>MaxOpenLot)lot=MaxOpenLot;return(NormalizeDouble(lot,DigitsLots));}
 void EAGOLD_ResetTickTransaction(){g_eagoldTickPolicy=EAGOLD_TICK_CONTINUE;}
 bool EAGOLD_EconomicExecutionAllowed(){return(g_eagoldTickPolicy==EAGOLD_TICK_CONTINUE);}
