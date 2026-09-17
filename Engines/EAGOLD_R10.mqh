@@ -2,7 +2,7 @@
 #define EAGOLD_R10_MQH
 
 // Compatibility shim.
-// R10 is now physically consolidated into Engine 2 — Exposure Management.
-#include "EAGOLD_Engine2_Exposure.mqh"
+// R10 remains exposed through the active Engine 2 composition layer.
+#include "EAGOLD_Engine2_Exposure_v0116.mqh"
 
 #endif
