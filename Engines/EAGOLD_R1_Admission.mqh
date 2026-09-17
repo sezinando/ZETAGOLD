@@ -2,7 +2,7 @@
 #define EAGOLD_R1_ADMISSION_MQH
 
 // Compatibility shim.
-// R1 admission is now physically consolidated into Engine 1 — Lifecycle & Recovery.
-#include "EAGOLD_Engine1_LifecycleRecovery.mqh"
+// R1 admission remains exposed through the active Engine 1 composition layer.
+#include "EAGOLD_Engine1_LifecycleRecovery_v0116.mqh"
 
 #endif
