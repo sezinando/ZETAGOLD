@@ -4,6 +4,9 @@
 #include "../Core/EAGOLD_Config.mqh"
 #include "../Core/EAGOLD_ActionContract.mqh"
 #include "../Core/EAGOLD_Orders.mqh"
+bool IsR13Order();
+bool IsR13OwnershipConfigurationValid();
+bool EAGOLDValidateOwnershipConfiguration();
 #include "../Core/EAGOLD_R12_RegimeObserver.mqh"
 #include "../Core/EAGOLD_ExcursionTracker.mqh"
 #include "../Core/EAGOLD_CounterfactualPathTelemetry.mqh"
