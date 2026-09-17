@@ -497,21 +497,116 @@ Telemetry
 
 ## 17. Estado do estudo
 
-### Concluído
+### ETAPA 5 — Reduce Ratio e Reduce Capacity — CONCLUÍDA
 
-- Anatomia do R10 atual;
-- distinção entre margem e capital de redução;
-- conceito de capital interno;
-- Balanced Reduce;
-- Position Adjustment;
-- PA-1 / PA-2;
-- seleção de tickets;
-- Farthest/Worst Candidate;
-- Reduction Budget;
+Foi estabelecida a separação entre:
+
+- **CandidateReduce** — quantidade sugerida pelo Reduce Ratio;
+- **CapacityReduce** — quantidade máxima permitida pelas restrições;
+- **AuthorizedReduce** — quantidade final, após capital, exposição, R11 e normalização do broker.
+
+Ratios experimentais estudados:
+
+```
+1/4
+1/5
+1/6
+1/7
+1/8
+1/10
+```
+
+Nenhum ratio foi escolhido como regra definitiva.
+
+---
+
+### ETAPA 6 — Recovery Capital / Reduction Budget — CONCLUÍDA
+
+Foi formalizado o **Reduction Capital Ledger** para evitar double counting e preservar a identidade econômica do capital.
+
+Estados conceituais:
+
+```
+GENERATED → ELIGIBLE → RESERVED → CONSUMED
+                         ↓
+                      RELEASED
+```
+
+Cada evento deve permitir distinguir:
+
+- RealizedProfitGenerated;
+- CapitalEligible;
+- CapitalReserved;
+- CapitalConsumed;
+- CapitalReleased;
+- CapitalRemaining.
+
+Fontes candidatas: lucro realizado elegível, resultado líquido de operações R10 e capital de recuperação explicitamente autorizado pelo R13.
+
+**Regra:** o mesmo resultado realizado não pode ser contabilizado duas vezes em RealizationCascade e R10 Budget.
+
+---
+
+### ETAPA 7 — Opportunity Filter — CONCLUÍDA
+
+Foi definida uma decisão em camadas:
+
+```
+Eligibility
+→ Capital
+→ Structural Benefit
+→ Economic Cost
+→ Governance
+→ Execution
+```
+
+Tipos de oportunidade:
+
+- **OPP-1 Balanced Reduction** — reduzir GROSS preservando NET quando desejável;
+- **OPP-2 Position Adjustment** — reduzir carga estrutural de posições adversas;
+- **OPP-3 Directional Reduction** — reduzir excesso de exposição direcional quando permitido.
+
+Dimensões observáveis:
+
 - Exposure Relief;
-- Recovery Load como hipótese;
-- integração conceitual com R11 e R13;
-- invariantes principais.
+- Net Exposure Preservation;
+- Recovery Load Relief;
+- Structural Improvement;
+- Recovery Capacity Improvement;
+- Execution Cost.
+
+Foi rejeitada a utilização prematura de um score único.
+
+---
+
+### ETAPA 8 — Target Selection Engine — CONCLUÍDA
+
+O R10 primeiro identifica o **objetivo da redução**, depois constrói o **Candidate Set** e somente então seleciona o alvo.
+
+Critérios estudados:
+
+- Farthest;
+- Worst Loss;
+- Loss Per Lot;
+- Recovery Load;
+- Concentration;
+- Structural Impact;
+- Easy / Hard.
+
+Para Balanced Reduce, o alvo passa a ser um par BUY/SELL compatível, e a redução comum fica limitada pela menor capacidade elegível dos dois lados, capital, R11 e restrições do broker.
+
+A seleção deve produzir um plano explicável contendo, conceitualmente:
+
+- Objective;
+- Target Ticket(s);
+- Requested Lots;
+- Authorized Lots;
+- Selection Policy;
+- Capital Source;
+- Expected Exposure Relief;
+- Expected Recovery Load Relief.
+
+---
 
 ### Ainda não definido
 
@@ -529,47 +624,48 @@ Telemetry
 
 ## 18. Próximas etapas
 
-### ETAPA 5
-**Reduce Ratio e capacidade de redução**
-
-Comparar 1/4, 1/5, 1/6, 1/7, 1/8 e 1/10.
-
-### ETAPA 6
-**Recovery Capital / Reduction Budget**
-
-Definir exatamente quais realizações podem financiar cada tipo de redução.
-
-### ETAPA 7
-**Reduction Plan**
-
-Definir como selecionar um ou vários tickets.
-
-### ETAPA 8
-**Consolidação / oportunidade de ajuste**
-
-Definir condições objetivas para permitir ajuste estrutural.
-
 ### ETAPA 9
-**R11 Governor**
+**Structural Impact & Average Adjustment**
 
-Determinar a capacidade máxima permitida.
+Estudar matematicamente como redução parcial e seleção de tickets alteram:
+
+- weighted average;
+- composição da cesta;
+- distribuição de volume;
+- distância média;
+- Recovery Load;
+- capacidade de recuperação;
+- Break-Even estrutural.
+
+**Próximo ponto oficial do estudo.**
 
 ### ETAPA 10
-**Instrumentação sem mudança de comportamento**
+**R11 Governor**
 
-Registrar o que o novo R10 teria feito sem executar.
+Determinar como o governador limita a redução autorizável sem assumir a decisão econômica do R10.
 
 ### ETAPA 11
-**Backtest comparativo**
+**Shadow / Counterfactual Instrumentation**
 
-Comparar R10 atual × R10 instrumentado × R10 v2.
+Registrar o que o R10 v2 teria decidido sem alterar o comportamento real do EA.
 
 ### ETAPA 12
-**Implementação controlada**
+**Backtest Comparativo**
 
-Somente após validação.
+Comparar:
 
----
+```
+R10 atual
+vs
+R10 instrumentado
+vs
+R10 v2
+```
+
+### ETAPA 13
+**Implementação Controlada**
+
+Somente após a validação dos resultados.
 
 ## 19. Critérios de validação futura
 
