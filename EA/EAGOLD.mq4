@@ -12,6 +12,7 @@
 #include "../Core/EAGOLD_Execution.mqh"
 string EA_NAME="EAGOLD";string R10_MARKER_PREFIX="EAGOLD_R10_MARKER_";string ENGINE_MARKER_PREFIX="EAGOLD_ENGINE_";string STATE_PREFIX="EAGOLD_STATE_";bool g_r9HedgeActive=false;int g_r9ProcessedTickets[];datetime g_r10LastAction=0;string g_r1LastDecision="DISABLED";string g_r1LastReason="";datetime g_r1LastDecisionTime=0;bool g_r10RecoveryCycleActive=false;double g_r10RecoveryStartEquity=0.0;double g_r10RecoveryWorstEquity=0.0;EAGOLD_TickPolicy g_eagoldTickPolicy=EAGOLD_TICK_CONTINUE;
 #include "../Engines/EAGOLD_R10_Reconciliation.mqh"
+#include "../Engines/EAGOLD_R1_Admission_v0116.mqh"
 #include "../Engines/EAGOLD_Engine1_LifecycleRecovery_v0116.mqh"
 #include "../Engines/EAGOLD_Engine2_Exposure_v0116.mqh"
 #include "../Core/EAGOLD_R1_AtomicAdmission.mqh"
