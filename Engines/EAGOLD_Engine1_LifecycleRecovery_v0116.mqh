@@ -6,11 +6,12 @@
 // ZETAGOLD / EAGOLD v0.116 parity composition layer.
 //
 // This file establishes ownership without redesigning economic rules.
-// The underlying v0.116 implementations remain authoritative:
-//   - R1 admission / atomic first seed
+// The underlying consolidated lifecycle/recovery implementation remains
+// authoritative for the v0.116-compatible behavior:
+//   - R1 admission support
 //   - R4 single realization
 //   - R5 / BRX basket realization
-//   - R7 keep-alive
+//   - R7 lifecycle/keep-alive compatibility
 //   - Recovery / R10.2 accounting
 //   - R11 dynamic recovery step
 //   - global pending trailing
@@ -18,22 +19,14 @@
 //
 // Core broker mutation primitives remain in Core/Execution.
 // Action Contract and Reconciliation remain cross-cutting infrastructure.
+//
+// The implementation is included directly to avoid a compatibility-shim
+// cycle (R1/Recovery/Lifecycle -> Engine1 -> R1/Recovery/Lifecycle).
+// Transactional v0.116 R1 and R7 authorities are layered explicitly below.
 //==================================================================
 
-// R1 admission predicates are consumed by the atomic first-seed transaction.
-#include "EAGOLD_R1_Admission.mqh"
-
-// Recovery contains R10.2 recovery state and the dynamic recovery step (R11).
-#include "EAGOLD_Recovery.mqh"
-
-// Lifecycle contains R4/R5/BRX realization, global pending trailing,
-// compatibility lifecycle helpers, and BUY/SELL machine orchestration.
-#include "EAGOLD_Lifecycle.mqh"
-
-// Atomic R1 is the sole flat-cycle first-seed authority in v0.116.
+#include "EAGOLD_Engine1_LifecycleRecovery.mqh"
 #include "../Core/EAGOLD_R1_AtomicAdmission.mqh"
-
-// R7 is the transactional missing-direction restart authority.
 #include "../Core/EAGOLD_R7_KeepAlive.mqh"
 
 #endif
