@@ -7,19 +7,43 @@ double g_modPanelMaxProfit=0.0;
 double g_modPanelMaxLots=0.0;
 bool g_modPanelInitialized=false;
 
+string EAGOLD_ModPanelMoney(double value){return(DoubleToString(value,2));}
+string EAGOLD_ModPanelLots(double value){return(DoubleToString(value,2));}
+string EAGOLD_ModPanelBool(bool value){return(value?"ON":"OFF");}
+
+double EAGOLD_ModPanelWeightedBE(int direction)
+{
+   double lots=0.0,weighted=0.0;
+   for(int i=OrdersTotal()-1;i>=0;i--)
+   {
+      if(!OrderSelect(i,SELECT_BY_POS,MODE_TRADES))continue;
+      if(!IsEAGOLDOrder())continue;
+      if(OrderType()!=direction)continue;
+      lots+=OrderLots();
+      weighted+=OrderOpenPrice()*OrderLots();
+   }
+   if(lots<=0.0)return(0.0);
+   return(NormalizePrice(weighted/lots));
+}
+
+string EAGOLD_ModPanelBRXMode()
+{
+   if(!EnableBasketRealization)return("OFF");
+   if(BRXRealizationMode==0)return("LEGACY");
+   if(BRXRealizationMode==1)return("DIRECTIONAL");
+   if(BRXRealizationMode==2)return("BIDIRECTIONAL");
+   return("HYBRID");
+}
+
+string EAGOLD_ModPanelR13Regime(){return(R13RegimeName(g_r13Observer.regime));}
+
 void EAGOLD_ModPanelLabel(string id,string text,int row,color clr)
 {
    string name=EAGOLD_MOD_PANEL_PREFIX+id;
    if(ObjectFind(0,name)<0)
    {
-      if(!ObjectCreate(0,name,OBJ_LABEL,0,0,0))
-      {
-         Print("EAGOLD MOD PANEL: ObjectCreate failed id=",id," error=",GetLastError());
-         return;
-      }
+      if(!ObjectCreate(0,name,OBJ_LABEL,0,0,0))return;
       ObjectSetInteger(0,name,OBJPROP_CORNER,CORNER_LEFT_UPPER);
-      ObjectSetInteger(0,name,OBJPROP_XDISTANCE,12);
-      ObjectSetInteger(0,name,OBJPROP_YDISTANCE,12+row*17);
       ObjectSetInteger(0,name,OBJPROP_FONTSIZE,9);
       ObjectSetString(0,name,OBJPROP_FONT,"Consolas");
       ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
@@ -29,36 +53,136 @@ void EAGOLD_ModPanelLabel(string id,string text,int row,color clr)
    }
    ObjectSetString(0,name,OBJPROP_TEXT,text);
    ObjectSetInteger(0,name,OBJPROP_COLOR,clr);
+   ObjectSetInteger(0,name,OBJPROP_XDISTANCE,14);
+   ObjectSetInteger(0,name,OBJPROP_YDISTANCE,10+row*17);
+}
+
+void EAGOLD_ModPanelBackground(bool visible,int height)
+{
+   string name=EAGOLD_MOD_PANEL_PREFIX+"BG";
+   if(!visible){if(ObjectFind(0,name)>=0)ObjectDelete(0,name);return;}
+   if(ObjectFind(0,name)<0)
+   {
+      if(!ObjectCreate(0,name,OBJ_RECTANGLE_LABEL,0,0,0))return;
+      ObjectSetInteger(0,name,OBJPROP_CORNER,CORNER_LEFT_UPPER);
+      ObjectSetInteger(0,name,OBJPROP_ANCHOR,ANCHOR_LEFT_UPPER);
+      ObjectSetInteger(0,name,OBJPROP_BGCOLOR,clrBlack);
+      ObjectSetInteger(0,name,OBJPROP_COLOR,clrDimGray);
+      ObjectSetInteger(0,name,OBJPROP_BORDER_TYPE,BORDER_FLAT);
+      ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
+      ObjectSetInteger(0,name,OBJPROP_SELECTED,false);
+      ObjectSetInteger(0,name,OBJPROP_HIDDEN,true);
+      ObjectSetInteger(0,name,OBJPROP_BACK,false);
+      ObjectSetInteger(0,name,OBJPROP_ZORDER,999);
+   }
+   ObjectSetInteger(0,name,OBJPROP_XDISTANCE,6);
+   ObjectSetInteger(0,name,OBJPROP_YDISTANCE,4);
+   ObjectSetInteger(0,name,OBJPROP_XSIZE,PanelBackgroundWidth);
+   ObjectSetInteger(0,name,OBJPROP_YSIZE,height);
 }
 
 void EAGOLD_ModPanelUpdate()
 {
-   EAGOLD_ModPanelLabel("TITLE","EAGOLD MODULARIZATION",0,clrWhite);
-   EAGOLD_ModPanelLabel("SEP","========================",1,clrSilver);
-   EAGOLD_ModPanelLabel("S1","[DONE] 01 CORE / ORDERS",2,clrLime);
-   EAGOLD_ModPanelLabel("S2","[DONE] 02 CORE / EXECUTION",3,clrLime);
-   EAGOLD_ModPanelLabel("S3","[DONE] 03 PERSISTENCE",4,clrLime);
-   EAGOLD_ModPanelLabel("S4","[DONE] 04 R9 EXPOSURE",5,clrLime);
-   EAGOLD_ModPanelLabel("S5","[DONE] 05 R10 INTEGRATION",6,clrLime);
-   EAGOLD_ModPanelLabel("S6","[DONE] 06 RECOVERY",7,clrLime);
-   EAGOLD_ModPanelLabel("S7","[DONE] 07 LIFECYCLE",8,clrLime);
-   EAGOLD_ModPanelLabel("S8","[DONE] 08 R1 ADMISSION",9,clrLime);
-   EAGOLD_ModPanelLabel("PROG","PROGRESS: 8 / 8  (100.0%)",10,clrAqua);
-   EAGOLD_ModPanelLabel("STATUS","STATUS: MODULE LOADED / RUNNING",11,clrLime);
-   EAGOLD_ModPanelLabel("ORDERS","ORDERS: "+IntegerToString(CountEAGOLDOrders()),12,clrAqua);
-   EAGOLD_ModPanelLabel("HEART","HEARTBEAT: "+TimeToString(TimeCurrent(),TIME_SECONDS),13,clrWhite);
-   EAGOLD_ModPanelLabel("BASE","BASELINE: v0.106",14,clrSilver);
+   if(!EnableModularizationPanel){EAGOLD_ModPanelDelete();return;}
+   RefreshRates();
+   int buyCount=0,sellCount=0,buyPending=0,sellPending=0;
+   double buyLots=0.0,sellLots=0.0,buyProfit=0.0,sellProfit=0.0;
+   for(int i=OrdersTotal()-1;i>=0;i--)
+   {
+      if(!OrderSelect(i,SELECT_BY_POS,MODE_TRADES))continue;
+      if(!IsEAGOLDOrder())continue;
+      int type=OrderType();
+      if(type==OP_BUY){buyCount++;buyLots+=OrderLots();buyProfit+=OrderProfit()+OrderSwap()+OrderCommission();}
+      else if(type==OP_SELL){sellCount++;sellLots+=OrderLots();sellProfit+=OrderProfit()+OrderSwap()+OrderCommission();}
+      else if(type==OP_BUYSTOP)buyPending++;
+      else if(type==OP_SELLSTOP)sellPending++;
+   }
+   double totalProfit=buyProfit+sellProfit;
+   double grossLots=buyLots+sellLots;
+   double netLots=MathAbs(buyLots-sellLots);
+   double todayProfit=EAGOLDTodayProfit();
+   double balance=AccountBalance(),equity=AccountEquity();
+   double currentDD=MathMax(0.0,balance-equity);
+   double ddPct=equity>0.0?(currentDD/equity)*100.0:0.0;
+   double spreadPoints=(Ask-Bid)/Point;
+   bool spreadAlert=(SpreadLimit>0 && spreadPoints>SpreadLimit);
+   int recoveryLevel=MathMax(RecoveryLevel(OP_BUY),RecoveryLevel(OP_SELL));
+   int displayDirection=HeavyDirection();
+   if(displayDirection<0)displayDirection=OP_BUY;
+   int displayLevel=RecoveryLevel(displayDirection);
+   double recoveryDebt=R10RecoveryDebt();
+   double recoveryRemaining=R10RecoveryRemainingDebt();
+   if(!g_modPanelInitialized)
+   {
+      string minKey=StateKey("PANEL_MIN_PROFIT"),maxProfitKey=StateKey("PANEL_MAX_PROFIT"),maxLotsKey=StateKey("MAX_ACCUM_LOTS");
+      g_modPanelMinProfit=GlobalVariableCheck(minKey)?GlobalVariableGet(minKey):totalProfit;
+      g_modPanelMaxProfit=GlobalVariableCheck(maxProfitKey)?GlobalVariableGet(maxProfitKey):totalProfit;
+      g_modPanelMaxLots=GlobalVariableCheck(maxLotsKey)?GlobalVariableGet(maxLotsKey):grossLots;
+      g_modPanelInitialized=true;
+   }
+   bool extremaChanged=false;
+   if(totalProfit<g_modPanelMinProfit){g_modPanelMinProfit=totalProfit;extremaChanged=true;}
+   if(totalProfit>g_modPanelMaxProfit){g_modPanelMaxProfit=totalProfit;extremaChanged=true;}
+   if(grossLots>g_modPanelMaxLots){g_modPanelMaxLots=grossLots;extremaChanged=true;}
+   if(extremaChanged)PersistPanelExtrema(g_modPanelMinProfit,grossLots,g_modPanelMaxProfit);
+   g_panelMinProfit=g_modPanelMinProfit;
+   g_panelMaxProfit=g_modPanelMaxProfit;
+   g_panelMaxLots=g_modPanelMaxLots;
+   g_panelInitialized=g_modPanelInitialized;
+
+   int row=0;
+   EAGOLD_ModPanelBackground(true,EnableModularizationDebug?670:550);
+   EAGOLD_ModPanelLabel("TITLE",StringFormat("EAGOLD v%s | OPERATIONAL PANEL",EAGOLD_VERSION),row++,clrWhite);
+   EAGOLD_ModPanelLabel("SEP1","----------------------------------------------",row++,clrDimGray);
+   EAGOLD_ModPanelLabel("IDENT",MagicNumber==-1?StringFormat("SYMBOL %-8s   MAGIC %4d   | TODOS",Symbol(),MagicNumber):StringFormat("SYMBOL %-8s   MAGIC %4d",Symbol(),MagicNumber),row++,MagicNumber==-1?clrYellow:clrAqua);
+   EAGOLD_ModPanelLabel("MARKET",StringFormat("BID %10s   ASK %10s",DoubleToString(Bid,Digits),DoubleToString(Ask,Digits)),row++,clrWhite);
+   EAGOLD_ModPanelLabel("SPREAD",StringFormat("SPREAD %6.1f pts   LIMIT %3d",spreadPoints,SpreadLimit),row++,spreadAlert?clrTomato:clrLime);
+   EAGOLD_ModPanelLabel("SEP2","----------------------------------------------",row++,clrDimGray);
+   EAGOLD_ModPanelLabel("BUY",StringFormat("BUY  %3d pos   %6s lot   P/L %10s",buyCount,EAGOLD_ModPanelLots(buyLots),EAGOLD_ModPanelMoney(buyProfit)),row++,buyProfit>=0.0?clrLime:clrTomato);
+   EAGOLD_ModPanelLabel("SELL",StringFormat("SELL %3d pos   %6s lot   P/L %10s",sellCount,EAGOLD_ModPanelLots(sellLots),EAGOLD_ModPanelMoney(sellProfit)),row++,sellProfit>=0.0?clrLime:clrTomato);
+   EAGOLD_ModPanelLabel("EXPOS",StringFormat("GROSS %6s   NET %6s",EAGOLD_ModPanelLots(grossLots),EAGOLD_ModPanelLots(netLots)),row++,clrWhite);
+   EAGOLD_ModPanelLabel("PENDING",StringFormat("PENDING  BUY %3d   SELL %3d",buyPending,sellPending),row++,clrSilver);
+   EAGOLD_ModPanelLabel("SEP3","----------------------------------------------",row++,clrDimGray);
+   EAGOLD_ModPanelLabel("TOTAL",StringFormat("TOTAL P/L %14s",EAGOLD_ModPanelMoney(totalProfit)),row++,totalProfit>=0.0?clrLime:clrTomato);
+   EAGOLD_ModPanelLabel("EQUITY",StringFormat("EQUITY    %14s",EAGOLD_ModPanelMoney(equity)),row++,clrAqua);
+   EAGOLD_ModPanelLabel("ACCUM",StringFormat("LUCRO DO DIA %9s",EAGOLD_ModPanelMoney(todayProfit)),row++,todayProfit>=0.0?clrLime:clrTomato);
+   EAGOLD_ModPanelLabel("MIN",StringFormat("MENOR P/L   %11s",EAGOLD_ModPanelMoney(g_modPanelMinProfit)),row++,clrYellow);
+   EAGOLD_ModPanelLabel("MAXPROFIT",StringFormat("MAIOR P/L   %11s",EAGOLD_ModPanelMoney(g_modPanelMaxProfit)),row++,clrYellow);
+   EAGOLD_ModPanelLabel("LOTS",StringFormat("LOTES ATUAIS %9s",EAGOLD_ModPanelLots(grossLots)),row++,clrWhite);
+   EAGOLD_ModPanelLabel("MAXLOTS",StringFormat("MAIOR ACUM. %9s",EAGOLD_ModPanelLots(g_modPanelMaxLots)),row++,clrYellow);
+   EAGOLD_ModPanelLabel("DD",StringFormat("DD %11s  %6.2f%%",EAGOLD_ModPanelMoney(currentDD),ddPct),row++,currentDD>0.0?clrYellow:clrLime);
+   EAGOLD_ModPanelLabel("SEP4","----------------------------------------------",row++,clrDimGray);
+   bool r13Enabled=(EnableR13 && g_r13Observer.configValid),r13Eligible=g_r13Observer.eligible;
+   EAGOLD_ModPanelLabel("R13A",StringFormat("R13 %-3s   REG %-9s   ELIG %-3s",r13Enabled?"ON":"OFF",EAGOLD_ModPanelR13Regime(),r13Eligible?"YES":"NO"),row++,r13Eligible?clrLime:(r13Enabled?clrAqua:clrSilver));
+   EAGOLD_ModPanelLabel("R13B",StringFormat("R13 ATR %7.1f   RNG %7.1f   DRIFT %7.1f",g_r13Observer.atrPoints,g_r13Observer.rangePoints,g_r13Observer.driftPoints),row++,clrAqua);
+   EAGOLD_ModPanelLabel("R13C",StringFormat("R13 MEXP %5.2f   POS %2d   P/L %9s",g_r13Observer.masterExposureLots,g_r13Observer.satellitePositions,EAGOLD_ModPanelMoney(g_r13Observer.satelliteProfit)),row++,clrSilver);
+   EAGOLD_ModPanelLabel("HEDGE",StringFormat("HEDGE     %s",g_r9HedgeActive?"ATIVO":"INATIVO"),row++,g_r9HedgeActive?clrYellow:clrSilver);
+   EAGOLD_ModPanelLabel("R11",StringFormat("R11 STEP x %4.2f   L%-2d = %s",EnableRecoveryStepMultiplier?RecoveryStepMultiplier:1.00,displayLevel,EAGOLD_ModPanelLots(RecoveryStepForLevel(displayLevel))),row++,EnableRecoveryStepMultiplier?clrAqua:clrSilver);
+   EAGOLD_ModPanelLabel("REC",StringFormat("RECOVERY  B%-2d S%-2d L%-2d",RecoveryLevel(OP_BUY),RecoveryLevel(OP_SELL),recoveryLevel),row++,recoveryRemaining>0.0?clrYellow:clrLime);
+   EAGOLD_ModPanelLabel("RECD",StringFormat("DEBT %10s   REM %10s",EAGOLD_ModPanelMoney(recoveryDebt),EAGOLD_ModPanelMoney(recoveryRemaining)),row++,recoveryRemaining>0.0?clrYellow:clrSilver);
+   EAGOLD_ModPanelLabel("SEP5","----------------------------------------------",row++,clrDimGray);
+   EAGOLD_ModPanelLabel("BRX",StringFormat("BRX %-11s   DIR %6s   BI %6s",EAGOLD_ModPanelBRXMode(),EAGOLD_ModPanelMoney(BRXDirectionalMinProfit),EAGOLD_ModPanelMoney(BRXBidirectionalMinProfit)),row++,clrAqua);
+   EAGOLD_ModPanelLabel("TRAIL",StringFormat("TRAIL %-3s   CD %5.1fs   STEP %5.1f",EAGOLD_ModPanelBool(EnableGlobalStopTrail),GlobalStopTrailCooldownSeconds,GlobalStopTrailMinStepPoints),row++,EnableGlobalStopTrail?clrAqua:clrSilver);
+   EAGOLD_ModPanelLabel("TIME",StringFormat("TIME      %s",TimeToString(TimeCurrent(),TIME_SECONDS)),row++,clrSilver);
+   if(EnableModularizationDebug)
+   {
+      EAGOLD_ModPanelLabel("SEP6","============= DEBUG =============",row++,clrDimGray);
+      EAGOLD_ModPanelLabel("DBG1","MODULE STATUS: RUNNING",row++,clrLime);
+      EAGOLD_ModPanelLabel("DBG2",StringFormat("S1-S9: COMPLETE  | BASELINE v%s",EAGOLD_VERSION),row++,clrSilver);
+      EAGOLD_ModPanelLabel("DBG3","R1 DECISION: "+g_r1LastDecision,row++,clrWhite);
+      EAGOLD_ModPanelLabel("DBG4","R1 REASON: "+g_r1LastReason,row++,clrSilver);
+      EAGOLD_ModPanelLabel("DBG5","R1 TIME: "+(g_r1LastDecisionTime>0?TimeToString(g_r1LastDecisionTime,TIME_SECONDS):"-"),row++,clrSilver);
+      EAGOLD_ModPanelLabel("DBG6","R10 LAST ACTION: "+(g_r10LastAction>0?TimeToString(g_r10LastAction,TIME_SECONDS):"-"),row++,clrSilver);
+      EAGOLD_ModPanelLabel("DBG7","ORDERS TOTAL: "+IntegerToString(CountEAGOLDOrders()),row++,clrSilver);
+   }
    ChartRedraw(0);
 }
 
 void EAGOLD_ModPanelDelete()
 {
-   string ids[]={"TITLE","SEP","S1","S2","S3","S4","S5","S6","S7","S8","PROG","STATUS","ORDERS","HEART","BASE"};
-   for(int i=0;i<ArraySize(ids);i++)
-   {
-      string name=EAGOLD_MOD_PANEL_PREFIX+ids[i];
-      if(ObjectFind(0,name)>=0) ObjectDelete(0,name);
-   }
+   string ids[]={"TITLE","SEP1","IDENT","MARKET","SPREAD","SEP2","BUY","SELL","EXPOS","PENDING","SEP3","TOTAL","EQUITY","ACCUM","MIN","MAXPROFIT","LOTS","MAXLOTS","DD","SEP4","R13A","R13B","R13C","HEDGE","R11","REC","RECD","SEP5","BRX","TRAIL","TIME","SEP6","DBG1","DBG2","DBG3","DBG4","DBG5","DBG6","DBG7"};
+   for(int i=0;i<ArraySize(ids);i++){string name=EAGOLD_MOD_PANEL_PREFIX+ids[i];if(ObjectFind(0,name)>=0)ObjectDelete(0,name);}
+   string bg=EAGOLD_MOD_PANEL_PREFIX+"BG";if(ObjectFind(0,bg)>=0)ObjectDelete(0,bg);
 }
 
 #endif
