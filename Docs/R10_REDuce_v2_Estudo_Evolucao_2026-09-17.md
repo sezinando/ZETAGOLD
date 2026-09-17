@@ -608,17 +608,253 @@ A seleção deve produzir um plano explicável contendo, conceitualmente:
 
 ---
 
-### Ainda não definido
+### ETAPA 9 — Structural Impact & Average Adjustment — CONCLUÍDA
 
-- fórmula definitiva de Recovery Load;
-- fórmula definitiva de R10 Benefit;
-- política final de capital;
-- Reduce Ratio ótimo;
-- prioridade entre Balanced Reduce e Position Adjustment;
-- critérios objetivos de consolidação;
-- limites por ciclo/tick;
-- parâmetros finais;
-- impacto estatístico em backtests.
+Esta etapa definiu como medir o efeito estrutural de uma redução antes de transformar o conceito em regra operacional.
+
+#### 9.1 Weighted Average por direção
+
+Para uma direção com tickets (i=1..n):
+
+```
+WeightedAverage = Σ(Lots_i × OpenPrice_i) / Σ(Lots_i)
+```
+
+Para uma redução de `q` lotes do ticket `k`:
+
+```
+NewAverage =
+    (Σ(Lots_i × OpenPrice_i) - q × OpenPrice_k)
+    / (TotalLots - q)
+```
+
+A variação pode ser expressa como:
+
+```
+AverageDelta =
+    q × (AverageBefore - OpenPrice_k)
+    / (TotalLots - q)
+```
+
+Consequência importante:
+
+- reduzir parcialmente um único ticket **não altera o OpenPrice daquele ticket**;
+- o Weighted Average da direção somente muda quando a composição ponderada dos tickets muda;
+- retirar volume de um ticket acima da média desloca a média remanescente para baixo;
+- retirar volume de um ticket abaixo da média desloca a média remanescente para cima.
+
+Portanto, "Position Adjustment" deve distinguir **redução de volume** de **melhoria da composição média**.
+
+#### 9.2 Structural Impact
+
+O impacto estrutural de uma ação R10 será observado em dimensões independentes:
+
+```
+Volume Relief
+Gross Exposure Relief
+Net Exposure Change
+Weighted Average Delta
+Average Distance To Market
+Recovery Load Relief
+Concentration Change
+Recovery Capacity Change
+```
+
+Não será criado, nesta etapa, um score único.
+
+#### 9.3 Average Distance to Market
+
+Para uma direção:
+
+```
+AverageDistance =
+    Σ(Lots_i × |OpenPrice_i - MarketReference|)
+    / Σ(Lots_i)
+```
+
+A referência de mercado deverá ser definida de forma consistente com a direção e o instrumento; para estudo inicial, será usado o preço executável/relevante do lado da posição, evitando misturar referências entre cenários.
+
+#### 9.4 Recovery Load — refinamento
+
+A hipótese anterior:
+
+```
+Recovery Load ≈ Lots × Distance
+```
+
+foi refinada para uma forma agregada por ticket:
+
+```
+RecoveryLoad =
+    Σ(Lots_i × Distance_i)
+```
+
+E, quando convertido para unidade monetária:
+
+```
+RecoveryLoadMoney =
+    Σ(Lots_i × Distance_i × ValuePerPoint_i)
+```
+
+A fórmula continua sendo uma **métrica de estudo**, não uma regra econômica definitiva.
+
+O ganho estrutural de uma redução poderá ser medido por:
+
+```
+RecoveryLoadRelief =
+    RecoveryLoadBefore - RecoveryLoadAfter
+```
+
+#### 9.5 Basket Break-Even
+
+Não devemos confundir:
+
+- Weighted Average de BUY;
+- Weighted Average de SELL;
+- Break-Even da cesta completa.
+
+O Break-Even da cesta depende simultaneamente de:
+
+- volumes BUY e SELL;
+- preços de entrada;
+- preço atual;
+- valor por ponto;
+- spread;
+- swap;
+- comissão;
+- custos de execução.
+
+Logo, o R10 v2 deverá registrar separadamente:
+
+```
+BUY Weighted Average
+SELL Weighted Average
+Basket Net Exposure
+Basket Break-Even
+```
+
+O Basket Break-Even será tratado como resultado econômico derivado, e não como substituto do Weighted Average.
+
+#### 9.6 Position Adjustment — efeito desejável
+
+Uma redução seletiva somente deverá ser considerada estruturalmente favorável quando houver evidência mensurável em uma ou mais dimensões, por exemplo:
+
+```
+- menor Gross Exposure;
+- menor Recovery Load;
+- menor concentração em ticket adverso;
+- melhora da composição ponderada;
+- preservação controlada do Net Exposure;
+- aumento da Recovery Capacity.
+```
+
+Uma redução que apenas realiza prejuízo, sem produzir benefício estrutural observável, não deverá ser classificada automaticamente como oportunidade R10.
+
+#### 9.7 Balanced Reduce — efeito estrutural
+
+Para:
+
+```
+BUY = B
+SELL = S
+q = redução comum
+```
+
+temos:
+
+```
+BUY'  = B - q
+SELL' = S - q
+GROSS' = GROSS - 2q
+NET'   = NET
+```
+
+desde que `q` seja executado integralmente nos dois lados.
+
+Portanto, Balanced Reduce possui uma propriedade estrutural clara:
+
+> reduz GROSS Exposure sem alterar NET Exposure.
+
+Essa propriedade deverá ser preservada como hipótese principal do modo Balanced, mas sempre condicionada à execução efetiva das duas pernas e à política de risco.
+
+#### 9.8 Recovery Capacity
+
+A redução de volume pode aumentar a capacidade operacional de recuperação, mas isso não deve ser presumido.
+
+Para fins de estudo, serão registrados:
+
+```
+Recovery Capacity Before
+Recovery Capacity After
+Capacity Delta
+```
+
+A definição monetária/operacional dessa capacidade será refinada nas etapas seguintes.
+
+#### 9.9 Structural Impact Record
+
+Cada ação candidata do R10 v2 deverá poder gerar, em telemetria, um registro conceitual:
+
+```
+Action
+Objective
+Tickets
+RequestedLots
+AuthorizedLots
+
+GrossBefore
+GrossAfter
+GrossRelief
+
+NetBefore
+NetAfter
+NetDelta
+
+WeightedAverageBefore
+WeightedAverageAfter
+AverageDelta
+
+RecoveryLoadBefore
+RecoveryLoadAfter
+RecoveryLoadRelief
+
+BasketBreakEvenBefore
+BasketBreakEvenAfter
+
+RealizedP/L
+ExecutionCost
+CapitalConsumed
+```
+
+Esse registro será fundamental para o futuro Shadow/Counterfactual Instrumentation.
+
+#### 9.10 Conclusão da ETAPA 9
+
+A conclusão desta etapa é:
+
+> **R10 v2 não deve considerar uma redução "boa" apenas porque ela diminui lotes. Deve medir como a ação altera a estrutura remanescente da operação.**
+
+Assim, o fluxo conceitual passa a ser:
+
+```
+Opportunity
+    ↓
+Target Selection
+    ↓
+Structural Impact Projection
+    ↓
+Capital / R11 Authorization
+    ↓
+Reduction Plan
+    ↓
+Execution
+    ↓
+Reconciliation
+    ↓
+Structural Impact Actual
+```
+
+**Nenhuma mudança econômica foi implementada nesta etapa.**
 
 ---
 
@@ -699,4 +935,4 @@ O R10 v2 deverá ser comparado por:
 
 A implementação deverá preservar a arquitetura existente e ocorrer somente depois da modelagem e validação.
 
-**Próximo ponto oficial do estudo:** ETAPA 5 — Reduce Ratio e capacidade de redução.
+**Próximo ponto oficial do estudo:** ETAPA 10 — R11 Governor.
