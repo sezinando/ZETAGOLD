@@ -2258,3 +2258,131 @@ Objetivos:
 - projetar BUY/SELL/GROSS/NET antes/depois;
 - estabelecer a fronteira de reserva do capital;
 - garantir que uma autorização bilateral não produza uma perna órfã em execução parcial.
+
+
+## ETAPA 13.15 — Balanced Pair Projection & Capital Reservation Boundary — IMPLEMENTADA
+
+**Data:** 2026-09-18  
+**Branch:** `refactor/v0.116-engine12-parity`
+
+### Objetivo
+
+O Balanced Reduce deixou de ser tratado como uma redução de um único ticket. A oportunidade bilateral agora possui duas pernas explícitas:
+
+`BUY ticket + SELL ticket`
+
+A seleção é realizada antes da autorização e permanece read-only.
+
+Novo módulo:
+
+`Core/EAGOLD_R10_V2_BalancedPair.mqh`
+
+### Seleção do par
+
+O mecanismo procura explicitamente:
+
+- um ticket BUY elegível;
+- um ticket SELL elegível.
+
+A política de seleção do Balanced utiliza primeiro a maior distância ao mercado e, em empate, a maior perda por lote.
+
+A capacidade comum nasce do menor volume das duas pernas:
+
+`CommonCandidate = MIN(BuyLots, SellLots)`
+
+O REDUCE comum é calculado sobre essa capacidade, e não sobre o ticket mais pesado isoladamente.
+
+### Invariante bilateral
+
+Para uma redução comum autorizada `q`:
+
+`BUY'  = BUY  - q`
+
+`SELL' = SELL - q`
+
+`GROSS' = GROSS - 2q`
+
+`NET' = NET`
+
+A projeção bilateral rejeita o plano se a variação de NET ultrapassar a tolerância de normalização.
+
+### Capacidades
+
+A autorização bilateral é limitada simultaneamente por:
+
+- Desired Reduction;
+- Common Exposure Capacity;
+- R11 Capacity do BUY;
+- R11 Capacity do SELL;
+- Broker Capacity do BUY;
+- Broker Capacity do SELL;
+- Capital Capacity.
+
+A capacidade comum é, portanto, a interseção das restrições das duas pernas.
+
+A estrutura preserva pelo menos `Lot` em cada direção quando o R11 Reduction Governor está habilitado.
+
+### Projeção estrutural bilateral
+
+Novo registro `EAGOLD_R10V2BalancedProjection` calcula:
+
+- BUY Before / After;
+- SELL Before / After;
+- GROSS Before / After;
+- GROSS Relief;
+- NET Before / After;
+- NET Delta;
+- Recovery Load Before / After;
+- Recovery Load Relief;
+- média ponderada BUY antes/depois;
+- média ponderada SELL antes/depois.
+
+O Balanced somente pode cruzar a integridade de autorização quando a projeção é válida e existe benefício estrutural.
+
+### Capital Reservation Boundary
+
+A necessidade econômica de reserva é calculada proporcionalmente ao P/L realizado esperado das duas pernas para o volume comum:
+
+`ProjectedPairPL = q × (BuyPL/Lots + SellPL/Lots)`
+
+`CapitalRequired = MAX(0, -ProjectedPairPL)`
+
+Essa quantia passa a ser explicitamente exposta no Decision Contract como `capitalReservationRequired`.
+
+**Importante:** a reserva real ainda não é executada nesta etapa. O ponto de reserva está definido para ocorrer imediatamente antes do futuro handoff ao Execution Core.
+
+O princípio é:
+
+`Decision → Authorization → Reserve → Execute → Reconcile → Consume/Release`
+
+Assim, uma falha parcial não pode ser tratada como execução bilateral completa. O resultado do broker deverá determinar a quantidade realmente executada; o Action Contract/Reconciliation continuará sendo a autoridade pós-execução.
+
+### Segurança
+
+Esta etapa:
+
+- não chama `OrderClose`;
+- não altera ordens;
+- não reserva capital real;
+- não consome R13;
+- não altera Recovery State;
+- não promove o Balanced Reduce para execução real.
+
+### Commits
+
+- `ca821354349dd57116eba625a8e952c125337b18` — Add R10 v2 balanced pair selection boundary
+- `03ad1e4514bb45e977f6b6fdb7436261a402eccc` — Harden balanced common reduction sizing
+- `4f0c7f8d02438144cf9b5c0416ccfb7fc7a00465` — Add bilateral balanced structural projection
+- `7a706e6c075fe34fd49cc18ee8a8668f9006e92e` — Add explicit R10 v2 capital reservation field
+- `7169eca2accae61337815d2854875faf61e80623` — Expose balanced capital reservation requirement
+
+### Próxima fronteira
+
+**ETAPA 13.16 — Decision Contract Consolidation & Execution Boundary**
+
+Objetivo:
+
+- eliminar a atribuição manual de campos do Decision Contract no `OnTick()`;
+- fazer o Plan Builder receber o resultado autoritativo de target/capacidade/projeção;
+- manter uma única construção determinística do contrato;
+- preparar o handoff futuro para o Execution Core sem ainda ativar execução econômica do R10 v2.
