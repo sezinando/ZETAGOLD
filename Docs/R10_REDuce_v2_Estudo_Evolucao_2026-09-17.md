@@ -2527,3 +2527,129 @@ A validação final continua sendo feita no MetaEditor local.
 **ETAPA 13.17 — Decision Contract Validation & Pre-Execution Gate**
 
 Objetivo: validar sistematicamente o contrato completo antes de qualquer futuro handoff, incluindo coerência entre target(s), oportunidade, capacidades, projeção estrutural, capital requerido, volume autorizado e invariantes do Balanced Reduce, mantendo a execução econômica desativada.
+
+
+## ETAPA 13.17 — Decision Contract Validation & Pre-Execution Gate — IMPLEMENTADA
+
+**Data:** 2026-09-18  
+**Branch:** `refactor/v0.116-engine12-parity`
+
+### Objetivo
+
+Foi adicionada uma barreira explícita de validação entre o Decision Contract e o futuro Execution Adapter:
+
+```
+Decision Contract
+      ↓
+Pre-Execution Validation Gate
+      ↓
+Future Execution Adapter
+      ↓
+Execution Core
+```
+
+A etapa valida a coerência do contrato sem abrir a execução econômica.
+
+Novo módulo:
+
+`Core/EAGOLD_R10_V2_ContractValidation.mqh`
+
+### Validações implementadas
+
+O gate verifica, para contratos autorizados:
+
+- estado compatível com `AUTHORIZED`;
+- ação compatível com `PARTIAL_CLOSE`;
+- existência do target;
+- ownership do ticket pelo símbolo/magic do EAGOLD;
+- direção compatível com o ticket;
+- coerência entre Candidate / Desired / Authorized Lots;
+- `AuthorizedLots` não excedendo Capital / Exposure / R11 / Broker Capacity;
+- capital de reserva não negativo;
+- compatibilidade entre oportunidade e identidade dos targets;
+- Balanced com BUY + SELL distintos;
+- Balanced preservando NET dentro da tolerância de lote;
+- redução positiva de GROSS;
+- coerência das projeções GROSS/NET;
+- ausência de Recovery Load Relief negativo.
+
+Para `NO_OPPORTUNITY`, o gate confirma que o contrato permanece semanticamente vazio, sem volume autorizado ou ação de handoff.
+
+### Resultado do gate
+
+O resultado é separado do estado de autorização:
+
+```
+AUTHORIZED
+    ↓
+PreExecutionGate = TRUE
+    ↓
+Contrato estruturalmente coerente
+    ↓
+executionEligible continua FALSE
+```
+
+Portanto:
+
+**Gate aprovado ≠ execução autorizada pelo broker.**
+
+A propriedade `executionEligible=false` permanece intencionalmente intacta nesta etapa.
+
+### Segurança
+
+A etapa não:
+
+- chama `OrderClose`;
+- chama `OrderSend`;
+- chama `OrderDelete`;
+- reserva capital;
+- consome capital;
+- altera R13;
+- altera Recovery State;
+- altera R11;
+- substitui o R10 operacional.
+
+O gate apenas responde se o contrato está coerente para ser recebido por uma futura camada de execução.
+
+### Integração
+
+`EA/EAGOLD.mq4` agora mantém:
+
+- `g_r10V2PreExecutionGate`;
+- `g_r10V2PreExecutionReason`.
+
+Depois da construção única do Decision Contract, o gate é executado. Se um contrato `AUTHORIZED` falhar na validação, o evento é registrado no Journal e nenhum handoff econômico ocorre.
+
+### Commit
+
+- `90841813aaaaa683579157bb0463a393b6a62028` — Add R10 v2 pre-execution contract validation gate
+- `bdabe86357ca0fcae4766aaf2b4d81a682ee08d2` — Integrate R10 v2 pre-execution contract gate
+- `cd56767f3b6dc7b4ebee38f72dd8493ee2f11cb2` — Harden balanced contract volume validation
+
+### Compile Gate
+
+O usuário confirmou **0 erros** após a ETAPA 13.16. A ETAPA 13.17 foi então implementada sobre esse estado.
+
+A compilação final da ETAPA 13.17 deve ser confirmada no MetaEditor local antes de promover a próxima fronteira.
+
+### Próxima fronteira
+
+**ETAPA 13.18 — Capital Reservation Transaction**
+
+Objetivo: conectar a decisão autorizada ao `Reduction Capital Ledger` por uma transação de reserva, ainda antes do broker execution, com:
+
+```
+AUTHORIZED
+    ↓
+VALIDATED
+    ↓
+RESERVE
+    ↓
+EXECUTE
+    ↓
+RECONCILE
+    ↓
+CONSUME / RELEASE
+```
+
+A reserva deverá ser atômica, identificável e reversível em caso de falha, sem double counting e sem considerar a reserva como consumo efetivo.
