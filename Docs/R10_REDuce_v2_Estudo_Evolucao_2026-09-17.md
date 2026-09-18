@@ -1,6 +1,6 @@
 # ZETAGOLD — R10 REDUCE v2 — Estudo, Objetivo e Evolução
 
-**Status:** Estudo aprovado — sem alteração de comportamento econômico  
+**Status:** Estudo aprovado — ETAPAS 5 a 10 concluídas; sem alteração de comportamento econômico  
 **Branch de referência:** `refactor/v0.116-engine12-parity`  
 **Data:** 2026-09-17  
 **Escopo:** ENGINE 2 / R10 — Exposure Reduction
@@ -858,12 +858,279 @@ Structural Impact Actual
 
 ---
 
+### ETAPA 10 — R11 Governor — CONCLUÍDA
+
+Esta etapa separou formalmente duas responsabilidades que não devem ser confundidas:
+
+- **R10 decide se uma redução faz sentido economicamente e qual redução deseja executar**;
+- **R11 governa a capacidade máxima dessa redução quando ela puder interferir na arquitetura de recuperação**.
+
+A implementação atual do R11 já possui um governador operacional para **adições de recuperação** por meio de `R11RecoveryLotFactor()` e `R11RecoveryAdditionAllowed()`. A conclusão desta etapa não altera esse comportamento. O estudo define a extensão conceitual do R11 para o caminho de REDUCE.
+
+#### 10.1 Princípio de autoridade
+
+Fluxo aprovado:
+
+```
+R10 Opportunity
+      ↓
+R10 Desired Reduction
+      ↓
+R11 Reduction Governor
+      ↓
+R10 Authorized Reduction
+      ↓
+Execution Core
+      ↓
+Reconciliation
+```
+
+O R11 **não escolhe o alvo**, não define a oportunidade e não executa ordens.
+
+Ele responde apenas:
+
+> **"Dada a redução desejada pelo R10, qual é a capacidade máxima que a política de recuperação permite neste momento?"**
+
+#### 10.2 Assimetria importante: adicionar ≠ reduzir
+
+Uma conclusão central desta etapa é que o R11 não deve ser tratado como um simples "limitador de lote" simétrico.
+
+Adicionar recuperação aumenta GROSS Exposure.
+
+Reduzir exposição normalmente diminui GROSS Exposure.
+
+Portanto:
+
+```
+Recovery Addition → Governor restritivo
+Reduction         → Governor normalmente permissivo
+```
+
+Porém, uma redução excessiva pode remover volume/estrutura necessária para determinadas políticas de recuperação. Por isso, o R11 pode impor **preservação mínima de estrutura**, mas somente quando existir uma regra de recuperação que justifique essa preservação.
+
+Não devemos bloquear uma redução apenas porque ela reduz capacidade potencial de recuperação futura.
+
+#### 10.3 R11 Reduction Capacity
+
+A capacidade de redução será conceitualmente definida como:
+
+```
+R11ReductionCapacity =
+    MIN(
+        PerActionCapacity,
+        DirectionCapacity,
+        StructureCapacity,
+        RecoveryPolicyCapacity
+    )
+```
+
+Cada componente deve ser explicável.
+
+**PerActionCapacity**
+
+Limite máximo de lotes que uma única ação R10 pode remover.
+
+**DirectionCapacity**
+
+Limite associado à direção alvo e à exposição atual.
+
+**StructureCapacity**
+
+Limite destinado a preservar uma estrutura mínima quando essa preservação for explicitamente exigida.
+
+**RecoveryPolicyCapacity**
+
+Limite derivado de uma política de recuperação ativa, quando aplicável.
+
+Se nenhuma política exigir preservação adicional:
+
+```
+RecoveryPolicyCapacity = INFINITE
+```
+
+e o R11 não deve inventar uma restrição.
+
+#### 10.4 Hard Block
+
+O R11 pode produzir:
+
+```
+R11ReductionCapacity = 0
+```
+
+somente quando houver condição objetiva de bloqueio, por exemplo:
+
+- ação incompatível com uma política de recuperação ativa;
+- violação de estrutura mínima explicitamente configurada;
+- limite operacional por ação atingido;
+- estado de reconciliação/inconsistência que impeça nova mutação.
+
+O último caso pertence primordialmente ao Execution/Reconciliation layer e não deve ser duplicado como lógica econômica do R11.
+
+#### 10.5 Taper
+
+Assim como o R11 atual reduz progressivamente a capacidade de **adicionar** recuperação quando o GROSS Exposure se aproxima do bloqueio, uma política futura poderá limitar progressivamente a **redução** quando a operação estiver próxima de uma estrutura mínima necessária.
+
+Entretanto:
+
+> **Taper de redução não é default.**
+
+Somente deve existir se backtests demonstrarem que remover exposição além de determinado ponto prejudica sistematicamente a recuperação.
+
+#### 10.6 Preservação de NET Exposure
+
+O R11 não deve assumir que NET Exposure precisa ser preservado.
+
+Essa é uma decisão do R10.
+
+Exemplo:
+
+```
+BUY 10
+SELL 8
+
+Balanced Reduce:
+BUY 9
+SELL 7
+
+NET = +2  → preservado
+```
+
+O R11 pode limitar `q`, mas não deve transformar uma redução Balanced em Directional Reduction por conta própria.
+
+Portanto:
+
+```
+R10 = decide Objective
+R11 = limits Capacity
+```
+
+#### 10.7 Relação com R11 atual
+
+O R11 existente calcula:
+
+```
+Gross Exposure
+Net Exposure
+Net/Gross Ratio
+Recovery Lot Factor
+Gross Exposure Block
+Gross Exposure Taper
+Minimum Net/Gross Ratio
+Minimum Recovery Lot Factor
+```
+
+Esses mecanismos continuam ligados ao **Recovery Addition Path**.
+
+Para o R10 v2, a futura instrumentação deverá registrar separadamente:
+
+```
+R11 Addition Capacity
+R11 Reduction Capacity
+```
+
+Não devemos reutilizar automaticamente `R11RecoveryLotFactor()` para REDUCE, porque a semântica econômica é diferente.
+
+#### 10.8 Authorized Reduction
+
+A fórmula conceitual consolidada passa a ser:
+
+```
+CandidateReduce
+        ↓
+Capital Capacity
+        ↓
+Exposure Capacity
+        ↓
+R11 Reduction Capacity
+        ↓
+Broker Capacity
+        ↓
+AuthorizedReduce
+```
+
+Ou:
+
+```
+AuthorizedReduce =
+MIN(
+    CandidateReduce,
+    CapitalCapacity,
+    ExposureCapacity,
+    R11ReductionCapacity,
+    BrokerCapacity
+)
+```
+
+seguida da normalização para `LotStep/MinLot`.
+
+#### 10.9 R11 deve preservar a recuperação, não impedir o alívio
+
+Foi registrada uma regra arquitetural importante:
+
+> **O R11 existe para governar a capacidade de recuperação; não para impedir sistematicamente a redução de risco.**
+
+Se uma redução:
+
+- diminui GROSS Exposure;
+- diminui Recovery Load;
+- mantém ou melhora a capacidade de recuperação;
+- não viola uma política explícita;
+
+o R11 não deve bloquear essa ação apenas por conservadorismo genérico.
+
+#### 10.10 Telemetria necessária
+
+Toda decisão R10 v2 deverá poder registrar:
+
+```
+R10 Desired Lots
+R11 Capacity Lots
+R11 Block Reason
+R11 Policy
+Authorized Lots
+R11 Reduction Factor
+```
+
+Quando houver redução parcial por R11:
+
+```
+Desired = 0.20
+R11 Capacity = 0.10
+Authorized = 0.10
+```
+
+A telemetria deve deixar claro que:
+
+- R10 desejou 0.20;
+- R11 permitiu no máximo 0.10;
+- Execution Core executou 0.10, se possível.
+
+#### 10.11 Conclusão da ETAPA 10
+
+O R11 não será transformado em uma segunda inteligência econômica do R10.
+
+A separação aprovada é:
+
+```
+R10 → WHY / WHAT / WHICH
+R11 → HOW MUCH IS ALLOWED
+Execution → EXECUTE
+Reconciliation → WHAT ACTUALLY HAPPENED
+```
+
+Essa separação mantém a arquitetura determinística, auditável e compatível com a estrutura atual do ZETAGOLD.
+
+**Nenhuma mudança econômica foi implementada nesta etapa.**
+
+---
+
 ## 18. Próximas etapas
 
 ### ETAPA 9
 **Structural Impact & Average Adjustment**
 
-Estudar matematicamente como redução parcial e seleção de tickets alteram:
+Concluída. Esta etapa definiu as métricas de impacto estrutural antes/depois da redução.
 
 - weighted average;
 - composição da cesta;
@@ -873,15 +1140,15 @@ Estudar matematicamente como redução parcial e seleção de tickets alteram:
 - capacidade de recuperação;
 - Break-Even estrutural.
 
-**Próximo ponto oficial do estudo.**
-
 ### ETAPA 10
 **R11 Governor**
 
-Determinar como o governador limita a redução autorizável sem assumir a decisão econômica do R10.
+Concluída. O R11 foi definido como governador de capacidade, sem assumir a decisão econômica do R10.
 
 ### ETAPA 11
 **Shadow / Counterfactual Instrumentation**
+
+Próximo ponto oficial do estudo.
 
 Registrar o que o R10 v2 teria decidido sem alterar o comportamento real do EA.
 
@@ -935,4 +1202,4 @@ O R10 v2 deverá ser comparado por:
 
 A implementação deverá preservar a arquitetura existente e ocorrer somente depois da modelagem e validação.
 
-**Próximo ponto oficial do estudo:** ETAPA 10 — R11 Governor.
+**Próximo ponto oficial do estudo:** ETAPA 11 — Shadow / Counterfactual Instrumentation.
