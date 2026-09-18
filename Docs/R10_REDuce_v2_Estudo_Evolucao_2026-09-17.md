@@ -1,6 +1,6 @@
 # ZETAGOLD — R10 REDUCE v2 — Estudo, Objetivo e Evolução
 
-**Status:** Estudo aprovado — ETAPAS 5 a 10 concluídas; sem alteração de comportamento econômico  
+**Status:** Estudo aprovado — ETAPAS 5 a 11 concluídas; sem alteração de comportamento econômico  
 **Branch de referência:** `refactor/v0.116-engine12-parity`  
 **Data:** 2026-09-17  
 **Escopo:** ENGINE 2 / R10 — Exposure Reduction
@@ -1125,6 +1125,311 @@ Essa separação mantém a arquitetura determinística, auditável e compatível
 
 ---
 
+### ETAPA 11 — Shadow / Counterfactual Instrumentation — CONCLUÍDA
+
+Esta etapa definiu o mecanismo de observação necessário para avaliar o R10 v2 **sem alterar o comportamento econômico do EA**.
+
+O ZETAGOLD já possui `EAGOLD_CounterfactualPathTelemetry.mqh`, que registra o estado real da operação em arquivo CSV, incluindo tickets, volumes, P/L, exposição, ciclo, excursão e regime R12. A ETAPA 11 não substitui esse mecanismo; ela define a próxima camada: **Decision Shadow do R10 v2**.
+
+#### 11.1 Princípio
+
+O Shadow R10 v2 deve responder:
+
+> **"Dado o estado real observado neste momento, o que o R10 v2 teria decidido?"**
+
+Mas não pode:
+
+- abrir ordens;
+- fechar ordens;
+- alterar SL/TP;
+- reservar capital real;
+- alterar Recovery State;
+- alterar R11;
+- alterar R13;
+- alterar o Action Contract operacional.
+
+Fluxo:
+
+```
+Estado Real
+   ↓
+R10 v2 Shadow
+   ↓
+Candidate Opportunity
+   ↓
+Structural Projection
+   ↓
+Capital Projection
+   ↓
+R11 Capacity Projection
+   ↓
+Hypothetical Authorized Reduce
+   ↓
+LOG ONLY
+```
+
+#### 11.2 Separação entre REAL e SHADOW
+
+O registro deverá distinguir explicitamente:
+
+```
+REAL_ACTION
+SHADOW_DECISION
+SHADOW_PROJECTION
+```
+
+Uma decisão Shadow nunca deve ser interpretada como execução real.
+
+Exemplo:
+
+```
+REAL:
+BUY 0.80
+SELL 0.30
+
+SHADOW:
+Objective = POSITION_ADJUSTMENT
+Candidate = BUY ticket #123
+DesiredLots = 0.10
+CapitalCapacity = 0.08
+R11Capacity = 0.10
+AuthorizedLots = 0.08
+Decision = CANDIDATE
+ExecutedLots = 0.00
+```
+
+#### 11.3 Máquina de decisão Shadow
+
+O modelo aprovado é:
+
+```
+OBSERVE
+  ↓
+ELIGIBILITY
+  ↓
+OPPORTUNITY
+  ↓
+TARGET
+  ↓
+STRUCTURAL PROJECTION
+  ↓
+CAPITAL PROJECTION
+  ↓
+R11 PROJECTION
+  ↓
+AUTHORIZED SHADOW PLAN
+  ↓
+RECORD
+```
+
+Nenhuma etapa chama o Execution Core.
+
+#### 11.4 Estados de decisão
+
+Para evitar ambiguidades, o Shadow deverá utilizar estados explicáveis:
+
+```
+NO_OPPORTUNITY
+BLOCKED
+CANDIDATE
+AUTHORIZED
+```
+
+E razões separadas:
+
+```
+NO_EXPOSURE
+NO_CAPITAL
+NO_STRUCTURAL_BENEFIT
+TARGET_NOT_ELIGIBLE
+R11_BLOCK
+BROKER_CAPACITY
+COOLDOWN
+RECONCILIATION_REQUIRED
+POLICY_BLOCK
+```
+
+Não devemos registrar apenas "score = X". A razão da decisão precisa ser recuperável.
+
+#### 11.5 Projection Before / After
+
+Para cada candidato, o Shadow deverá calcular, sem executar:
+
+```
+GrossBefore / GrossAfter
+NetBefore / NetAfter
+TargetLotsBefore / TargetLotsAfter
+WeightedAverageBefore / WeightedAverageAfter
+AverageDistanceBefore / AverageDistanceAfter
+RecoveryLoadBefore / RecoveryLoadAfter
+BasketBreakEvenBefore / BasketBreakEvenAfter
+```
+
+Além disso:
+
+```
+GrossRelief
+NetDelta
+AverageDelta
+RecoveryLoadRelief
+```
+
+Esses valores são **projeções matemáticas**, não resultados de execução.
+
+#### 11.6 Capital Shadow
+
+O Shadow deve simular o orçamento sem consumir o orçamento real:
+
+```
+ShadowCapitalAvailable
+ShadowCapitalReserved
+ShadowCapitalConsumed
+ShadowCapitalRemaining
+```
+
+A projeção deve respeitar a mesma regra de identidade de capital definida na ETAPA 6.
+
+Importante:
+
+> **Shadow capital não pode contaminar o capital real.**
+
+#### 11.7 R11 Shadow
+
+O Shadow deve reproduzir a política do R11 de forma observacional:
+
+```
+DesiredLots
+R11Capacity
+AuthorizedLots
+BlockReason
+```
+
+Sem alterar:
+
+- `R11RecoveryLotFactor()`;
+- Recovery Addition Path;
+- estado real do governador.
+
+Para o futuro R10 v2, uma função específica de cálculo de capacidade deverá ser preferida a reutilizar diretamente o executor do R11.
+
+#### 11.8 Counterfactual Plan
+
+O registro mínimo de uma decisão Shadow deverá conter:
+
+```
+Timestamp
+CycleId
+Direction
+Objective
+SelectionPolicy
+TargetTicket(s)
+
+DesiredLots
+CapitalCapacity
+ExposureCapacity
+R11Capacity
+BrokerCapacity
+AuthorizedLots
+
+GrossBefore
+GrossAfter
+NetBefore
+NetAfter
+RecoveryLoadBefore
+RecoveryLoadAfter
+
+ProjectedRealizedPL
+ProjectedExecutionCost
+ProjectedCapitalConsumed
+
+DecisionState
+DecisionReason
+```
+
+Quando houver múltiplos candidatos, o sistema deverá registrar o Candidate Set ou pelo menos o identificador do conjunto analisado e o alvo selecionado pela política sequencial.
+
+#### 11.9 Comparação futura
+
+O objetivo não é somente saber "quantas reduções teriam ocorrido".
+
+Precisamos responder:
+
+```
+Quantas oportunidades?
+Quantas bloqueadas?
+Quanto volume seria reduzido?
+Quanto GROSS seria aliviado?
+Quanto Recovery Load seria removido?
+Qual seria o custo realizado projetado?
+Quantos eventos ocorreriam perto de breaks?
+Quantos ocorreriam antes/depois de recovery additions?
+```
+
+A comparação deverá preservar a linha temporal para evitar viés retrospectivo.
+
+#### 11.10 Anti-leakage / Anti-lookahead
+
+O Shadow só pode utilizar informações disponíveis no instante da decisão.
+
+É proibido utilizar:
+
+- preço futuro;
+- resultado futuro;
+- fechamento futuro da cesta;
+- informação posterior ao tick;
+- resultado de execução que ainda não ocorreu.
+
+A projeção deve ser calculada com o estado observado no momento do evento.
+
+Essa regra é essencial para que o backtest não produza um falso resultado de qualidade.
+
+#### 11.11 Frequência e deduplicação
+
+O Shadow não precisa gerar uma decisão idêntica em todos os ticks.
+
+Deveremos registrar:
+
+- mudança de estado;
+- nova oportunidade;
+- mudança de alvo;
+- mudança de capacidade;
+- mudança de regime;
+- mudança de capital;
+- mudança de exposição;
+- periodicidade de amostragem.
+
+Decisões idênticas podem ser agregadas, mas o mecanismo deve preservar um identificador de decisão/evento para reconstrução temporal.
+
+#### 11.12 REAL vs SHADOW
+
+A telemetria futura deverá permitir reconstruir esta linha:
+
+```
+SHADOW_DECISION
+      ↓
+REAL_ACTION (se o R10 atual executou algo)
+      ↓
+REAL_STATE_AFTER
+      ↓
+COUNTERFACTUAL_STATE_AFTER
+```
+
+Assim poderemos responder posteriormente:
+
+> "O que o R10 atual fez e o que o R10 v2 teria feito no mesmo contexto?"
+
+#### 11.13 Conclusão da ETAPA 11
+
+A decisão registrada é:
+
+> **Antes de implementar o R10 v2, devemos instrumentá-lo em Shadow Mode e medir suas decisões contra o caminho real do ZETAGOLD.**
+
+Isso preserva o EA atual enquanto cria evidência para decidir quais componentes do R10 v2 merecem implementação.
+
+**Nenhuma mudança econômica foi implementada nesta etapa.**
+
+---
+
 ## 18. Próximas etapas
 
 ### ETAPA 9
@@ -1148,12 +1453,12 @@ Concluída. O R11 foi definido como governador de capacidade, sem assumir a deci
 ### ETAPA 11
 **Shadow / Counterfactual Instrumentation**
 
-Próximo ponto oficial do estudo.
-
-Registrar o que o R10 v2 teria decidido sem alterar o comportamento real do EA.
+Concluída. Definido o Decision Shadow do R10 v2, com projeção before/after, capital e R11 simulados, razões de decisão e proteção contra lookahead.
 
 ### ETAPA 12
 **Backtest Comparativo**
+
+Próximo ponto oficial do estudo.
 
 Comparar:
 
@@ -1202,4 +1507,4 @@ O R10 v2 deverá ser comparado por:
 
 A implementação deverá preservar a arquitetura existente e ocorrer somente depois da modelagem e validação.
 
-**Próximo ponto oficial do estudo:** ETAPA 11 — Shadow / Counterfactual Instrumentation.
+**Próximo ponto oficial do estudo:** ETAPA 12 — Backtest Comparativo.
