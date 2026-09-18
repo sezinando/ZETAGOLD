@@ -9,7 +9,6 @@
 #include "../Core/EAGOLD_R10_V2_DecisionContract.mqh"
 #include "../Core/EAGOLD_R10_V2_DecisionPlan.mqh"
 #include "../Core/EAGOLD_R10_V2_ContractValidation.mqh"
-#include "../Core/EAGOLD_R10_V2_CapitalLedger.mqh"
 #include "../Core/EAGOLD_R10_V2_TargetSelection.mqh"
 #include "../Core/EAGOLD_R10_V2_BalancedPair.mqh"
 #include "../Core/EAGOLD_R10_V2_ReductionCapacity.mqh"
