@@ -6,6 +6,7 @@
 #include "../Core/EAGOLD_Orders.mqh"
 #include "../Core/EAGOLD_R10_V2_Context.mqh"
 #include "../Core/EAGOLD_R10_V2_Opportunity.mqh"
+#include "../Core/EAGOLD_R10_V2_DecisionContract.mqh"
 bool IsR13Order();
 bool IsR13OwnershipConfigurationValid();
 bool EAGOLDValidateOwnershipConfiguration();
