@@ -38,7 +38,7 @@ int R10V2ShadowOpen(){
    return(g_r10v2ShadowHandle);
 }
 
-void R10V2ShadowClose(){
+void EAGOLD_R10V2ShadowClose(){
    if(g_r10v2ShadowHandle==INVALID_HANDLE)return;
    FileFlush(g_r10v2ShadowHandle);
    FileClose(g_r10v2ShadowHandle);
@@ -92,7 +92,7 @@ double R10V2ShadowNormalizeLots(double lots){
    return(lots);
 }
 
-void R10V2ShadowWrite(string phase){
+void EAGOLD_R10V2ShadowWrite(string phase){
    if(!EnableCounterfactualPathTelemetry)return;
    int handle=R10V2ShadowOpen();
    if(handle==INVALID_HANDLE)return;
@@ -208,7 +208,7 @@ void R10V2ShadowWrite(string phase){
 }
 
 void EAGOLD_R10V2ShadowReset(){
-   R10V2ShadowClose();
+   EAGOLD_R10V2ShadowClose();
    g_r10v2ShadowSequence=0;
    g_r10v2ShadowHandle=INVALID_HANDLE;
    g_r10v2ShadowLastSignature="";
