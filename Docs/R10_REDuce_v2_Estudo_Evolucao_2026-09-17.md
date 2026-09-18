@@ -1997,3 +1997,143 @@ GENERATED → ELIGIBLE → RESERVED → CONSUMED
 ```
 
 com prevenção explícita de double counting e sem tratar Free Margin ou lucro flutuante como capital automaticamente disponível.
+
+
+---
+
+## ETAPA 13.13 — Reduction Capital Ledger — IMPLEMENTADA
+
+**Data:** 2026-09-18  
+**Branch:** `refactor/v0.116-engine12-parity`
+
+Foi implementada a primeira fronteira executável do **Reduction Capital Ledger** em:
+
+`Core/EAGOLD_R10_V2_CapitalLedger.mqh`
+
+### 13.13.1 — Identidade do capital
+
+O ledger não cria capital novo.
+
+A fonte explicitamente autorizada nesta etapa é:
+
+```
+R13 Recovery Capital
+        ↓
+R10 Capital Ledger
+        ↓
+R10 v2 Capital Capacity
+```
+
+Não são tratados automaticamente como Reduction Capital:
+
+- Free Margin;
+- Equity;
+- Balance;
+- Floating Profit.
+
+Isso preserva a separação entre capacidade financeira da conta e capital econômico autorizado para REDUCE.
+
+### 13.13.2 — Estados do ledger
+
+A estrutura mantém:
+
+```
+RealizedProfitGenerated
+CapitalEligible
+CapitalReserved
+CapitalConsumed
+CapitalReleased
+CapitalRemaining
+R13CapitalAvailable
+R13CapitalUsed
+```
+
+O fluxo conceitual continua:
+
+```
+GENERATED → ELIGIBLE → RESERVED → CONSUMED
+                         ↓
+                      RELEASED
+```
+
+Nesta etapa, o saldo disponível do R13 é **espelhado**, não creditado novamente. Isso evita contar o mesmo capital duas vezes.
+
+### 13.13.3 — Capital Capacity
+
+A capacidade em lotes é derivada de:
+
+```
+SpendableCapital =
+CapitalRemaining × R10V2CapitalUtilization
+
+CapitalCapacityLots =
+SpendableCapital / LossPerLot
+```
+
+e limitada ao `DesiredLots`.
+
+Quando o alvo não possui `LossPerLot > 0`, a capacidade conservadora permanece zero. Isso evita transformar capital disponível em autorização de redução sem uma relação econômica de custo definida.
+
+### 13.13.4 — Reservation API
+
+O ledger possui interfaces explícitas para:
+
+- reservar capital;
+- liberar capital reservado;
+- consumir capital previamente reservado.
+
+A execução do broker ainda não foi conectada a essas operações. Portanto, esta etapa **não altera a execução econômica do R10 atual** e não cria uma execução automática do R10 v2.
+
+### 13.13.5 — Integração
+
+O fluxo do `OnTick()` passa a ser:
+
+```
+Context
+  ↓
+Opportunity
+  ↓
+Target
+  ↓
+Desired Reduction
+  ↓
+Capital Ledger Sync
+  ↓
+R11 Reduction Governor
+  ↓
+Reduction Capacity
+  ↓
+Decision Plan
+```
+
+O `CapitalCapacity` agora deixa de ser artificialmente zero quando existe capital R13 explicitamente disponível e um alvo com perda por lote mensurável.
+
+O `AuthorizedLots` continua condicionado simultaneamente a:
+
+- Desired Lots;
+- Capital Capacity;
+- Exposure Capacity;
+- R11 Capacity;
+- Broker Capacity.
+
+### 13.13.6 — Limite atual
+
+O ledger ainda não recebe uma segunda fonte independente de capital realizado diretamente do R10. Isso é proposital: o próximo refinamento deve primeiro estabelecer a identidade completa entre **Realization Cascade**, R13 Recovery Capital e R10 Budget, evitando double counting.
+
+Também não há persistência própria do ledger nesta etapa; o R13 permanece a autoridade persistida para o capital de recuperação existente.
+
+### 13.13.7 — Commits
+
+- `53f4d5364ee30b5caa68af04193e55e6657d362a` — Add R10 v2 reduction capital ledger
+- `b6e0eb673f7aefac63872a7d213af938f27b3156` — Integrate R10 v2 capital ledger
+- `e7949590ea5b642494f70c3daf54af7311b4316d` — Connect R10 v2 capacity to capital ledger and R11
+
+### Decisão
+
+**ETAPA 13.13 — CONCLUÍDA.**
+
+Próxima fronteira:
+
+**ETAPA 13.14 — Structural Impact Projection / Authorization Integrity**
+
+Objetivo: fazer o plano calcular explicitamente o efeito BEFORE/AFTER da redução e garantir que `AuthorizedLots` somente possa ser produzido quando houver benefício estrutural verificável, capital autorizado, capacidade R11 e capacidade de execução.
