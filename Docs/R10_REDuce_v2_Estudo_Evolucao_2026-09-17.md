@@ -1757,3 +1757,52 @@ O R10 v2 deverá ser comparado por:
 A implementação deverá preservar a arquitetura existente e ocorrer somente depois da modelagem e validação.
 
 **Próximo ponto oficial do estudo:** ETAPA 12 — Backtest Comparativo.
+
+
+## ETAPA 12.4A — Parameterization & Backtest Control
+
+Implementada a primeira camada de calibração controlada do R10 v2.
+
+### 12.4A.1 — Inputs numerados
+
+Os parâmetros existentes em `Core/EAGOLD_Config.mqh` foram reorganizados sem alteração dos valores operacionais e receberam identificadores estáveis no formato `[GRUPO.ITEM]`. Isso permite localizar rapidamente parâmetros durante backtests e registrar combinações de forma reprodutível.
+
+Foi criada também a família `09 R10 v2 / BACKTEST SIMULATION`:
+
+- [09.01] `EnableR10V2BacktestSimulation`
+- [09.02] `R10V2ReduceRatio`
+- [09.03] `R10V2MinimumLossPerLot`
+- [09.04] `R10V2MaxReductionLots`
+- [09.05] `R10V2CapitalUtilization`
+- [09.06] `R10V2MinGrossRelief`
+- [09.07] `R10V2CooldownSeconds`
+- [09.08] `R10V2EnableBalancedReduction`
+- [09.09] `R10V2EnablePositionAdjustment`
+- [09.10] `R10V2EnableDirectionalReduction`
+
+Os valores padrão preservam a condição segura: `EnableR10V2BacktestSimulation=false`.
+
+### 12.4A.2 — Backtest Execution Simulator
+
+Criado `Core/EAGOLD_R10_V2_Backtest.mqh`. O módulo só pode executar reduções quando `IsTesting()` for verdadeiro e o input [09.01] estiver habilitado. Portanto, a nova camada não possui autorização para execução em live/demo.
+
+O fluxo é:
+
+`R10 v2 decision → capacity → simulated tester-side partial close → Action Contract → reconciliation`
+
+A primeira implementação cobre:
+
+1. **Balanced Reduction** — reduz volume comum em BUY e SELL, preservando NET e reduzindo GROSS.
+2. **Position Adjustment** — reduz parcialmente o ticket mais adverso, limitado por capital realizado do ciclo, capacidade de exposição e parâmetros do backtest.
+3. **Directional Reduction** — permanece opcional e desabilitado por padrão.
+4. Cooldown e limite máximo de redução.
+5. Normalização por `MODE_LOTSTEP`/`MODE_MINLOT`.
+6. Falha parcial solicita reconciliação e interrompe o restante do tick conforme o Action Contract.
+
+### 12.4A.3 — Regra de segurança
+
+Esta etapa não transforma o R10 v2 em autoridade de produção. O simulador altera ordens apenas dentro do Strategy Tester. O Shadow continua observer-only e permanece disponível para comparação.
+
+### 12.4A.4 — Próximo experimento
+
+Executar backtests comparativos mantendo todos os parâmetros do ZETAGOLD constantes e variando inicialmente apenas [09.02] `R10V2ReduceRatio`. A sequência inicial recomendada para experimento é 0.10, 0.125, aproximadamente 0.1667, 0.20. Não existe ainda valor ótimo validado; esses valores são apenas candidatos experimentais.
