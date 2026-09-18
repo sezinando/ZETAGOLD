@@ -4,24 +4,282 @@
 #define EAGOLD_R13_DEFAULT_COMMENT "EAGOLD_RECOVERY_SATELLITE"
 #define EAGOLD_EXPIRY_DATE D'2026.12.31 00:00'
 double g_panelMinProfit=0.0; double g_panelMaxProfit=0.0; double g_panelMaxLots=0.0; bool g_panelInitialized=false; bool EAGOLD_TradingAllowed(){return(TimeCurrent()<EAGOLD_EXPIRY_DATE);}
-input string INPUT_GROUP_GENERAL="=== 01 GENERAL / IDENTITY ==="; extern int MagicNumber=1101; extern bool RequireCleanLegacyOwnership=true; extern bool EnableLegacyReattach=false;
-input string INPUT_GROUP_MONEY="=== 02 CORE MONEY / LOT PROGRESSION ==="; extern double Lot=0.01; extern double Multiplier=1.10; extern int DigitsLots=2; extern double LotIncrement=0.02; extern double MaxOpenLot=3.00; extern double TakeProfit=5.00; extern double SellProfit=30.00; extern double BasketLoss=100.00; extern int SpreadLimit=100; extern int WaitSeconds=0;
-input string INPUT_GROUP_GRID="=== 02A CORE GRID / DISTANCES ==="; extern double FirstStep=160.0; extern double MiniGrid1=320.0; extern double SmartGrid1=280.0; extern double RecoveryMinDistance=340.0; extern double MiniGrid2=80.0; extern double SmartGrid2=60.0; extern double PendingStepTrail=50.0; extern double BasketRestartStep=160.0; extern int MaxTrades=2000; extern bool EnableCloseBy=true; extern double BuyProgressionTolerance=10.0;
-input string INPUT_GROUP_ENTRY_GUARDS="=== 02B / ENTRY TIME + SPREAD GUARDS ==="; extern bool EnableTradingTimeWindow=false; extern int TradeStartHour=0; extern int TradeStartMinute=0; extern int TradeEndHour=23; extern int TradeEndMinute=59;
-input string INPUT_GROUP_R1_ADMISSION="=== 03 R1 / FIRST ADMISSION CONTROL ==="; extern bool EnableR1AdmissionGate=false; extern bool EnableR1BrokerGuard=false; extern bool EnableR1LotGuard=false; extern bool EnableR1MarginGuard=false; extern bool EnableR1TradePermissionGuard=false; extern double R1BrokerSafetyBufferPoints=0.0; extern double R1MinFreeMarginAfterOrder=0.0; extern bool EnableR1DecisionLog=true;
-input string INPUT_GROUP_LIFECYCLE="=== 03 R4 / R5 / R7 LIFECYCLE ==="; input string INPUT_GROUP_GLOBAL_TRAIL="=== 03 GLOBAL STOP TRAIL CONTROL ==="; extern bool EnableGlobalStopTrail=true; extern double GlobalStopTrailCooldownSeconds=0.0; extern double GlobalStopTrailMinStepPoints=0.0;
-input string INPUT_GROUP_BRX="=== 04 BRX / BASKET REALIZATION ==="; extern bool EnableBasketRealization=true; extern int BRXRealizationMode=3; extern double BRXDirectionalMinProfit=5.00; extern double BRXBidirectionalMinProfit=5.00; extern double BRXRealizationSafetyBuffer=5.00; extern bool BRXRequireWeightedBE=false; extern double BRXWeightedBEBufferPoints=0.0;
-input string INPUT_GROUP_R9="=== 05 R9 / EXPOSURE CONTROLLER ==="; extern bool EnableR9Hedge=true; extern double R9ExposureTriggerLots=1.00; extern double R9TriggerLotMinimum=0.00; extern double R9HedgeFraction=0.6666666667; extern double R9BalanceCap=0.50;
-input string INPUT_GROUP_R10="=== 05 R10 / EXPOSURE REDUCTION ==="; extern bool EnableR10Reduce=true; extern double R10MinExposureLots=0.01; extern bool EnableR10PairReduction=true; extern double R10PairMinProfit=5.00; extern double R10PairMaxLots=1.00; extern int R10PairCooldownSeconds=30;
-input string INPUT_GROUP_R102="=== 05 R10.2 / RECOVERY REALIZATION ==="; extern bool EnableR10RecoveryRealization=false; extern double R10RecoveryMinDebt=100.0; extern double R10RecoveryProfitTarget=50.0; extern double R10RecoveryDebtTargetPercent=0.0; extern bool R10RecoveryRequireDebtRepaid=true;
-input string INPUT_GROUP_R11="=== 05 R11 / RECOVERY STEP & EXPOSURE GOVERNOR ==="; extern bool EnableRecoveryStepMultiplier=true; extern double RecoveryStepMultiplier=1.15; extern double RecoveryStepMax=500.0; extern bool EnableR11ExposureGovernor=true; extern double R11TaperStartGrossExposureLots=8.00; extern double R11BlockGrossExposureLots=12.00; extern double R11MinNetToGrossRatio=0.10; extern double R11MinRecoveryLotFactor=0.25;
-input string INPUT_GROUP_APG="=== 05A / ADAPTIVE PROFIT GUARD ==="; extern bool EnableAdaptiveProfitGuard=false; extern bool EnableAdaptiveProfitGuardExecution=false; extern double AdaptiveProfitGuardMinEquity=20.0; extern double AdaptiveProfitGuardMinGivebackPercent=25.0; extern double AdaptiveProfitGuardMinGrossLots=0.02; extern double AdaptiveProfitGuardReduceLots=0.01; extern int AdaptiveProfitGuardCooldownSeconds=60; extern double AdaptiveProfitGuardMaxDailyLoss=0.0; extern double AdaptiveProfitGuardMaxCycleDD=0.0;
-input string INPUT_GROUP_R13="=== 06 R13 / RECOVERY SATELLITE ==="; extern bool EnableR13=true; extern bool EnableR13AutoActivation=true; extern bool EnableR13Trading=true; extern double R13ProfitTarget=5.00; extern double R13EntryCooldownSeconds=30.0; extern bool R13CloseWhenMasterFlat=true; extern bool EnableR13MasterAdjustment=true; extern double R13MasterAdjustmentMaxLots=0.20; extern int R13MagicNumber=3010; extern string R13OrderComment=EAGOLD_R13_DEFAULT_COMMENT; extern double R13MaxLots=0.20; extern int R13MaxPositions=3; extern double R13MaxDrawdown=50.00; extern double R13MaxDailyLoss=50.00; extern double R13MaxSpread=100.0; extern int R13StartHour=0; extern int R13EndHour=23; extern bool EnableR13DirectionalComplementarity=true; extern double R13MinDirectionalImbalance=0.01; extern double R13RecoveryCapitalFraction=1.00;
-input string INPUT_GROUP_R10_MARKERS="=== 07 R10 / ACTION MARKERS ==="; extern bool EnableR10VisualMarker=true; extern string R10MarkerFont="Segoe UI Semibold"; extern int R10MarkerFontSize=9; extern color R10BuyMarkerColor=clrLime; extern color R10SellMarkerColor=clrTomato; extern double R10MarkerOffsetPoints=25.0;
-input string INPUT_GROUP_ENGINE_MARKERS="=== 07 ENGINE ACTION MARKERS ==="; extern bool EnableEngineActionMarkers=true; extern string EngineActionMarkerFont="Impact"; extern int EngineActionMarkerFontSize=9; extern color EngineActionMarkerTextColor=clrYellow; extern color EngineActionMarkerBackgroundColor=clrBlack; extern double EngineActionMarkerOffsetPips=20.0; extern double EngineActionMarkerStackStepPips=20.0; double EngineActionMarkerOffsetPoints=100.0;
-input string INPUT_GROUP_COUNTERFACTUAL_TELEMETRY="=== 07A COUNTERFACTUAL PATH TELEMETRY ==="; extern bool EnableCounterfactualPathTelemetry=false; extern int CounterfactualPathSampleSeconds=2;
-input string INPUT_GROUP_PANEL="=== 07 MODULAR PANEL / DEBUG ==="; extern bool EnableModularizationPanel=true; extern bool EnableModularizationDebug=false;
-input string INPUT_GROUP_CHART_GUIDES="=== 07 CHART BASKET GUIDES ==="; extern bool EnableChartBasketGuides=true; extern int ChartBasketGuideOffsetBars=2;
-input string INPUT_GROUP_UI="=== 07 UI / PANEL LAYOUT ==="; extern int PanelBackgroundX=260; extern int PanelBackgroundY=8; extern int PanelBackgroundHeight=450; extern int PanelBottomY=8; extern int PanelBottomX1=15; extern int PanelBottomX2=190; extern int PanelBottomX3=520; extern int PanelBottomX4=850; extern int PanelBackgroundWidth=430;
-input string INPUT_GROUP_PERSISTENCE="=== 08 PERSISTENCE / CHECKPOINT POLICY ==="; extern double PersistenceWorstEquityStep=5.00;
+input string INPUT_GROUP_GENERAL="=== 01 GENERAL / IDENTITY ===";
+// [01.01] MagicNumber
+extern int MagicNumber=1101;
+// [01.02] RequireCleanLegacyOwnership
+extern bool RequireCleanLegacyOwnership=true;
+// [01.03] EnableLegacyReattach
+extern bool EnableLegacyReattach=false;
+input string INPUT_GROUP_MONEY="=== 02 CORE MONEY / LOT PROGRESSION ===";
+// [02.01] Lot
+extern double Lot=0.01;
+// [02.02] Multiplier
+extern double Multiplier=1.10;
+// [02.03] DigitsLots
+extern int DigitsLots=2;
+// [02.04] LotIncrement
+extern double LotIncrement=0.02;
+// [02.05] MaxOpenLot
+extern double MaxOpenLot=3.00;
+// [02.06] TakeProfit
+extern double TakeProfit=5.00;
+// [02.07] SellProfit
+extern double SellProfit=30.00;
+// [02.08] BasketLoss
+extern double BasketLoss=100.00;
+// [02.09] SpreadLimit
+extern int SpreadLimit=100;
+// [02.10] WaitSeconds
+extern int WaitSeconds=0;
+input string INPUT_GROUP_GRID="=== 02A CORE GRID / DISTANCES ===";
+// [02A.01] FirstStep
+extern double FirstStep=160.0;
+// [02A.02] MiniGrid1
+extern double MiniGrid1=320.0;
+// [02A.03] SmartGrid1
+extern double SmartGrid1=280.0;
+// [02A.04] RecoveryMinDistance
+extern double RecoveryMinDistance=340.0;
+// [02A.05] MiniGrid2
+extern double MiniGrid2=80.0;
+// [02A.06] SmartGrid2
+extern double SmartGrid2=60.0;
+// [02A.07] PendingStepTrail
+extern double PendingStepTrail=50.0;
+// [02A.08] BasketRestartStep
+extern double BasketRestartStep=160.0;
+// [02A.09] MaxTrades
+extern int MaxTrades=2000;
+// [02A.10] EnableCloseBy
+extern bool EnableCloseBy=true;
+// [02A.11] BuyProgressionTolerance
+extern double BuyProgressionTolerance=10.0;
+input string INPUT_GROUP_ENTRY_GUARDS="=== 02B / ENTRY TIME + SPREAD GUARDS ===";
+// [02B.01] EnableTradingTimeWindow
+extern bool EnableTradingTimeWindow=false;
+// [02B.02] TradeStartHour
+extern int TradeStartHour=0;
+// [02B.03] TradeStartMinute
+extern int TradeStartMinute=0;
+// [02B.04] TradeEndHour
+extern int TradeEndHour=23;
+// [02B.05] TradeEndMinute
+extern int TradeEndMinute=59;
+input string INPUT_GROUP_R1_ADMISSION="=== 03 R1 / FIRST ADMISSION CONTROL ===";
+// [03.01] EnableR1AdmissionGate
+extern bool EnableR1AdmissionGate=false;
+// [03.02] EnableR1BrokerGuard
+extern bool EnableR1BrokerGuard=false;
+// [03.03] EnableR1LotGuard
+extern bool EnableR1LotGuard=false;
+// [03.04] EnableR1MarginGuard
+extern bool EnableR1MarginGuard=false;
+// [03.05] EnableR1TradePermissionGuard
+extern bool EnableR1TradePermissionGuard=false;
+// [03.06] R1BrokerSafetyBufferPoints
+extern double R1BrokerSafetyBufferPoints=0.0;
+// [03.07] R1MinFreeMarginAfterOrder
+extern double R1MinFreeMarginAfterOrder=0.0;
+// [03.08] EnableR1DecisionLog
+extern bool EnableR1DecisionLog=true;
+input string INPUT_GROUP_LIFECYCLE="=== 03 R4 / R5 / R7 LIFECYCLE ==="; input string INPUT_GROUP_GLOBAL_TRAIL="=== 03 GLOBAL STOP TRAIL CONTROL ===";
+// [03.09] EnableGlobalStopTrail
+extern bool EnableGlobalStopTrail=true;
+// [03.10] GlobalStopTrailCooldownSeconds
+extern double GlobalStopTrailCooldownSeconds=0.0;
+// [03.11] GlobalStopTrailMinStepPoints
+extern double GlobalStopTrailMinStepPoints=0.0;
+input string INPUT_GROUP_BRX="=== 04 BRX / BASKET REALIZATION ===";
+// [04.01] EnableBasketRealization
+extern bool EnableBasketRealization=true;
+// [04.02] BRXRealizationMode
+extern int BRXRealizationMode=3;
+// [04.03] BRXDirectionalMinProfit
+extern double BRXDirectionalMinProfit=5.00;
+// [04.04] BRXBidirectionalMinProfit
+extern double BRXBidirectionalMinProfit=5.00;
+// [04.05] BRXRealizationSafetyBuffer
+extern double BRXRealizationSafetyBuffer=5.00;
+// [04.06] BRXRequireWeightedBE
+extern bool BRXRequireWeightedBE=false;
+// [04.07] BRXWeightedBEBufferPoints
+extern double BRXWeightedBEBufferPoints=0.0;
+input string INPUT_GROUP_R9="=== 05 R9 / EXPOSURE CONTROLLER ===";
+// [05.01] EnableR9Hedge
+extern bool EnableR9Hedge=true;
+// [05.02] R9ExposureTriggerLots
+extern double R9ExposureTriggerLots=1.00;
+// [05.03] R9TriggerLotMinimum
+extern double R9TriggerLotMinimum=0.00;
+// [05.04] R9HedgeFraction
+extern double R9HedgeFraction=0.6666666667;
+// [05.05] R9BalanceCap
+extern double R9BalanceCap=0.50;
+input string INPUT_GROUP_R10="=== 05 R10 / EXPOSURE REDUCTION ===";
+// [05.06] EnableR10Reduce
+extern bool EnableR10Reduce=true;
+// [05.07] R10MinExposureLots
+extern double R10MinExposureLots=0.01;
+// [05.08] EnableR10PairReduction
+extern bool EnableR10PairReduction=true;
+// [05.09] R10PairMinProfit
+extern double R10PairMinProfit=5.00;
+// [05.10] R10PairMaxLots
+extern double R10PairMaxLots=1.00;
+// [05.11] R10PairCooldownSeconds
+extern int R10PairCooldownSeconds=30;
+input string INPUT_GROUP_R102="=== 05 R10.2 / RECOVERY REALIZATION ===";
+// [05.12] EnableR10RecoveryRealization
+extern bool EnableR10RecoveryRealization=false;
+// [05.13] R10RecoveryMinDebt
+extern double R10RecoveryMinDebt=100.0;
+// [05.14] R10RecoveryProfitTarget
+extern double R10RecoveryProfitTarget=50.0;
+// [05.15] R10RecoveryDebtTargetPercent
+extern double R10RecoveryDebtTargetPercent=0.0;
+// [05.16] R10RecoveryRequireDebtRepaid
+extern bool R10RecoveryRequireDebtRepaid=true;
+input string INPUT_GROUP_R11="=== 05 R11 / RECOVERY STEP & EXPOSURE GOVERNOR ===";
+// [05.17] EnableRecoveryStepMultiplier
+extern bool EnableRecoveryStepMultiplier=true;
+// [05.18] RecoveryStepMultiplier
+extern double RecoveryStepMultiplier=1.15;
+// [05.19] RecoveryStepMax
+extern double RecoveryStepMax=500.0;
+// [05.20] EnableR11ExposureGovernor
+extern bool EnableR11ExposureGovernor=true;
+// [05.21] R11TaperStartGrossExposureLots
+extern double R11TaperStartGrossExposureLots=8.00;
+// [05.22] R11BlockGrossExposureLots
+extern double R11BlockGrossExposureLots=12.00;
+// [05.23] R11MinNetToGrossRatio
+extern double R11MinNetToGrossRatio=0.10;
+// [05.24] R11MinRecoveryLotFactor
+extern double R11MinRecoveryLotFactor=0.25;
+input string INPUT_GROUP_APG="=== 05A / ADAPTIVE PROFIT GUARD ===";
+// [05A.01] EnableAdaptiveProfitGuard
+extern bool EnableAdaptiveProfitGuard=false;
+// [05A.02] EnableAdaptiveProfitGuardExecution
+extern bool EnableAdaptiveProfitGuardExecution=false;
+// [05A.03] AdaptiveProfitGuardMinEquity
+extern double AdaptiveProfitGuardMinEquity=20.0;
+// [05A.04] AdaptiveProfitGuardMinGivebackPercent
+extern double AdaptiveProfitGuardMinGivebackPercent=25.0;
+// [05A.05] AdaptiveProfitGuardMinGrossLots
+extern double AdaptiveProfitGuardMinGrossLots=0.02;
+// [05A.06] AdaptiveProfitGuardReduceLots
+extern double AdaptiveProfitGuardReduceLots=0.01;
+// [05A.07] AdaptiveProfitGuardCooldownSeconds
+extern int AdaptiveProfitGuardCooldownSeconds=60;
+// [05A.08] AdaptiveProfitGuardMaxDailyLoss
+extern double AdaptiveProfitGuardMaxDailyLoss=0.0;
+// [05A.09] AdaptiveProfitGuardMaxCycleDD
+extern double AdaptiveProfitGuardMaxCycleDD=0.0;
+input string INPUT_GROUP_R13="=== 06 R13 / RECOVERY SATELLITE ===";
+// [06.01] EnableR13
+extern bool EnableR13=true;
+// [06.02] EnableR13AutoActivation
+extern bool EnableR13AutoActivation=true;
+// [06.03] EnableR13Trading
+extern bool EnableR13Trading=true;
+// [06.04] R13ProfitTarget
+extern double R13ProfitTarget=5.00;
+// [06.05] R13EntryCooldownSeconds
+extern double R13EntryCooldownSeconds=30.0;
+// [06.06] R13CloseWhenMasterFlat
+extern bool R13CloseWhenMasterFlat=true;
+// [06.07] EnableR13MasterAdjustment
+extern bool EnableR13MasterAdjustment=true;
+// [06.08] R13MasterAdjustmentMaxLots
+extern double R13MasterAdjustmentMaxLots=0.20;
+// [06.09] R13MagicNumber
+extern int R13MagicNumber=3010;
+// [06.10] R13OrderComment
+extern string R13OrderComment=EAGOLD_R13_DEFAULT_COMMENT;
+// [06.11] R13MaxLots
+extern double R13MaxLots=0.20;
+// [06.12] R13MaxPositions
+extern int R13MaxPositions=3;
+// [06.13] R13MaxDrawdown
+extern double R13MaxDrawdown=50.00;
+// [06.14] R13MaxDailyLoss
+extern double R13MaxDailyLoss=50.00;
+// [06.15] R13MaxSpread
+extern double R13MaxSpread=100.0;
+// [06.16] R13StartHour
+extern int R13StartHour=0;
+// [06.17] R13EndHour
+extern int R13EndHour=23;
+// [06.18] EnableR13DirectionalComplementarity
+extern bool EnableR13DirectionalComplementarity=true;
+// [06.19] R13MinDirectionalImbalance
+extern double R13MinDirectionalImbalance=0.01;
+// [06.20] R13RecoveryCapitalFraction
+extern double R13RecoveryCapitalFraction=1.00;
+input string INPUT_GROUP_R10_MARKERS="=== 07 R10 / ACTION MARKERS ===";
+// [07.01] EnableR10VisualMarker
+extern bool EnableR10VisualMarker=true;
+// [07.02] R10MarkerFont
+extern string R10MarkerFont="Segoe UI Semibold";
+// [07.03] R10MarkerFontSize
+extern int R10MarkerFontSize=9;
+// [07.04] R10BuyMarkerColor
+extern color R10BuyMarkerColor=clrLime;
+// [07.05] R10SellMarkerColor
+extern color R10SellMarkerColor=clrTomato;
+// [07.06] R10MarkerOffsetPoints
+extern double R10MarkerOffsetPoints=25.0;
+input string INPUT_GROUP_ENGINE_MARKERS="=== 07 ENGINE ACTION MARKERS ===";
+// [07.07] EnableEngineActionMarkers
+extern bool EnableEngineActionMarkers=true;
+// [07.08] EngineActionMarkerFont
+extern string EngineActionMarkerFont="Impact";
+// [07.09] EngineActionMarkerFontSize
+extern int EngineActionMarkerFontSize=9;
+// [07.10] EngineActionMarkerTextColor
+extern color EngineActionMarkerTextColor=clrYellow;
+// [07.11] EngineActionMarkerBackgroundColor
+extern color EngineActionMarkerBackgroundColor=clrBlack;
+// [07.12] EngineActionMarkerOffsetPips
+extern double EngineActionMarkerOffsetPips=20.0;
+// [07.13] EngineActionMarkerStackStepPips
+extern double EngineActionMarkerStackStepPips=20.0; double EngineActionMarkerOffsetPoints=100.0;
+input string INPUT_GROUP_COUNTERFACTUAL_TELEMETRY="=== 07A COUNTERFACTUAL PATH TELEMETRY ===";
+// [07A.01] EnableCounterfactualPathTelemetry
+extern bool EnableCounterfactualPathTelemetry=false;
+// [07A.02] CounterfactualPathSampleSeconds
+extern int CounterfactualPathSampleSeconds=2;
+input string INPUT_GROUP_PANEL="=== 07 MODULAR PANEL / DEBUG ===";
+// [07.14] EnableModularizationPanel
+extern bool EnableModularizationPanel=true;
+// [07.15] EnableModularizationDebug
+extern bool EnableModularizationDebug=false;
+input string INPUT_GROUP_CHART_GUIDES="=== 07 CHART BASKET GUIDES ===";
+// [07.16] EnableChartBasketGuides
+extern bool EnableChartBasketGuides=true;
+// [07.17] ChartBasketGuideOffsetBars
+extern int ChartBasketGuideOffsetBars=2;
+input string INPUT_GROUP_UI="=== 07 UI / PANEL LAYOUT ===";
+// [07.18] PanelBackgroundX
+extern int PanelBackgroundX=260;
+// [07.19] PanelBackgroundY
+extern int PanelBackgroundY=8;
+// [07.20] PanelBackgroundHeight
+extern int PanelBackgroundHeight=450;
+// [07.21] PanelBottomY
+extern int PanelBottomY=8;
+// [07.22] PanelBottomX1
+extern int PanelBottomX1=15;
+// [07.23] PanelBottomX2
+extern int PanelBottomX2=190;
+// [07.24] PanelBottomX3
+extern int PanelBottomX3=520;
+// [07.25] PanelBottomX4
+extern int PanelBottomX4=850;
+// [07.26] PanelBackgroundWidth
+extern int PanelBackgroundWidth=430;
+input string INPUT_GROUP_PERSISTENCE="=== 08 PERSISTENCE / CHECKPOINT POLICY ===";
+// [08.01] PersistenceWorstEquityStep
+extern double PersistenceWorstEquityStep=5.00;
 #endif
