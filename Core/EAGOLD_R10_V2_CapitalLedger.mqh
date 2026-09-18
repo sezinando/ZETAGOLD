@@ -33,6 +33,11 @@ struct EAGOLD_R10V2CapitalLedger
    double capitalRemaining;
    double r13CapitalAvailable;
    double r13CapitalUsed;
+   bool reservationActive;
+   double reservationAmount;
+   int reservationTicket;
+   int reservationTicket2;
+   datetime reservationTimestamp;
 };
 
 EAGOLD_R10V2CapitalLedger g_r10V2CapitalLedger;
