@@ -175,7 +175,7 @@ bool EAGOLD_R10V2ValidatePreExecution(
          return(false);
       }
 
-      if(contract.authorizedLots>MathMin(OrderLots(),ctx.sellLots)+Lot*0.5)
+      if(contract.authorizedLots>MathMin(ctx.buyLots,ctx.sellLots)+Lot*0.5)
       {
          reason=EAGOLD_R10V2_VALIDATION_LOTS_INCOHERENT;
          return(false);
