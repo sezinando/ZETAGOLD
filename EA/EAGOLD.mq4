@@ -9,6 +9,7 @@
 #include "../Core/EAGOLD_R10_V2_DecisionContract.mqh"
 #include "../Core/EAGOLD_R10_V2_DecisionPlan.mqh"
 #include "../Core/EAGOLD_R10_V2_ContractValidation.mqh"
+#include "../Core/EAGOLD_R10_V2_ExecutionAdapter.mqh"
 #include "../Core/EAGOLD_R10_V2_TargetSelection.mqh"
 #include "../Core/EAGOLD_R10_V2_BalancedPair.mqh"
 #include "../Core/EAGOLD_R10_V2_ReductionCapacity.mqh"
@@ -132,6 +133,18 @@ EAGOLD_R10V2DecisionPlanBuild(
 g_r10V2PreExecutionGate=EAGOLD_R10V2ValidatePreExecution(g_r10V2DecisionContract,g_r10V2Context,g_r10V2PreExecutionReason);
 if(g_r10V2DecisionContract.state==EAGOLD_R10V2_DECISION_AUTHORIZED && !g_r10V2PreExecutionGate)
    Print(EA_NAME," R10 v2 PRE-EXECUTION GATE BLOCKED: ",EAGOLD_R10V2ValidationReasonName(g_r10V2PreExecutionReason));
+
+// ETAPA 13.19 — execution adapter is wired but remains dormant while
+// executionEligible=false. Balanced remains reserved for ETAPA 13.20.
+if(EAGOLD_EconomicExecutionAllowed() &&
+   g_r10V2DecisionContract.state==EAGOLD_R10V2_DECISION_AUTHORIZED &&
+   g_r10V2PreExecutionGate &&
+   g_r10V2DecisionContract.executionEligible)
+{
+   EAGOLD_ActionResult r10V2Result=EAGOLD_R10V2ExecuteSingle(g_r10V2DecisionContract,g_r10V2PreExecutionGate);
+   if(r10V2Result!=EAGOLD_ACTION_BLOCKED)
+      EAGOLD_ApplyActionResult(r10V2Result,"R10V2","PARTIAL_CLOSE",g_r10V2DecisionContract.direction,g_r10V2DecisionContract.authorizedLots);
+}
 
 // ETAPA 13.18 — reservation boundary is armed only when the execution
 // boundary is explicitly open. ETAPA 13.17 keeps executionEligible=false,
