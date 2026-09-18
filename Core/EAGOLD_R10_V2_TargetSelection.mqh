@@ -158,7 +158,7 @@ bool EAGOLD_R10V2BetterTarget(const EAGOLD_R10V2Ticket &a,
                               const EAGOLD_R10V2Ticket &b,
                               EAGOLD_R10V2SelectionPolicy policy)
 {
-   if(!b.ticket<0)return(true);
+   if(b.ticket<0)return(true);
 
    if(policy==EAGOLD_R10V2_POLICY_FARTHEST)
       return(a.distanceToMarket>b.distanceToMarket);
