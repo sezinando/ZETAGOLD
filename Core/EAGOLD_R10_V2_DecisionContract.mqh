@@ -102,6 +102,7 @@ struct EAGOLD_R10V2DecisionContract
    double   exposureCapacity;
    double   r11Capacity;
    double   brokerCapacity;
+   double   capitalReservationRequired;
 
    double   grossBefore;
    double   grossAfter;
@@ -144,6 +145,7 @@ void EAGOLD_R10V2DecisionContractReset(EAGOLD_R10V2DecisionContract &contract)
    contract.exposureCapacity=0.0;
    contract.r11Capacity=0.0;
    contract.brokerCapacity=0.0;
+   contract.capitalReservationRequired=0.0;
 
    contract.grossBefore=0.0;
    contract.grossAfter=0.0;
