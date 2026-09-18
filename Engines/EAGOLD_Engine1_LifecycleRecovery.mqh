@@ -89,8 +89,8 @@ void TrailAllStopOrders(){if(PendingStepTrail<=0.0)return;double stopLevel=Marke
 
 void RestartEmptyBasket(int direction){if(BasketRestartStep<=0.0)return;if(CountDirectionPositions(direction)!=0||CountDirectionPending(direction)!=0)return;RefreshRates();if(direction==OP_BUY){int r7ticket=SendPending(OP_BUYSTOP,Ask+PointsToPrice(BasketRestartStep),Lot,"EAGOLD R7 RESTART BUY");if(r7ticket>0)CreateEngineActionMarker("R7","RESTART",OP_BUY,Lot);}else{int r7ticket=SendPending(OP_SELLSTOP,Bid-PointsToPrice(BasketRestartStep),Lot,"EAGOLD R7 RESTART SELL");if(r7ticket>0)CreateEngineActionMarker("R7","RESTART",OP_SELL,Lot);}}
 
-void BuyMachine(){if(BuyBasketTargetReached()&&DirectionLots(OP_BUY)>DirectionLots(OP_SELL))Rule10Reduce(OP_BUY);bool basketClosed=BuyBasketClose();if(basketClosed)RestartEmptyBasket(OP_BUY);BuySingleTakeProfit();BuyRecovery();}
+void BuyMachine(){if(BuyBasketTargetReached()&&DirectionLots(OP_BUY)>DirectionLots(OP_SELL))Rule10Reduce(OP_BUY);BuyBasketClose();BuySingleTakeProfit();BuyRecovery();}
 
-void SellMachine(){if(SellBasketTargetReached()&&DirectionLots(OP_SELL)>DirectionLots(OP_BUY))Rule10Reduce(OP_SELL);bool basketClosed=SellBasketClose();if(basketClosed)RestartEmptyBasket(OP_SELL);SellSingleTakeProfit();SellRecovery();}
+void SellMachine(){if(SellBasketTargetReached()&&DirectionLots(OP_SELL)>DirectionLots(OP_BUY))Rule10Reduce(OP_SELL);SellBasketClose();SellSingleTakeProfit();SellRecovery();}
 
 #endif
