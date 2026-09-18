@@ -280,6 +280,27 @@ extern int PanelBottomX4=850;
 // [07.26] PanelBackgroundWidth
 extern int PanelBackgroundWidth=430;
 input string INPUT_GROUP_PERSISTENCE="=== 08 PERSISTENCE / CHECKPOINT POLICY ===";
+input string INPUT_GROUP_R10V2_BACKTEST="=== 09 R10 v2 / BACKTEST SIMULATION ===";
+// [09.01] EnableR10V2BacktestSimulation
+extern bool EnableR10V2BacktestSimulation=false;
+// [09.02] R10V2ReduceRatio
+extern double R10V2ReduceRatio=0.125;
+// [09.03] R10V2MinimumLossPerLot
+extern double R10V2MinimumLossPerLot=0.0;
+// [09.04] R10V2MaxReductionLots
+extern double R10V2MaxReductionLots=0.0;
+// [09.05] R10V2CapitalUtilization
+extern double R10V2CapitalUtilization=1.0;
+// [09.06] R10V2MinGrossRelief
+extern double R10V2MinGrossRelief=0.01;
+// [09.07] R10V2CooldownSeconds
+extern int R10V2CooldownSeconds=30;
+// [09.08] R10V2EnableBalancedReduction
+extern bool R10V2EnableBalancedReduction=true;
+// [09.09] R10V2EnablePositionAdjustment
+extern bool R10V2EnablePositionAdjustment=true;
+// [09.10] R10V2EnableDirectionalReduction
+extern bool R10V2EnableDirectionalReduction=false;
 // [08.01] PersistenceWorstEquityStep
 extern double PersistenceWorstEquityStep=5.00;
 #endif
