@@ -1542,6 +1542,17 @@ Antes da implementação controlada deverão ser demonstrados:
 A ETAPA 12, portanto, está **em andamento**, sem alteração econômica no ZETAGOLD.
 
 
+### ETAPA 12.1 — Baseline Runtime Validation — DEFINIDA
+
+Foi criada a especificação de validação do baseline em `Tests/R10/R10_V2_BASELINE_VALIDATION.md`.
+
+O objetivo é provar o caminho atual antes de comparar qualquer decisão Shadow. A validação cobre compilação, startup/ownership, R1 atomic, lifecycle/recovery, R10 atual e suas regressões, R13/capital, BRX/realization, reconciliation, Action Contract e telemetria.
+
+**Regra:** sem MetaEditor/Strategy Tester executado, nenhum resultado numérico será declarado como validado.
+
+A ETAPA 12.1 não altera comportamento econômico.
+
+
 ## 18. Próximas etapas
 
 ### ETAPA 9
