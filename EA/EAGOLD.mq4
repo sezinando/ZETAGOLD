@@ -9,6 +9,7 @@
 #include "../Core/EAGOLD_R10_V2_DecisionContract.mqh"
 #include "../Core/EAGOLD_R10_V2_DecisionPlan.mqh"
 #include "../Core/EAGOLD_R10_V2_ContractValidation.mqh"
+#include "../Core/EAGOLD_R10_V2_CapitalLedger.mqh"
 #include "../Core/EAGOLD_R10_V2_TargetSelection.mqh"
 #include "../Core/EAGOLD_R10_V2_BalancedPair.mqh"
 #include "../Core/EAGOLD_R10_V2_ReductionCapacity.mqh"
@@ -132,5 +133,20 @@ EAGOLD_R10V2DecisionPlanBuild(
 g_r10V2PreExecutionGate=EAGOLD_R10V2ValidatePreExecution(g_r10V2DecisionContract,g_r10V2Context,g_r10V2PreExecutionReason);
 if(g_r10V2DecisionContract.state==EAGOLD_R10V2_DECISION_AUTHORIZED && !g_r10V2PreExecutionGate)
    Print(EA_NAME," R10 v2 PRE-EXECUTION GATE BLOCKED: ",EAGOLD_R10V2ValidationReasonName(g_r10V2PreExecutionReason));
+
+// ETAPA 13.18 — reservation boundary is armed only when the execution
+// boundary is explicitly open. ETAPA 13.17 keeps executionEligible=false,
+// so the live/demo path cannot strand real capital before an executor exists.
+if(g_r10V2DecisionContract.state==EAGOLD_R10V2_DECISION_AUTHORIZED &&
+   g_r10V2PreExecutionGate &&
+   g_r10V2DecisionContract.executionEligible &&
+   !EAGOLD_R10V2CapitalReservationActive())
+{
+   EAGOLD_R10V2CapitalReserveTransaction(
+      g_r10V2DecisionContract.capitalReservationRequired,
+      g_r10V2DecisionContract.targetTicket,
+      g_r10V2DecisionContract.targetTicket2,
+      g_r10V2DecisionContract.timestamp);
+}
 
 if(EAGOLD_EconomicExecutionAllowed()){EAGOLD_ActionResult r9Result=Rule9DetectActivatedOrdersTransactional();if(r9Result!=EAGOLD_ACTION_BLOCKED)EAGOLD_ApplyActionResult(r9Result,"R9","HEDGE",HeavyDirection(),0.0);}if(EAGOLD_EconomicExecutionAllowed()){EAGOLD_ActionResult r7Result=EAGOLD_R7EnsureMissingDirectionTransactional();if(r7Result!=EAGOLD_ACTION_BLOCKED)EAGOLD_ApplyActionResult(r7Result,"R7","KEEP_ALIVE",HeavyDirection(),Lot);}if(EAGOLD_EconomicExecutionAllowed())BuyMachine();if(EAGOLD_EconomicExecutionAllowed())SellMachine();if(EAGOLD_EconomicExecutionAllowed()){EAGOLD_ActionResult r1Result=EAGOLD_CreateFirstOrdersAtomic();if(r1Result!=EAGOLD_ACTION_BLOCKED)EAGOLD_ApplyActionResult(r1Result,"R1","FIRST_SEED",HeavyDirection(),Lot);}if(EAGOLD_EconomicExecutionAllowed())TrailAllStopOrders();if(EAGOLD_EconomicExecutionAllowed())R13Observe(g_r13Observer);EAGOLD_ExcursionTrackerObserve();ObjectsDeleteAll(0,R10_MARKER_PREFIX);EAGOLD_ModPanelUpdate();EAGOLD_RealizationCascadeUpdate();EAGOLD_ChartBasketGuidesUpdate();PersistAllState(false);}
