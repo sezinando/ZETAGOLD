@@ -1430,6 +1430,118 @@ Isso preserva o EA atual enquanto cria evidência para decidir quais componentes
 
 ---
 
+---
+
+### ETAPA 12 — Backtest Comparativo — INICIADA / EXECUÇÃO BLOQUEADA
+
+A ETAPA 12 avançou da definição conceitual para um **protocolo experimental formal**, registrado em:
+
+`Tests/R10/R10_V2_BACKTEST_PROTOCOL.md`
+
+O protocolo estabelece três caminhos:
+
+```
+BASELINE
+R10 atual
+   ↓
+SHADOW
+R10 v2 observer-only
+   ↓
+FUTURE ACTIVE
+R10 v2 executável, somente após validação
+```
+
+A comparação deverá usar a mesma linha temporal, símbolo, timeframe, modelagem de ticks, condições de conta e configurações, alterando somente o comportamento do R10 quando a fase Active for autorizada.
+
+#### 12.1 Pré-condição
+
+A execução do backtest está **BLOCKED** pelo Compile Gate atual.
+
+O repositório registra:
+
+- Branch alignment: PASS;
+- Include tree: PASS;
+- Static dependency integrity: PASS em nível de composição;
+- Strict MetaEditor compile: FAIL;
+- Behavioral test: BLOCKED até compilação PASS.
+
+Portanto, **não será apresentado nenhum resultado de Strategy Tester como se tivesse sido validado**.
+
+#### 12.2 Matriz experimental
+
+O protocolo cobre, no mínimo:
+
+- tendência favorável;
+- tendência adversa;
+- consolidação/retração;
+- BUY-heavy;
+- SELL-heavy;
+- BUY/SELL próximos para Balanced Reduce;
+- basket profundamente adversa;
+- recovery ativo;
+- alta volatilidade;
+- baixa volatilidade;
+- breaks rápidos;
+- execução parcial/falha.
+
+#### 12.3 Hipóteses a validar
+
+```
+H1  Exposure Relief
+H2  Recovery Load
+H3  Balanced Reduce
+H4  Capital Discipline
+H5  Structural Selection
+H6  R11 Separation
+```
+
+As hipóteses serão avaliadas por métricas observáveis, sem score único.
+
+#### 12.4 Métricas
+
+Principais métricas:
+
+```
+Max Drawdown
+Recovery Time
+Gross / Net Exposure
+Recovery Load
+Recovery Orders
+Average Recovery Lot
+R10 Reduction Frequency
+Reduced Lots
+R10 Realized Loss
+Profit Used by R10
+Net Reduction Result
+Exposure Relief
+Cycles Recovered / Broken
+Reconciliation Events
+```
+
+Também será preservada a comparação entre **projeção Shadow** e **resultado real**, quando houver caminho correspondente, permitindo medir erro de projeção e custo de execução.
+
+#### 12.5 Regra de promoção
+
+Mais reduções ou maior P/L isolado não serão suficientes para promover o R10 v2.
+
+Antes da implementação controlada deverão ser demonstrados:
+
+- respeito aos invariantes;
+- ausência de aumento de exposição causado pela redução;
+- capital corretamente atribuído;
+- ausência de double counting;
+- reconciliação correta;
+- ausência de lookahead;
+- determinismo;
+- explicabilidade.
+
+#### 12.6 Decisão da ETAPA 12
+
+**Protocolo definido e registrado. Execução aguardando Compile Gate PASS.**
+
+A ETAPA 12, portanto, está **em andamento**, sem alteração econômica no ZETAGOLD.
+
+
 ## 18. Próximas etapas
 
 ### ETAPA 9
@@ -1458,7 +1570,7 @@ Concluída. Definido o Decision Shadow do R10 v2, com projeção before/after, c
 ### ETAPA 12
 **Backtest Comparativo**
 
-Próximo ponto oficial do estudo.
+Iniciada. Protocolo experimental formal criado; execução bloqueada até Compile Gate PASS.
 
 Comparar:
 
