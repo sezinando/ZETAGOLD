@@ -107,23 +107,6 @@ void EAGOLD_R10V2SelectBalancedPair(const EAGOLD_R10V2Context &ctx,
       pair.commonDesiredLots=pair.commonCandidateLots;
 }
 
-EAGOLD_R10V2Target MakeR10V2TargetFromTicket(const EAGOLD_R10V2Ticket &t)
-{
-   EAGOLD_R10V2Target target;
-   target.found=(t.ticket>=0);
-   target.ticket=t.ticket;
-   target.direction=t.direction;
-   target.candidateLots=t.lots;
-   target.floatingProfit=t.floatingProfit;
-   target.lossPerLot=t.lossPerLot;
-   target.distanceToMarket=t.distanceToMarket;
-   target.recoveryLoad=t.recoveryLoad;
-   target.relativeVolume=t.relativeVolume;
-   target.structuralPosition=t.structuralPosition;
-   target.policy=EAGOLD_R10V2_POLICY_BALANCED;
-   return(target);
-}
-
 double EAGOLD_R10V2BalancedCapitalRequirement(
    const EAGOLD_R10V2BalancedPair &pair,
    double commonLots)
