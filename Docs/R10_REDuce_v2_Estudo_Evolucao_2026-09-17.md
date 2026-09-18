@@ -1837,3 +1837,30 @@ No CSV telemetry was re-enabled. No economic behavior of the current R10 was cha
 Commits:
 - `925658996ca5f0fcf38d8cf33952873d67f3f4be` — Add read-only R10 v2 decision context
 - `31539ea5923ad7cbe3faab83bbd96e98e2f76fda` — Integrate R10 v2 read-only decision context
+
+## ETAPA 13.2 — R10 v2 Opportunity Engine
+
+Implemented the opportunity classification layer without broker execution.
+
+New module:
+- `Core/EAGOLD_R10_V2_Opportunity.mqh`
+
+Opportunity states:
+- `NO_OPPORTUNITY`
+- `BALANCED_REDUCTION`
+- `POSITION_ADJUSTMENT`
+- `DIRECTIONAL_REDUCTION`
+
+The layer only classifies the opportunity from the read-only R10 v2 Context. It does not select tickets, calculate final authorized lots, reserve/consume capital, call R11, or execute orders.
+
+Balanced Reduction is evaluated first when both directions are present because its intended structural property is GROSS reduction while preserving NET. Position Adjustment requires an adverse heavy side with negative floating P/L. Directional Reduction remains controlled by its dedicated input and disabled by default.
+
+Integration:
+- `EA/EAGOLD.mq4` builds the context and evaluates the opportunity on each tick.
+- The result is held in `g_r10V2Opportunity`.
+- The operational R10 remains unchanged and authoritative for current execution.
+- CSV telemetry remains disabled.
+
+Commits:
+- `4b99f8b5b26c24a7b9bd4f6f76a0d845b5f1ff1a` — Add R10 v2 opportunity decision layer
+- `a8b8253f9c0b21bae41d732523622209b1562973` — Integrate R10 v2 opportunity evaluation
