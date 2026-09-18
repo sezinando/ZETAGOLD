@@ -2653,3 +2653,110 @@ CONSUME / RELEASE
 ```
 
 A reserva deverá ser atômica, identificável e reversível em caso de falha, sem double counting e sem considerar a reserva como consumo efetivo.
+
+## ETAPA 13.18 — Capital Reservation Transaction — IMPLEMENTADA
+
+**Data:** 2026-09-18  
+**Branch:** refactor/v0.116-engine12-parity
+
+### Objetivo
+
+A fronteira entre autorização econômica e reserva de capital foi formalizada no Reduction Capital Ledger.
+
+Fluxo:
+
+```
+AUTHORIZED
+    ↓
+PRE-EXECUTION VALIDATED
+    ↓
+RESERVE
+    ↓
+EXECUTE
+    ↓
+RECONCILE
+    ↓
+CONSUME / RELEASE
+```
+
+### Correção importante do Ledger
+
+Durante a implementação foi identificada e corrigida uma inconsistência contábil potencial: capitalReleased estava sendo utilizado simultaneamente como histórico e como crédito no cálculo de capitalRemaining.
+
+Isso poderia produzir double counting após uma liberação.
+
+O cálculo agora mantém:
+
+```
+CapitalRemaining = CapitalEligible - CapitalReserved - CapitalConsumed
+```
+
+capitalReleased permanece como métrica histórica/auditável. A liberação efetivamente aumenta o saldo disponível porque reduz CapitalReserved.
+
+### Reserva transacional
+
+O Ledger agora mantém uma única reserva ativa identificável por:
+
+- valor reservado;
+- ticket primário;
+- ticket secundário, quando Balanced;
+- timestamp;
+- estado reservationActive.
+
+Foi adicionada a API:
+
+- EAGOLD_R10V2CapitalReserveTransaction();
+- EAGOLD_R10V2CapitalReservationActive();
+- EAGOLD_R10V2CapitalReservationAmount();
+- EAGOLD_R10V2CapitalReleaseTransaction();
+- EAGOLD_R10V2CapitalConsumeReservation().
+
+### Regra de segurança
+
+A reserva não é executada enquanto executionEligible=false.
+
+Isso é deliberado.
+
+Na situação atual:
+
+```
+Decision Contract = AUTHORIZED
+Pre-Execution Gate = TRUE
+executionEligible = FALSE
+        ↓
+NENHUMA RESERVA REAL
+```
+
+Assim, não existe risco de o EA atual reservar capital e deixá-lo bloqueado sem que exista ainda um Execution Adapter capaz de consumir ou liberar a reserva.
+
+Quando a futura etapa de execução abrir explicitamente executionEligible, o OnTick já possui a fronteira transacional preparada para reservar o capital imediatamente antes do handoff.
+
+### Sem execução econômica
+
+Esta etapa ainda não:
+
+- chama OrderClose;
+- executa R10 v2;
+- consome R13;
+- altera Recovery State;
+- altera R11;
+- promove Balanced para broker execution.
+
+A reserva é uma infraestrutura de transação preparada para a abertura da próxima fronteira.
+
+### Commits
+
+- e5a9e7d52795549ec4ac79bc1ba4d5479b7c4338 — Add R10 v2 capital reservation transaction boundary
+- f1c10a3c87057074113f5a00e9b3bedf74b45ecb — Fix released capital double counting in ledger
+- 1c9b6f932874e8abb3d69bd381e276ff00d42637 — Arm R10 v2 capital reservation at execution boundary
+- 64ec9dbb5c45564f84308201e7ba0f6546551f30 — Clean duplicate R10 v2 capital ledger include
+
+### Compile Gate
+
+O código deve ser recompilado no MetaEditor antes de abrir a próxima fronteira.
+
+### Próxima etapa
+
+**ETAPA 13.19 — R10 v2 Execution Adapter**
+
+Objetivo: transformar somente um contrato AUTHORIZED, validado, executionEligible=true e com Capital Reserved em uma chamada controlada ao Execution Core, sem permitir que a camada de decisão execute broker operations diretamente.
