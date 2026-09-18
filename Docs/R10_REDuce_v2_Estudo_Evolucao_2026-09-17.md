@@ -2386,3 +2386,144 @@ Objetivo:
 - fazer o Plan Builder receber o resultado autoritativo de target/capacidade/projeção;
 - manter uma única construção determinística do contrato;
 - preparar o handoff futuro para o Execution Core sem ainda ativar execução econômica do R10 v2.
+
+
+## ETAPA 13.16 — Decision Contract Consolidation & Execution Boundary — IMPLEMENTADA
+
+**Data:** 2026-09-18  
+**Branch:** `refactor/v0.116-engine12-parity`
+
+### Objetivo
+
+A construção do Decision Contract foi consolidada em uma única fronteira determinística. O `OnTick()` deixa de construir parcialmente o contrato e depois sobrescrever manualmente seus campos.
+
+O fluxo agora é:
+
+```
+Context
+   ↓
+Opportunity
+   ↓
+Target / Balanced Pair
+   ↓
+Desired Reduction
+   ↓
+Capital Capacity
+   ↓
+R11 Capacity
+   ↓
+Broker Capacity
+   ↓
+Structural Projection
+   ↓
+ONE AUTHORITATIVE DECISION CONTRACT
+   ↓
+Future Execution Boundary
+```
+
+### Implementação
+
+O módulo:
+
+`Core/EAGOLD_R10_V2_DecisionPlan.mqh`
+
+passa a receber explicitamente os resultados produzidos pelas camadas anteriores:
+
+- target ticket(s);
+- direction;
+- candidate lots;
+- desired lots;
+- capital capacity;
+- exposure capacity;
+- R11 capacity;
+- broker capacity;
+- authorized lots;
+- capital reservation requirement;
+- validade e benefício estrutural;
+- projeções GROSS/NET;
+- Recovery Load antes/depois.
+
+O builder é responsável pela construção completa do contrato, incluindo:
+
+- `state`;
+- `reason`;
+- `action`;
+- `objective`;
+- `selectionPolicy`;
+- `capitalSource`;
+- `targetTicket`;
+- `targetTicket2`;
+- capacidades;
+- volume autorizado;
+- métricas BEFORE/AFTER;
+- `executionEligible`.
+
+### Estados
+
+O contrato agora distingue explicitamente:
+
+```
+NO_OPPORTUNITY
+      ↓
+BLOCKED
+      ↓
+CANDIDATE
+      ↓
+AUTHORIZED
+```
+
+A autorização é uma decisão do domínio R10 v2. Ela **não significa execução**.
+
+Na ETAPA 13.16:
+
+```
+AUTHORIZED
+executionEligible = false
+```
+
+A função `EAGOLD_R10V2DecisionContractCanHandoff()` continua sendo a barreira estrutural para um futuro handoff.
+
+### Balanced Reduce
+
+Quando existe um par BUY/SELL válido, o contrato recebe os dois tickets:
+
+```
+targetTicket  = BUY
+targetTicket2 = SELL
+direction     = BUY  (perna primária do contrato)
+```
+
+A redução comum continua representada por um único `authorizedLots`, preservando a semântica bilateral já estabelecida na ETAPA 13.15.
+
+### Segurança
+
+Esta etapa:
+
+- não chama `OrderClose`;
+- não chama `OrderSend`;
+- não reserva capital real;
+- não consome capital R13;
+- não altera Recovery State;
+- não substitui o R10 operacional;
+- não abre a execução do R10 v2 em live/demo.
+
+A única mudança desta etapa é a consolidação da representação da decisão.
+
+### Compile Gate
+
+A validação final continua sendo feita no MetaEditor local.
+
+**Nenhum resultado de Strategy Tester é inferido desta etapa.**
+
+### Commits
+
+- `2d4a1cca0c2dfeed09fddccffde2570e6bd3e383` — Consolidate R10 v2 decision contract construction
+- `7996451cde837ecfe1d5cc1f0a70201dd80ccbe9` — Decouple decision plan builder from EA global state
+- `769fa5ce04f217245f564a74637912845b2e1fe9` — Integrate consolidated R10 v2 decision contract builder
+- `403ad0944bebabb2092332e4fe4c57acc63ed6f8` — Preserve blocked R10 v2 target identity in contract
+
+### Próxima fronteira
+
+**ETAPA 13.17 — Decision Contract Validation & Pre-Execution Gate**
+
+Objetivo: validar sistematicamente o contrato completo antes de qualquer futuro handoff, incluindo coerência entre target(s), oportunidade, capacidades, projeção estrutural, capital requerido, volume autorizado e invariantes do Balanced Reduce, mantendo a execução econômica desativada.
