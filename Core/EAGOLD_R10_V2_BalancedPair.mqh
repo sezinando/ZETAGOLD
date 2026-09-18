@@ -95,15 +95,16 @@ void EAGOLD_R10V2SelectBalancedPair(const EAGOLD_R10V2Context &ctx,
    pair.buy=bestBuy;
    pair.sell=bestSell;
    pair.commonCandidateLots=MathMin(bestBuy.lots,bestSell.lots);
-   pair.commonDesiredLots=EAGOLD_R10V2CandidateReductionLots(
-      (bestBuy.lots<=bestSell.lots ? 
-       MakeR10V2TargetFromTicket(bestBuy) :
-       MakeR10V2TargetFromTicket(bestSell)));
-
+   double ratio=R10V2ReduceRatio;
+   if(ratio<0.0)ratio=0.0;
+   pair.commonDesiredLots=pair.commonCandidateLots*ratio;
    if(R10V2MaxReductionLots>0.0)
       pair.commonDesiredLots=MathMin(pair.commonDesiredLots,R10V2MaxReductionLots);
-
+   pair.commonDesiredLots=MathMin(
+      pair.commonDesiredLots,pair.commonCandidateLots);
    pair.commonDesiredLots=EAGOLD_R10V2NormalizeCapacityLots(pair.commonDesiredLots);
+   if(pair.commonDesiredLots>pair.commonCandidateLots)
+      pair.commonDesiredLots=pair.commonCandidateLots;
 }
 
 EAGOLD_R10V2Target MakeR10V2TargetFromTicket(const EAGOLD_R10V2Ticket &t)
