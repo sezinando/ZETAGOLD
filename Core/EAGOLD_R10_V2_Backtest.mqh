@@ -43,6 +43,25 @@ bool R10V2BacktestCloseTicket(int ticket,double lots,double &realized){
    return(CloseMarketOrderLots(ticket,lots,realized));
 }
 
+bool R10V2BacktestFindAnyTicket(int direction,int &ticket,double &ticketLots){
+   ticket=-1;ticketLots=0.0;
+   int type=(direction==OP_BUY?OP_BUY:OP_SELL);
+   double worstOpen=0.0;
+   bool found=false;
+   for(int i=OrdersTotal()-1;i>=0;i--){
+      if(!OrderSelect(i,SELECT_BY_POS,MODE_TRADES))continue;
+      if(!IsEAGOLDOrder()||OrderType()!=type)continue;
+      double lots=OrderLots();
+      if(lots<Lot)continue;
+      double open=OrderOpenPrice();
+      bool moreAdverse=(!found||(type==OP_BUY&&open>worstOpen)||(type==OP_SELL&&open<worstOpen));
+      if(moreAdverse){
+         found=true;ticket=OrderTicket();ticketLots=lots;worstOpen=open;
+      }
+   }
+   return(found && ticket>0 && ticketLots>=Lot);
+}
+
 bool R10V2BacktestFindTicket(int direction,int &ticket,double &ticketLots,double &ticketPL,double &lossPerLot){
    lossPerLot=R10V2ShadowWorstLossPerLot(direction,ticket,ticketLots,ticketPL);
    return(ticket>0 && ticketLots>=Lot && ticketPL<0.0 && lossPerLot>0.0);
@@ -71,8 +90,8 @@ bool EAGOLD_R10V2BacktestExecute(){
          int buyTicket=-1,sellTicket=-1;
          double buyLots=0.0,buyPL=0.0,buyLossPerLot=0.0;
          double sellLots=0.0,sellPL=0.0,sellLossPerLot=0.0;
-         bool haveBuy=R10V2BacktestFindTicket(OP_BUY,buyTicket,buyLots,buyPL,buyLossPerLot);
-         bool haveSell=R10V2BacktestFindTicket(OP_SELL,sellTicket,sellLots,sellPL,sellLossPerLot);
+         bool haveBuy=R10V2BacktestFindAnyTicket(OP_BUY,buyTicket,buyLots);
+         bool haveSell=R10V2BacktestFindAnyTicket(OP_SELL,sellTicket,sellLots);
 
          // Balanced reduction does not require a losing target; it requires
          // executable tickets on both sides.
