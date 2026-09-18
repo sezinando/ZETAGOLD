@@ -303,4 +303,10 @@ extern bool R10V2EnablePositionAdjustment=true;
 extern bool R10V2EnableDirectionalReduction=false;
 // [08.01] PersistenceWorstEquityStep
 extern double PersistenceWorstEquityStep=5.00;
+
+// -----------------------------------------------------------------------------
+// Indexed input names exposed in the MT4 Inputs window.
+// Internal source compatibility is preserved through aliases.
+// -----------------------------------------------------------------------------
+
 #endif
