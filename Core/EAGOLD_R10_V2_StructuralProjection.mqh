@@ -134,7 +134,9 @@ void EAGOLD_R10V2ProjectBalancedStructuralImpact(
 
 bool EAGOLD_R10V2BalancedAuthorizationIntegrity(
    const EAGOLD_R10V2Context &ctx,
-   const EAGOLD_R10V2BalancedPair &pair,
+   int buyTicket,
+   int sellTicket,
+   double commonCandidateLots,
    double desiredLots,
    double capitalCapacity,
    double exposureCapacity,
@@ -144,19 +146,36 @@ bool EAGOLD_R10V2BalancedAuthorizationIntegrity(
    double &authorizedLots)
 {
    authorizedLots=0.0;
-   if(!pair.found)return(false);
+
+   if(buyTicket<0 || sellTicket<0 || commonCandidateLots<Lot)
+      return(false);
 
    double candidate=MathMin(desiredLots,capitalCapacity);
    candidate=MathMin(candidate,exposureCapacity);
    candidate=MathMin(candidate,r11Capacity);
    candidate=MathMin(candidate,brokerCapacity);
-   candidate=MathMin(candidate,pair.commonCandidateLots);
+   candidate=MathMin(candidate,commonCandidateLots);
    candidate=EAGOLD_R10V2NormalizeCapacityLots(candidate);
 
    if(candidate<Lot)return(false);
 
+   // Reconstruct the pair locally from immutable ticket identifiers.
+   EAGOLD_R10V2BalancedPair localPair;
+   EAGOLD_R10V2BalancedPairReset(localPair);
+
+   if(!OrderSelect(buyTicket,SELECT_BY_TICKET,MODE_TRADES))return(false);
+   EAGOLD_R10V2BuildTicket(ctx,localPair.buy);
+   if(localPair.buy.ticket!=buyTicket || localPair.buy.direction!=OP_BUY)return(false);
+
+   if(!OrderSelect(sellTicket,SELECT_BY_TICKET,MODE_TRADES))return(false);
+   EAGOLD_R10V2BuildTicket(ctx,localPair.sell);
+   if(localPair.sell.ticket!=sellTicket || localPair.sell.direction!=OP_SELL)return(false);
+
+   localPair.found=true;
+   localPair.commonCandidateLots=commonCandidateLots;
+
    EAGOLD_R10V2ProjectBalancedStructuralImpact(
-      ctx,pair,candidate,projection);
+      ctx,localPair,candidate,projection);
 
    if(!projection.valid || !projection.structuralBenefit)return(false);
    if(MathAbs(projection.netDelta)>0.5*Lot)return(false);
