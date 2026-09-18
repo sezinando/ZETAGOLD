@@ -2137,3 +2137,124 @@ Próxima fronteira:
 **ETAPA 13.14 — Structural Impact Projection / Authorization Integrity**
 
 Objetivo: fazer o plano calcular explicitamente o efeito BEFORE/AFTER da redução e garantir que `AuthorizedLots` somente possa ser produzido quando houver benefício estrutural verificável, capital autorizado, capacidade R11 e capacidade de execução.
+
+
+---
+
+## ETAPA 13.14 — Structural Impact Projection / Authorization Integrity — IMPLEMENTADA
+
+**Data:** 2026-09-18  
+**Branch:** `refactor/v0.116-engine12-parity`
+
+Nova camada:
+
+`Core/EAGOLD_R10_V2_StructuralProjection.mqh`
+
+### Objetivo
+
+O R10 v2 passa a projetar o efeito de uma redução antes de considerar a autorização final.
+
+Fluxo:
+
+```
+Context
+  ↓
+Opportunity
+  ↓
+Target
+  ↓
+Desired Reduction
+  ↓
+Capital Capacity
+  ↓
+R11 Capacity
+  ↓
+Structural Projection
+  ↓
+Authorization Integrity
+```
+
+### Métricas projetadas
+
+A projeção calcula:
+
+- Lots Before / After;
+- Gross Exposure Before / After;
+- Gross Relief;
+- Net Exposure Before / After;
+- Net Delta;
+- Recovery Load Before / After;
+- Recovery Load Relief;
+- Weighted Average Before / After;
+- Average Delta.
+
+A projeção é **read-only** e não altera ordens.
+
+### Regra de integridade
+
+A autorização final somente pode ser maior que zero quando:
+
+1. existe target válido;
+2. existe Desired Reduction;
+3. existe Capital Capacity;
+4. existe Exposure Capacity;
+5. existe R11 Capacity;
+6. existe Broker Capacity;
+7. a projeção estrutural é válida;
+8. existe benefício estrutural observável.
+
+Assim, capital disponível isoladamente não autoriza uma redução.
+
+### Benefício estrutural
+
+O primeiro critério operacional conservador considera benefício quando existe pelo menos uma melhoria observável entre:
+
+- redução de GROSS Exposure;
+- redução de Recovery Load;
+- alteração mensurável da composição ponderada.
+
+O sistema não cria um score único.
+
+### Weighted Average
+
+A projeção recalcula a média ponderada da direção após remover hipoteticamente o volume autorizado do ticket selecionado.
+
+Isso preserva a distinção:
+
+```
+OpenPrice do ticket ≠ Weighted Average da estrutura
+```
+
+### Limite importante — Balanced Reduce
+
+A projeção implementada nesta etapa é **single-target**. O modo Balanced ainda precisa de uma projeção bilateral explícita BUY + SELL para garantir matematicamente:
+
+```
+BUY'  = BUY - q
+SELL' = SELL - q
+GROSS' = GROSS - 2q
+NET'   = NET
+```
+
+Essa extensão será tratada antes de qualquer promoção do Balanced Reduce para execução.
+
+### Segurança
+
+Nenhuma execução econômica do R10 v2 foi ativada por esta etapa. A camada somente calcula e valida autorização hipotética.
+
+### Commits
+
+- `7c029b9a00b9c686841caccecf6ffd1321bcc1e5` — Add R10 v2 structural impact projection
+- `8135439c7dc9a0544010b6531fd101aa03775d0a` — Integrate R10 v2 structural authorization integrity
+
+### Próxima etapa
+
+**ETAPA 13.15 — Balanced Pair Projection & Capital Reservation Boundary**
+
+Objetivos:
+
+- selecionar explicitamente as duas pernas do Balanced Reduce;
+- calcular capacidade comum;
+- projetar BUY/SELL/GROSS/NET antes/depois;
+- estabelecer a fronteira de reserva do capital;
+- garantir que uma autorização bilateral não produza uma perna órfã em execução parcial.
