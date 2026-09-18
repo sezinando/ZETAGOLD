@@ -1864,3 +1864,136 @@ Integration:
 Commits:
 - `4b99f8b5b26c24a7b9bd4f6f76a0d845b5f1ff1a` — Add R10 v2 opportunity decision layer
 - `a8b8253f9c0b21bae41d732523622209b1562973` — Integrate R10 v2 opportunity evaluation
+
+
+---
+
+## CHECKPOINT — ETAPA 13.12 — R11 Reduction Governor — CONCLUÍDA
+
+**Checkpoint date:** 2026-09-18  
+**Branch:** `refactor/v0.116-engine12-parity`
+
+### Estado arquitetural
+
+A fronteira de governança do REDUCE foi implementada explicitamente:
+
+```
+R10 Opportunity
+      ↓
+R10 Target
+      ↓
+R10 Desired Reduction
+      ↓
+R11 Reduction Governor
+      ↓
+R10 Authorized Reduction
+      ↓
+Execution Core
+      ↓
+Reconciliation
+```
+
+Novo módulo:
+
+`Core/EAGOLD_R10_V2_R11Governor.mqh`
+
+O governor retorna uma capacidade estruturada contendo:
+
+- `allowed`;
+- `desiredLots`;
+- `perActionCapacity`;
+- `directionCapacity`;
+- `structureCapacity`;
+- `recoveryPolicyCapacity`;
+- `capacityLots`;
+- `policy`;
+- `blockReason`.
+
+### Regra de autoridade
+
+O R11 Reduction Governor **não**:
+
+- seleciona tickets;
+- escolhe a oportunidade;
+- executa operações;
+- reserva capital;
+- consome capital;
+- altera Recovery State;
+- altera R13.
+
+A decisão econômica permanece no R10.
+
+### Separação entre ADD e REDUCE
+
+Não foi reutilizado diretamente `R11RecoveryAdditionAllowed()` para autorizar reduções.
+
+A razão arquitetural é que:
+
+- ADD aumenta exposição;
+- REDUCE diminui exposição.
+
+Portanto, os dois caminhos precisam de políticas de capacidade distintas.
+
+### Capacidade estrutural
+
+Quando o governor está habilitado, a capacidade direcional considera a posição existente e preserva uma estrutura mínima de `Lot` na direção selecionada.
+
+Conceitualmente:
+
+```
+StructureCapacity = DirectionLots - Lot
+```
+
+A capacidade final é limitada pelas quatro dimensões:
+
+```
+R11Capacity =
+MIN(
+    PerActionCapacity,
+    DirectionCapacity,
+    StructureCapacity,
+    RecoveryPolicyCapacity
+)
+```
+
+Quando o governor está desabilitado, a etapa não fabrica uma restrição inexistente: a capacidade é tratada como o `DesiredLots` solicitado, permanecendo as demais camadas responsáveis pelas restrições.
+
+### Integração no ZETAGOLD
+
+`EA/EAGOLD.mq4` agora:
+
+1. constrói o Context;
+2. avalia Opportunity;
+3. seleciona Target;
+4. calcula Candidate/Desired Reduction;
+5. executa o R11 Reduction Governor;
+6. disponibiliza `R11Capacity` para a camada de autorização.
+
+**Importante:** a existência de R11 capacity não cria capital. A capacidade de capital continua separada e, no estado atual, ainda não autoriza execução econômica do R10 v2.
+
+### Commits
+
+- `2203c2113242c0b99a616dea71dee58bef488117` — Add R10 v2 R11 reduction governor
+- `245b7715bcc26ad58046cf38313c6a50c73e33af` — Integrate R10 v2 R11 reduction governor
+
+### Compile Gate
+
+O código foi integrado; a validação final de compilação deve continuar sendo feita no MetaEditor local. Nenhum resultado de Strategy Tester é declarado por esta etapa.
+
+### Decisão do checkpoint
+
+**ETAPA 13.12 — CONCLUÍDA.**
+
+A próxima fronteira é:
+
+**ETAPA 13.13 — Reduction Capital Ledger**
+
+Objetivo: implementar a identidade econômica do capital do R10 v2:
+
+```
+GENERATED → ELIGIBLE → RESERVED → CONSUMED
+                         ↓
+                      RELEASED
+```
+
+com prevenção explícita de double counting e sem tratar Free Margin ou lucro flutuante como capital automaticamente disponível.
