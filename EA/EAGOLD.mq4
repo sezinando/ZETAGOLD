@@ -14,7 +14,6 @@ bool EAGOLDValidateOwnershipConfiguration();
 #include "../Core/EAGOLD_AdaptiveProfitGuard.mqh"
 #include "../Core/EAGOLD_TradingGuards.mqh"
 #include "../Core/EAGOLD_Execution.mqh"
-#include "../Core/EAGOLD_R10_V2_Backtest.mqh"
 string EA_NAME="EAGOLD";string R10_MARKER_PREFIX="EAGOLD_R10_MARKER_";string ENGINE_MARKER_PREFIX="EAGOLD_ENGINE_";string STATE_PREFIX="EAGOLD_STATE_";bool g_r9HedgeActive=false;int g_r9ProcessedTickets[];datetime g_r10LastAction=0;string g_r1LastDecision="DISABLED";string g_r1LastReason="";datetime g_r1LastDecisionTime=0;bool g_r10RecoveryCycleActive=false;double g_r10RecoveryStartEquity=0.0;double g_r10RecoveryWorstEquity=0.0;EAGOLD_TickPolicy g_eagoldTickPolicy=EAGOLD_TICK_CONTINUE;
 #include "../Engines/EAGOLD_R10_Reconciliation.mqh"
 #include "../Engines/EAGOLD_R1_Admission_v0116.mqh"
@@ -26,6 +25,7 @@ double PointsToPrice(double points){return(points*Point);}double NormalizePrice(
 void EAGOLD_ResetTickTransaction(){g_eagoldTickPolicy=EAGOLD_TICK_CONTINUE;}
 bool EAGOLD_EconomicExecutionAllowed(){return(g_eagoldTickPolicy==EAGOLD_TICK_CONTINUE);}
 void EAGOLD_ApplyActionResult(EAGOLD_ActionResult result,string engine,string action,int direction,double lots){EAGOLD_TickPolicy policy=EAGOLD_PolicyForResult(result);Print(EA_NAME," ACTION CONTRACT engine=",engine," action=",action," result=",EAGOLD_ActionResultName(result)," policy=",EAGOLD_TickPolicyName(policy)," direction=",(direction==OP_BUY?"BUY":"SELL")," lots=",DoubleToString(lots,DigitsLots));EAGOLD_ExcursionTrackerNoteRealization(engine,action,result);if(result==EAGOLD_ACTION_PARTIAL)EAGOLD_R10RequestReconciliation();if(policy==EAGOLD_TICK_HALT_FOR_RECONCILIATION)g_eagoldTickPolicy=EAGOLD_TICK_HALT_FOR_RECONCILIATION;else if(policy==EAGOLD_TICK_CONSUME&&g_eagoldTickPolicy==EAGOLD_TICK_CONTINUE)g_eagoldTickPolicy=EAGOLD_TICK_CONSUME;if(result==EAGOLD_ACTION_COMPLETED&&CountEAGOLDOrders()==0)EAGOLD_ExcursionTrackerFinalize();}
+#include "../Core/EAGOLD_R10_V2_Backtest.mqh"
 #include "../UI/EAGOLD_RealizationCascade.mqh"
 #include "../Engines/EAGOLD_R13_Satellite.mqh"
 #include "../Core/EAGOLD_Persistence.mqh"
