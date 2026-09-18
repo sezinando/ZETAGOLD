@@ -119,8 +119,7 @@ void EAGOLD_R10V2CapitalRelease(double amount)
       0.0,
       g_r10V2CapitalLedger.capitalEligible
       -g_r10V2CapitalLedger.capitalReserved
-      -g_r10V2CapitalLedger.capitalConsumed
-      +g_r10V2CapitalLedger.capitalReleased);
+      -g_r10V2CapitalLedger.capitalConsumed);
 }
 
 bool EAGOLD_R10V2CapitalConsumeReserved(double amount)
