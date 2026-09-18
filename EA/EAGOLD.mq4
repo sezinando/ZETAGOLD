@@ -58,7 +58,7 @@ int decisionDirection=0;
 bool decisionStructuralValid=false;
 bool decisionStructuralBenefit=false;
 
-if(g_r10V2BalancedPair.found && g_r10V2AuthorizedLots>=Lot)
+if(g_r10V2BalancedPair.found)
 {
    decisionTargetFound=true;
    decisionTargetTicket=g_r10V2BalancedPair.buy.ticket;
