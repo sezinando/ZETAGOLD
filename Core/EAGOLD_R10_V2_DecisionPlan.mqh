@@ -119,53 +119,54 @@ void EAGOLD_R10V2DecisionPlanBuild(
    double netDelta,
    double recoveryLoadBefore,
    double recoveryLoadAfter,
-   double recoveryLoadRelief)
+   double recoveryLoadRelief,
+   EAGOLD_R10V2DecisionContract &contract)
 {
-   EAGOLD_R10V2DecisionContractReset(g_r10V2DecisionContract);
+   EAGOLD_R10V2DecisionContractReset(contract);
 
-   g_r10V2DecisionContract.timestamp=ctx.timestamp;
-   g_r10V2DecisionContract.opportunity=opportunity;
-   g_r10V2DecisionContract.targetTicket=targetTicket;
-   g_r10V2DecisionContract.targetTicket2=targetTicket2;
-   g_r10V2DecisionContract.direction=direction;
+   contract.timestamp=ctx.timestamp;
+   contract.opportunity=opportunity;
+   contract.targetTicket=targetTicket;
+   contract.targetTicket2=targetTicket2;
+   contract.direction=direction;
 
-   g_r10V2DecisionContract.objective=EAGOLD_R10V2PlanObjective(opportunity);
-   g_r10V2DecisionContract.selectionPolicy=EAGOLD_R10V2PlanPolicy(opportunity);
+   contract.objective=EAGOLD_R10V2PlanObjective(opportunity);
+   contract.selectionPolicy=EAGOLD_R10V2PlanPolicy(opportunity);
 
-   g_r10V2DecisionContract.candidateLots=candidateLots;
-   g_r10V2DecisionContract.desiredLots=desiredLots;
-   g_r10V2DecisionContract.capitalCapacity=capitalCapacity;
-   g_r10V2DecisionContract.exposureCapacity=exposureCapacity;
-   g_r10V2DecisionContract.r11Capacity=r11Capacity;
-   g_r10V2DecisionContract.brokerCapacity=brokerCapacity;
-   g_r10V2DecisionContract.authorizedLots=authorizedLots;
-   g_r10V2DecisionContract.capitalReservationRequired=capitalReservationRequired;
+   contract.candidateLots=candidateLots;
+   contract.desiredLots=desiredLots;
+   contract.capitalCapacity=capitalCapacity;
+   contract.exposureCapacity=exposureCapacity;
+   contract.r11Capacity=r11Capacity;
+   contract.brokerCapacity=brokerCapacity;
+   contract.authorizedLots=authorizedLots;
+   contract.capitalReservationRequired=capitalReservationRequired;
 
-   g_r10V2DecisionContract.grossBefore=ctx.grossExposure;
-   g_r10V2DecisionContract.grossAfter=grossAfter;
-   g_r10V2DecisionContract.grossRelief=grossRelief;
+   contract.grossBefore=ctx.grossExposure;
+   contract.grossAfter=grossAfter;
+   contract.grossRelief=grossRelief;
 
-   g_r10V2DecisionContract.netBefore=ctx.netExposure;
-   g_r10V2DecisionContract.netAfter=netAfter;
-   g_r10V2DecisionContract.netDelta=netDelta;
+   contract.netBefore=ctx.netExposure;
+   contract.netAfter=netAfter;
+   contract.netDelta=netDelta;
 
-   g_r10V2DecisionContract.recoveryLoadBefore=recoveryLoadBefore;
-   g_r10V2DecisionContract.recoveryLoadAfter=recoveryLoadAfter;
-   g_r10V2DecisionContract.recoveryLoadRelief=recoveryLoadRelief;
+   contract.recoveryLoadBefore=recoveryLoadBefore;
+   contract.recoveryLoadAfter=recoveryLoadAfter;
+   contract.recoveryLoadRelief=recoveryLoadRelief;
 
-   g_r10V2DecisionContract.action=EAGOLD_R10V2_HANDOFF_NONE;
-   g_r10V2DecisionContract.executionEligible=false;
-   g_r10V2DecisionContract.capitalSource="";
+   contract.action=EAGOLD_R10V2_HANDOFF_NONE;
+   contract.executionEligible=false;
+   contract.capitalSource="";
 
    if(opportunity==EAGOLD_R10V2_OPP_NONE)
    {
-      g_r10V2DecisionContract.state=EAGOLD_R10V2_DECISION_NO_OPPORTUNITY;
-      g_r10V2DecisionContract.reason=EAGOLD_R10V2_REASON_NO_EXPOSURE;
+      contract.state=EAGOLD_R10V2_DECISION_NO_OPPORTUNITY;
+      contract.reason=EAGOLD_R10V2_REASON_NO_EXPOSURE;
       return;
    }
 
    if(targetFound && capitalCapacity>0.0)
-      g_r10V2DecisionContract.capitalSource="R13_RECOVERY_CAPITAL";
+      contract.capitalSource="R13_RECOVERY_CAPITAL";
 
    bool authorized=(authorizedLots>=Lot &&
                     targetFound &&
@@ -174,18 +175,18 @@ void EAGOLD_R10V2DecisionPlanBuild(
 
    if(authorized)
    {
-      g_r10V2DecisionContract.state=EAGOLD_R10V2_DECISION_AUTHORIZED;
-      g_r10V2DecisionContract.reason=EAGOLD_R10V2_REASON_AUTHORIZED;
-      g_r10V2DecisionContract.action=EAGOLD_R10V2_HANDOFF_PARTIAL_CLOSE;
+      contract.state=EAGOLD_R10V2_DECISION_AUTHORIZED;
+      contract.reason=EAGOLD_R10V2_REASON_AUTHORIZED;
+      contract.action=EAGOLD_R10V2_HANDOFF_PARTIAL_CLOSE;
 
       // Authorization is a decision-domain result only.
       // Execution remains closed in ETAPA 13.16.
-      g_r10V2DecisionContract.executionEligible=false;
+      contract.executionEligible=false;
       return;
    }
 
-   g_r10V2DecisionContract.state=EAGOLD_R10V2_DECISION_BLOCKED;
-   g_r10V2DecisionContract.reason=EAGOLD_R10V2PlanBlockReason(
+   contract.state=EAGOLD_R10V2_DECISION_BLOCKED;
+   contract.reason=EAGOLD_R10V2PlanBlockReason(
       desiredLots,
       authorizedLots,
       capitalCapacity,
