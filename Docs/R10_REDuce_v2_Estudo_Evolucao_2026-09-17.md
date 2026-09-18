@@ -2760,3 +2760,138 @@ O código deve ser recompilado no MetaEditor antes de abrir a próxima fronteira
 **ETAPA 13.19 — R10 v2 Execution Adapter**
 
 Objetivo: transformar somente um contrato AUTHORIZED, validado, executionEligible=true e com Capital Reserved em uma chamada controlada ao Execution Core, sem permitir que a camada de decisão execute broker operations diretamente.
+
+## ETAPA 13.19 — R10 v2 Execution Adapter — IMPLEMENTADA
+
+**Data:** 2026-09-18  
+**Branch:** `refactor/v0.116-engine12-parity`
+
+### Objetivo
+
+Foi criada a primeira ponte formal entre o Decision Contract e o Execution Core:
+
+```
+Decision Contract
+      ↓
+Pre-Execution Gate
+      ↓
+Execution Adapter
+      ↓
+Execution Core
+      ↓
+Broker
+```
+
+Novo módulo:
+
+`Core/EAGOLD_R10_V2_ExecutionAdapter.mqh`
+
+### Regra de autoridade
+
+O adapter é a única camada R10 v2 autorizada a solicitar a mutação de uma ordem através do Execution Core.
+
+Ele não:
+
+- escolhe oportunidade;
+- escolhe target;
+- calcula capacidade;
+- chama R11;
+- altera Recovery State;
+- altera R13.
+
+### Pré-condições
+
+A execução somente pode ser solicitada quando simultaneamente:
+
+```
+AUTHORIZED
++ PARTIAL_CLOSE
++ target válido
++ authorizedLots >= Lot
++ PreExecutionGate = TRUE
++ executionEligible = TRUE
+```
+
+Enquanto `executionEligible=false`, o adapter permanece efetivamente inerte.
+
+### Execução single-target
+
+A ETAPA 13.19 implementa somente **Position Adjustment / Directional single-target**.
+
+O adapter utiliza:
+
+`CloseMarketOrderLots(ticket, authorizedLots, realized)`
+
+O resultado do broker passa a ser a referência para a contabilidade posterior.
+
+### Capital
+
+Quando existe `capitalReservationRequired > 0`, a reserva é criada imediatamente antes da mutação do broker.
+
+Após sucesso:
+
+- perda realizada é limitada ao valor reservado;
+- o valor efetivamente consumido é baseado no resultado realizado;
+- eventual reserva não consumida é liberada.
+
+Após falha do broker:
+
+- a reserva é liberada;
+- nenhum consumo é registrado.
+
+### Action Contract
+
+O resultado da operação retorna como:
+
+`EAGOLD_ACTION_PARTIAL`
+
+Isso aciona a política existente:
+
+```
+PARTIAL
+   ↓
+HALT_FOR_RECONCILIATION
+```
+
+Portanto, uma redução R10 v2 não pode ser seguida por outra ação econômica no mesmo tick sem passar pela reconciliação existente.
+
+### Balanced deliberadamente bloqueado
+
+O adapter **não executa Balanced Reduce nesta etapa**.
+
+Isso é proposital. Duas pernas exigem:
+
+- execução bilateral;
+- identificação do resultado de cada ticket;
+- tratamento de primeira perna executada / segunda falhada;
+- consumo/liberação proporcional de capital;
+- reconciliação do par.
+
+Essa fronteira será tratada na **ETAPA 13.20**.
+
+### Segurança
+
+A integração foi colocada atrás de:
+
+`executionEligible`
+
+Como o Decision Plan atual ainda produz:
+
+`executionEligible=false`
+
+**nenhuma execução econômica do R10 v2 foi ativada por esta etapa.**
+
+### Commits
+
+- `32274d89428c4b3e754ba64e17ca437351eaafdd` — Add R10 v2 single-target execution adapter
+- `a1be0d19223fc5df395c65f8204770d2facb334e` — Wire R10 v2 execution adapter behind eligibility gate
+
+### Compile Gate
+
+A ETAPA 13.19 deve ser compilada no MetaEditor local antes de abrir a execução bilateral.
+
+### Próxima etapa
+
+**ETAPA 13.20 — Bilateral Execution & Reconciliation**
+
+Objetivo: implementar o Balanced Reduce com duas pernas e tornar o resultado parcial de uma das pernas uma condição explícita de reconciliação, sem permitir execução bilateral presumida.
