@@ -1806,3 +1806,34 @@ Esta etapa não transforma o R10 v2 em autoridade de produção. O simulador alt
 ### 12.4A.4 — Próximo experimento
 
 Executar backtests comparativos mantendo todos os parâmetros do ZETAGOLD constantes e variando inicialmente apenas [09.02] `R10V2ReduceRatio`. A sequência inicial recomendada para experimento é 0.10, 0.125, aproximadamente 0.1667, 0.20. Não existe ainda valor ótimo validado; esses valores são apenas candidatos experimentais.
+
+
+## ETAPA 13.1 — R10 v2 Decision Context
+
+Implemented the first executable boundary of the R10 v2 decision layer.
+
+New module:
+- `Core/EAGOLD_R10_V2_Context.mqh`
+
+The context is a read-only snapshot containing:
+- BUY/SELL position counts and lots;
+- pending counts by direction;
+- GROSS and NET exposure;
+- directional and total floating P/L;
+- account balance, equity and free margin;
+- accumulated and daily realized profit;
+- Bid, Ask and spread in points;
+- basic exposure/bidirectional/heavy-side state flags.
+
+The context does not execute broker mutations, reserve or consume capital, call R11, or replace the operational R10.
+
+Integration:
+- `EA/EAGOLD.mq4` owns one `EAGOLD_R10V2Context` instance.
+- The context is reset during initialization.
+- A fresh snapshot is built on each tick after reconciliation and before R9/R7/R10 lifecycle actions, providing a stable pre-decision state for the future Opportunity/Target/Authorization layers.
+
+No CSV telemetry was re-enabled. No economic behavior of the current R10 was changed.
+
+Commits:
+- `925658996ca5f0fcf38d8cf33952873d67f3f4be` — Add read-only R10 v2 decision context
+- `31539ea5923ad7cbe3faab83bbd96e98e2f76fda` — Integrate R10 v2 read-only decision context
