@@ -1542,6 +1542,132 @@ Antes da implementação controlada deverão ser demonstrados:
 A ETAPA 12, portanto, está **em andamento**, sem alteração econômica no ZETAGOLD.
 
 
+
+### ETAPA 12.2 — Implementação do Decision Shadow — CONCLUÍDA
+
+O primeiro Decision Shadow executável do R10 v2 foi implementado em:
+
+`Core/EAGOLD_R10_V2_Shadow.mqh`
+
+e integrado ao arquivo principal:
+
+`EA/EAGOLD.mq4`
+
+Commits:
+- `473ddbaef48c86696fadcc70089c24d6c4330281` — criação do módulo Shadow;
+- `6b92df0ba311e1245d7e8b6a156011e5e133747a` — integração no fluxo principal.
+
+#### 12.2.1 Propriedade de segurança
+
+O Shadow é estritamente observer-only:
+
+- não chama Execution Core;
+- não abre posições;
+- não fecha posições;
+- não altera SL/TP;
+- não reserva capital real;
+- não altera R11;
+- não altera R13;
+- não altera Recovery State;
+- não altera Action Contract.
+
+A ativação acompanha `EnableCounterfactualPathTelemetry`, portanto o mesmo input utilizado no TESTE2 habilita a instrumentação.
+
+#### 12.2.2 Arquivo específico
+
+Para não misturar snapshots de estado com decisões, o Shadow grava:
+
+`EAGOLD_R10_V2_SHADOW.csv`
+
+O arquivo registra separadamente:
+
+- Objective;
+- Selection Policy;
+- Target Ticket;
+- Target Lots;
+- Desired Lots;
+- Capital Available;
+- Capital Capacity;
+- Exposure Capacity;
+- R11 Capacity;
+- Broker Capacity;
+- Authorized Lots;
+- BUY/SELL/GROSS/NET before;
+- BUY/SELL/GROSS/NET after;
+- Target P/L;
+- Loss Per Lot;
+- Gross Relief;
+- Net Delta;
+- Recovery Load before/after;
+- Projected Realized P/L;
+- Projected Capital Consumed;
+- Decision State;
+- Decision Reason.
+
+#### 12.2.3 Políticas instrumentadas
+
+O Shadow atual instrumenta três caminhos conceituais:
+
+1. **Balanced Reduction** — redução comum dos dois lados, preservando NET e reduzindo GROSS quando existe capacidade bilateral;
+2. **Position Adjustment** — seleção do ticket mais adverso e projeção de redução parcial;
+3. **Directional/Exposure Adjustment** — representado pelo caminho de ajuste do lado dominante quando não há autorização Balanced.
+
+A fração experimental inicial usada pelo Shadow é **1/8**, exclusivamente como instrumento de medição. Ela não foi promovida a regra econômica do R10.
+
+#### 12.2.4 Capital
+
+O Shadow não utiliza Free Margin como capital de redução.
+
+Para Position Adjustment, a implementação atual usa como **proxy de estudo** o resultado realizado positivo do ciclo atual, limitado pela perda por lote do ticket candidato. Essa definição ainda não representa o Reduction Capital Ledger definitivo e deverá ser refinada antes de qualquer execução real.
+
+#### 12.2.5 R11
+
+A implementação não reutiliza o governador de adição do R11 para reduzir posições.
+
+No Shadow, a capacidade R11 inicial é permissiva para o caminho de redução e serve como campo explícito de telemetria. Isso preserva a separação:
+
+`R10 = decisão`
+`R11 = capacidade`
+`Execution = execução`
+
+A política específica de R11 Reduction Capacity continuará sendo refinada após observar os dados.
+
+#### 12.2.6 Deduplicação
+
+O Shadow evita repetir indefinidamente a mesma decisão em PRE_ACTION quando:
+
+- estado;
+- motivo;
+- alvo;
+- autorização;
+- exposição
+
+permanecem iguais.
+
+Isso reduz ruído no arquivo decisório sem remover a linha temporal do Counterfactual Path.
+
+#### 12.2.7 Próximo teste
+
+O próximo teste passa a ser:
+
+**TESTE3 — R10 v2 Decision Shadow**
+
+Manter a mesma configuração econômica do TESTE1/TESTE2 e:
+
+`EnableCounterfactualPathTelemetry = 1`
+
+`CounterfactualPathSampleSeconds = 2`
+
+Não alterar parâmetros econômicos.
+
+O resultado esperado é a criação de:
+
+`EAGOLD_R10_V2_SHADOW.csv`
+
+com registros `NO_OPPORTUNITY`, `BLOCKED`, `CANDIDATE` e/ou `AUTHORIZED`.
+
+**Importante:** a existência de `AUTHORIZED` no Shadow não significa execução real. Significa apenas que, sob as hipóteses atuais, o plano teria passado pelas capacidades simuladas.
+
 ### ETAPA 12.1 — Baseline Runtime Validation — DEFINIDA
 
 Foi criada a especificação de validação do baseline em `Tests/R10/R10_V2_BASELINE_VALIDATION.md`.
