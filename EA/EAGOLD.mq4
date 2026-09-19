@@ -27,6 +27,7 @@
 #include "../Core/EAGOLD_R10_V2_RegressionSuite.mqh"
 #include "../Core/EAGOLD_R10_V2_ReleaseReadiness.mqh"
 #include "../Core/EAGOLD_R10_V2_FailureRegression.mqh"
+#include "../Core/EAGOLD_R10_V2_ControlledExecutionBoundary.mqh"
 #include "../Core/EAGOLD_R10_V2_TestMatrix.mqh"
 #include "../Core/EAGOLD_R10_V2_ScenarioHarness.mqh"
 #include "../Core/EAGOLD_R10_V2_Calibration.mqh"
@@ -220,6 +221,18 @@ if(r10V2EnableMode!=EAGOLD_R10V2_ENABLE_OFF &&
 if(EnableModularizationDebug)
    EAGOLD_R10V2ReleaseReadinessSnapshot(safetyReason);
 
+bool r10V2Armed=false;
+if(EAGOLD_R10V2ControlledEnableMode()==EAGOLD_R10V2_ENABLE_CONTROLLED)
+{
+   r10V2Armed=EAGOLD_R10V2ArmControlledExecution(
+      EAGOLD_R10V2ControlledEnableMode(),
+      g_r10V2PreExecutionGate,
+      g_r10V2PreLiveGate,
+      (safetyReason==EAGOLD_R10V2_SAFETY_OK),
+      EAGOLD_R10ReconciliationRequired(),
+      EAGOLD_R10V2ExecutionDuplicate(g_r10V2DecisionContract),
+      g_r10V2DecisionContract);
+}
 if(EnableModularizationDebug)
    EAGOLD_R10V2RuntimeDiagnostic(
       r10V2EnableMode,
