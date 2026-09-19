@@ -21,6 +21,77 @@ void EAGOLD_R1ResetCycleLatch()
    g_eagoldR1BasketWasActive=false;
 }
 
+bool EAGOLD_R1RepairFlatPendingAnomaly(const EAGOLD_BrokerIntegrity &c)
+{
+   if(!c.valid || c.positions>0)
+      return(true);
+
+   int expectedPending=2;
+   if(ZG_DirectionFilterEnabled())
+      expectedPending=(g_zgIntelligenceDecision.Direction==ZG_DIR_BUY || g_zgIntelligenceDecision.Direction==ZG_DIR_SELL)?1:0;
+
+   int actualPending=c.buyPending+c.sellPending;
+   bool shapeOk=(actualPending==expectedPending);
+
+   if(shapeOk && ZG_DirectionFilterEnabled())
+   {
+      if(g_zgIntelligenceDecision.Direction==ZG_DIR_BUY && c.sellPending>0)
+         shapeOk=false;
+      if(g_zgIntelligenceDecision.Direction==ZG_DIR_SELL && c.buyPending>0)
+         shapeOk=false;
+      if(g_zgIntelligenceDecision.Direction==ZG_DIR_WAIT && actualPending>0)
+         shapeOk=false;
+   }
+
+   if(shapeOk)
+      return(true);
+
+   if(actualPending<=0)
+      return(true);
+
+   if(!IsTradeAllowed() || IsTradeContextBusy())
+   {
+      Print(EA_NAME," RULE 1 DOUBLE CHECK: pending anomaly detected but trade context is not available.");
+      return(false);
+   }
+
+   Print(EA_NAME," RULE 1 DOUBLE CHECK: FLAT/PENDING ANOMALY. expected=",expectedPending,
+         " actual=",actualPending," buyPending=",c.buyPending," sellPending=",c.sellPending,
+         " -> deleting orphan pending orders before re-admission.");
+
+   bool allDeleted=true;
+   for(int i=OrdersTotal()-1;i>=0;i--)
+   {
+      if(!OrderSelect(i,SELECT_BY_POS,MODE_TRADES))
+         continue;
+      if(!IsEAGOLDOrder())
+         continue;
+      int type=OrderType();
+      if(type!=OP_BUYSTOP && type!=OP_SELLSTOP)
+         continue;
+
+      int ticket=OrderTicket();
+      ResetLastError();
+      if(!OrderDelete(ticket,clrNONE))
+      {
+         int err=GetLastError();
+         Print(EA_NAME," RULE 1 DOUBLE CHECK: failed to delete orphan pending ticket=",ticket," err=",err);
+         allDeleted=false;
+      }
+      else
+         Print(EA_NAME," RULE 1 DOUBLE CHECK: orphan pending deleted ticket=",ticket);
+   }
+
+   if(!allDeleted)
+   {
+      EAGOLD_R10RequestReconciliation();
+      return(false);
+   }
+
+   EAGOLD_R1RearmFromBrokerFlat();
+   return(true);
+}
+
 void EAGOLD_R1RearmFromBrokerFlat()
 {
    // Broker census is authoritative: if no EAGOLD order exists, a stale
