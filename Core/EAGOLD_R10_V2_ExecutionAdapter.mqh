@@ -210,8 +210,10 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
    if(OrderSelect(contract.targetTicket2,SELECT_BY_TICKET,MODE_TRADES))
    {
       if(IsEAGOLDOrder() &&
+         OrderSymbol()==Symbol() &&
+         OrderMagicNumber()==MagicNumber &&
          OrderType()==OP_SELL &&
-         OrderLots()>=Lot)
+         OrderLots()+Lot*0.5>=contract.authorizedLots)
          sellValid=true;
    }
 
