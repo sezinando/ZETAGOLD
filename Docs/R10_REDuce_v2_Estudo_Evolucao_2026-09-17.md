@@ -3327,3 +3327,25 @@ Commits:
 ### Próxima etapa — ETAPA 13.30: Test Matrix / Failure Injection
 
 Antes de abrir a execução, vamos testar sistematicamente os caminhos `NO_OPPORTUNITY`, `BLOCKED`, `AUTHORIZED`, falha de preflight, falha de BUY, falha de SELL bilateral, capital insuficiente, R11 bloqueado, broker capacity, duplicate guard e reconciliation. O objetivo será demonstrar que cada falha termina no estado de segurança correto.
+
+
+## ETAPA 13.30 — TEST MATRIX / FAILURE INJECTION — IMPLEMENTADA
+
+Foi criada uma matriz explícita dos caminhos de segurança do R10 v2 em `Core/EAGOLD_R10_V2_TestMatrix.mqh`.
+
+Casos catalogados:
+`NO_OPPORTUNITY`, `BLOCKED`, `AUTHORIZED`, `CAPITAL_INSUFFICIENT`, `R11_BLOCK`, `BROKER_CAPACITY`, `TARGET_INVALID`, `PREFLIGHT_FAILURE`, `BUY_FAILURE`, `SELL_FAILURE`, `PARTIAL`, `DUPLICATE` e `RECONCILIATION_REQUIRED`.
+
+A matriz define as consequências esperadas para `TickPolicy`, mutação de broker, reconciliação e capital. Neste estágio a injeção não altera o broker: ela é um inventário/test harness de segurança e permanece Journal-only quando o debug está habilitado.
+
+Foi preservado o princípio crítico: `AUTHORIZED` não significa execução. Já `PARTIAL`/falha da segunda perna bilateral exige `HALT_FOR_RECONCILIATION`.
+
+Commits:
+- `d40ef5305f4a01da3f7dc7d0de1b4e384e01091c` — Add R10 v2 failure injection test matrix
+- `2adfb08200fda54683cd3b88b96fe41a11df684a` — Integrate R10 v2 test matrix inventory
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.31.
+
+### Próxima etapa — ETAPA 13.31: Paired Backtest / Scenario Harness
+
+Com a matriz definida, o próximo passo é transformar os casos em cenários determinísticos em memória, sem CSV e sem broker mutation, permitindo testar quantitativamente as decisões R10 v2 antes de qualquer abertura do Pre-Live.
