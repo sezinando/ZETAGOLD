@@ -27,6 +27,14 @@ struct EAGOLD_R10V2ComparativeMetrics
    long   partial;
    long   failed;
 
+   long   shadowAuthorizedReal;
+   long   shadowBlockedReal;
+   long   shadowPartialReal;
+   long   shadowCompletedReal;
+   long   shadowFailedReal;
+   long   shadowNoExecution;
+   long   shadowExecutionDivergence;
+
    double candidateLots;
    double desiredLots;
    double authorizedLots;
@@ -68,6 +76,13 @@ void EAGOLD_R10V2ComparativeReset()
    g_r10V2ComparativeMetrics.completed=0;
    g_r10V2ComparativeMetrics.partial=0;
    g_r10V2ComparativeMetrics.failed=0;
+   g_r10V2ComparativeMetrics.shadowAuthorizedReal=0;
+   g_r10V2ComparativeMetrics.shadowBlockedReal=0;
+   g_r10V2ComparativeMetrics.shadowPartialReal=0;
+   g_r10V2ComparativeMetrics.shadowCompletedReal=0;
+   g_r10V2ComparativeMetrics.shadowFailedReal=0;
+   g_r10V2ComparativeMetrics.shadowNoExecution=0;
+   g_r10V2ComparativeMetrics.shadowExecutionDivergence=0;
    g_r10V2ComparativeMetrics.candidateLots=0.0;
    g_r10V2ComparativeMetrics.desiredLots=0.0;
    g_r10V2ComparativeMetrics.authorizedLots=0.0;
@@ -144,6 +159,39 @@ void EAGOLD_R10V2ComparativeObserve(
    g_r10V2ComparativeMetrics.r11CapacityLots+=MathMax(0.0,contract.r11Capacity);
 }
 
+void EAGOLD_R10V2ComparativeRecordDecisionVsExecution(
+   EAGOLD_R10V2DecisionState decisionState,
+   bool executionAttempted,
+   EAGOLD_ActionResult result)
+{
+   if(decisionState==EAGOLD_R10V2_DECISION_AUTHORIZED)
+   {
+      if(!executionAttempted)
+      {
+         g_r10V2ComparativeMetrics.shadowAuthorizedReal++;
+         g_r10V2ComparativeMetrics.shadowNoExecution++;
+         return;
+      }
+
+      g_r10V2ComparativeMetrics.shadowAuthorizedReal++;
+      if(result==EAGOLD_ACTION_PARTIAL)
+         g_r10V2ComparativeMetrics.shadowPartialReal++;
+      else if(result==EAGOLD_ACTION_COMPLETED)
+         g_r10V2ComparativeMetrics.shadowCompletedReal++;
+      else if(result==EAGOLD_ACTION_FAILED)
+         g_r10V2ComparativeMetrics.shadowFailedReal++;
+      else if(result==EAGOLD_ACTION_BLOCKED)
+         g_r10V2ComparativeMetrics.shadowBlockedReal++;
+
+      if(result==EAGOLD_ACTION_BLOCKED || result==EAGOLD_ACTION_FAILED)
+         g_r10V2ComparativeMetrics.shadowExecutionDivergence++;
+   }
+   else if(decisionState==EAGOLD_R10V2_DECISION_BLOCKED)
+   {
+      g_r10V2ComparativeMetrics.shadowBlockedReal++;
+   }
+}
+
 void EAGOLD_R10V2ComparativeRecordExecution(EAGOLD_ActionResult result)
 {
    if(result==EAGOLD_ACTION_COMPLETED)
@@ -174,7 +222,14 @@ void EAGOLD_R10V2ComparativeJournalSummary()
       " v2NetCum=",DoubleToString(g_r10V2ComparativeMetrics.v2ProjectedNetCumulative,2),
       " completed=",g_r10V2ComparativeMetrics.completed,
       " partial=",g_r10V2ComparativeMetrics.partial,
-      " failed=",g_r10V2ComparativeMetrics.failed);
+      " failed=",g_r10V2ComparativeMetrics.failed,
+      " shadowAuthorized=",g_r10V2ComparativeMetrics.shadowAuthorizedReal,
+      " shadowBlocked=",g_r10V2ComparativeMetrics.shadowBlockedReal,
+      " shadowPartial=",g_r10V2ComparativeMetrics.shadowPartialReal,
+      " shadowCompleted=",g_r10V2ComparativeMetrics.shadowCompletedReal,
+      " shadowFailed=",g_r10V2ComparativeMetrics.shadowFailedReal,
+      " shadowNoExecution=",g_r10V2ComparativeMetrics.shadowNoExecution,
+      " shadowDivergence=",g_r10V2ComparativeMetrics.shadowExecutionDivergence);
 }
 
 #endif
