@@ -167,10 +167,18 @@ EAGOLD_ActionResult EAGOLD_CreateFirstOrdersAtomic()
       // BUY=+1 / SELL=-1. MT4 OP_BUY/OP_SELL use different values
       // (0/1), so never compare the Intelligence enum directly with OP_*.
       bool intelligenceBuy=(selectedDirection==ZG_DIR_BUY);
-      bool intelligenceSell=(selectedDirection==ZG_DIR_SELL);
       double selectedPrice=(intelligenceBuy?
          NormalizePrice(Ask+PointsToPrice(FirstStep)):
          NormalizePrice(Bid-PointsToPrice(FirstStep)));
+      Print(EA_NAME," R1 INTELLIGENCE ADMISSION: direction=",
+            (intelligenceBuy?"BUY":"SELL"),
+            " price=",DoubleToString(selectedPrice,Digits),
+            " lot=",DoubleToString(Lot,DigitsLots),
+            " cycleArmed=",g_eagoldR1CycleArmed,
+            " entrySuspended=",EAGOLD_EntrySuspendedThisTick(),
+            " tradeAllowed=",EAGOLD_TradingAllowed(),
+            " windowOpen=",EAGOLD_TradingWindowOpen(),
+            " spreadPoints=",DoubleToString((Ask-Bid)/Point,1));
       int selectedTicket=SendPending(
          intelligenceBuy?OP_BUYSTOP:OP_SELLSTOP,
          selectedPrice,Lot,
@@ -178,7 +186,8 @@ EAGOLD_ActionResult EAGOLD_CreateFirstOrdersAtomic()
       if(selectedTicket<=0)
       {
          Print(EA_NAME," RULE 1 INTELLIGENCE: selected seed failed. Direction=",
-               (selectedDirection==OP_BUY?"BUY":"SELL"));
+               (intelligenceBuy?"BUY":"SELL"),
+               " lastError=",GetLastError());
          return(EAGOLD_ACTION_FAILED);
       }
 
