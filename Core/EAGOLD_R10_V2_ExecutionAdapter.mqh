@@ -3,56 +3,34 @@
 
 //==================================================================
 // R10 v2 — EXECUTION ADAPTER
-// ETAPA 13.19
+// ETAPA 13.19 / 13.20
 //
-// Converts a validated, execution-eligible R10 v2 contract into an
-// Execution Core operation.
+// R10 v2 is bridged to the broker only through Execution Core.
+// Balanced execution is bilateral but NOT atomic: each OrderClose
+// is an independent broker mutation and the result of leg 1 is
+// recorded before leg 2 is attempted.
 //
-// This is the ONLY R10 v2 layer allowed to bridge the decision
-// contract to broker mutation.
-//
-// ETAPA 13.19 intentionally supports SINGLE-TARGET partial close.
-// Balanced bilateral execution is reserved for ETAPA 13.20 so that
-// two-leg partial execution can be reconciled explicitly.
-//
-// This module does NOT:
-//   - choose the opportunity
-//   - choose the target
-//   - calculate capacity
-//   - call R11
-//   - alter Recovery State / R13
+// Reconciliation remains the authority for the broker-visible state
+// after any partial bilateral result.
 //==================================================================
 
 EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
    const EAGOLD_R10V2DecisionContract &contract,
    bool preExecutionGate)
 {
-   if(!preExecutionGate)
+   if(!preExecutionGate || !contract.executionEligible)
       return(EAGOLD_ACTION_BLOCKED);
-
-   if(!contract.executionEligible)
+   if(contract.state!=EAGOLD_R10V2_DECISION_AUTHORIZED ||
+      contract.action!=EAGOLD_R10V2_HANDOFF_PARTIAL_CLOSE)
       return(EAGOLD_ACTION_BLOCKED);
-
-   if(contract.state!=EAGOLD_R10V2_DECISION_AUTHORIZED)
-      return(EAGOLD_ACTION_BLOCKED);
-
-   if(contract.action!=EAGOLD_R10V2_HANDOFF_PARTIAL_CLOSE)
-      return(EAGOLD_ACTION_BLOCKED);
-
-   // Balanced execution is deliberately held for the bilateral
-   // adapter/reconciliation stage.
    if(contract.opportunity==EAGOLD_R10V2_OPP_BALANCED_REDUCTION)
       return(EAGOLD_ACTION_BLOCKED);
-
    if(contract.targetTicket<0 ||
-      (contract.direction!=OP_BUY && contract.direction!=OP_SELL))
+      (contract.direction!=OP_BUY && contract.direction!=OP_SELL) ||
+      contract.targetTicket2>=0 ||
+      contract.authorizedLots<Lot)
       return(EAGOLD_ACTION_BLOCKED);
 
-   if(contract.authorizedLots<Lot)
-      return(EAGOLD_ACTION_BLOCKED);
-
-   // Capital is reserved immediately before broker mutation.
-   // Zero projected loss requires no capital reservation.
    if(contract.capitalReservationRequired>0.0 &&
       !EAGOLD_R10V2CapitalReservationActive())
    {
@@ -72,8 +50,6 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
       return(EAGOLD_ACTION_FAILED);
    }
 
-   // The broker result is authoritative. Consume only the realized
-   // loss funded by the reservation; release any unused reservation.
    if(EAGOLD_R10V2CapitalReservationActive())
    {
       double consumed=MathMax(0.0,-realized);
@@ -83,9 +59,107 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
          EAGOLD_R10V2CapitalReleaseTransaction();
    }
 
-   // A partial close is always reconciled by the existing R10
-   // reconciliation boundary before another economic action.
    return(EAGOLD_ACTION_PARTIAL);
+}
+
+// ETAPA 13.20 — Balanced bilateral execution.
+//
+// No atomicity is assumed. Leg 2 is attempted only after leg 1 has
+// returned from the broker. Any one-leg result is PARTIAL and therefore
+// forces the existing reconciliation boundary.
+EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
+   const EAGOLD_R10V2DecisionContract &contract,
+   bool preExecutionGate)
+{
+   if(!preExecutionGate || !contract.executionEligible)
+      return(EAGOLD_ACTION_BLOCKED);
+
+   if(contract.state!=EAGOLD_R10V2_DECISION_AUTHORIZED ||
+      contract.action!=EAGOLD_R10V2_HANDOFF_PARTIAL_CLOSE ||
+      contract.opportunity!=EAGOLD_R10V2_OPP_BALANCED_REDUCTION)
+      return(EAGOLD_ACTION_BLOCKED);
+
+   if(contract.targetTicket<0 || contract.targetTicket2<0 ||
+      contract.targetTicket==contract.targetTicket2 ||
+      contract.direction!=OP_BUY ||
+      contract.authorizedLots<Lot)
+      return(EAGOLD_ACTION_BLOCKED);
+
+   if(contract.capitalReservationRequired>0.0 &&
+      !EAGOLD_R10V2CapitalReservationActive())
+   {
+      if(!EAGOLD_R10V2CapitalReserveTransaction(
+            contract.capitalReservationRequired,
+            contract.targetTicket,
+            contract.targetTicket2,
+            contract.timestamp))
+         return(EAGOLD_ACTION_BLOCKED);
+   }
+
+   // Leg 1: BUY. Execution Core is authoritative.
+   double realizedBuy=0.0;
+   bool buyOk=CloseMarketOrderLots(
+      contract.targetTicket,
+      contract.authorizedLots,
+      realizedBuy);
+
+   if(!buyOk)
+   {
+      if(EAGOLD_R10V2CapitalReservationActive())
+         EAGOLD_R10V2CapitalReleaseTransaction();
+      return(EAGOLD_ACTION_FAILED);
+   }
+
+   // The first broker mutation succeeded. Re-read the second ticket
+   // before attempting leg 2; never assume it is still executable.
+   bool sellValid=false;
+   if(OrderSelect(contract.targetTicket2,SELECT_BY_TICKET,MODE_TRADES))
+   {
+      if(IsEAGOLDOrder() &&
+         OrderType()==OP_SELL &&
+         OrderLots()>=Lot)
+         sellValid=true;
+   }
+
+   double realizedSell=0.0;
+   bool sellOk=false;
+   if(sellValid)
+      sellOk=CloseMarketOrderLots(
+         contract.targetTicket2,
+         contract.authorizedLots,
+         realizedSell);
+
+   if(!sellOk)
+   {
+      // The BUY leg exists in broker state, while SELL does not.
+      // Do not fabricate symmetry. The reconciliation engine receives
+      // the PARTIAL boundary and rebuilds the real state on next tick.
+      if(EAGOLD_R10V2CapitalReservationActive())
+      {
+         double consumed=MathMax(0.0,-realizedBuy);
+         if(consumed>0.0)
+            EAGOLD_R10V2CapitalConsumeReservation(consumed);
+         else
+            EAGOLD_R10V2CapitalReleaseTransaction();
+      }
+      return(EAGOLD_ACTION_PARTIAL);
+   }
+
+   // Both legs executed. Capital is reconciled from the combined
+   // realized result. Any unused reservation is released.
+   if(EAGOLD_R10V2CapitalReservationActive())
+   {
+      double combinedRealized=realizedBuy+realizedSell;
+      double consumed=MathMax(0.0,-combinedRealized);
+      if(consumed>0.0)
+         EAGOLD_R10V2CapitalConsumeReservation(consumed);
+      else
+         EAGOLD_R10V2CapitalReleaseTransaction();
+   }
+
+   // Even with both legs successful, the action changed broker state.
+   // Returning COMPLETED consumes the current economic tick.
+   return(EAGOLD_ACTION_COMPLETED);
 }
 
 #endif
