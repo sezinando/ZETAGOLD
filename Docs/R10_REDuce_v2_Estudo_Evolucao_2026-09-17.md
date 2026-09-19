@@ -3303,3 +3303,27 @@ Commits:
 ### Próxima etapa — ETAPA 13.29: Pre-Live Gate
 
 Antes de considerar qualquer abertura de `executionEligible`, vamos consolidar o gate final: execução explicitamente autorizada, condições mínimas de ambiente, proteção contra execução duplicada, reconciliação obrigatória e capacidade de desligamento imediato.
+
+
+## ETAPA 13.29 — PRE-LIVE GATE — IMPLEMENTADA
+
+Foi criada a barreira explícita `Core/EAGOLD_R10_V2_PreLiveGate.mqh`. Ela reúne, em uma única decisão final, as condições necessárias para uma futura abertura da execução R10 v2: contrato válido, validação pré-execução, auditoria de segurança, ausência de reconciliação pendente, idempotência e coerência do capital.
+
+A abertura de execução **permanece desligada**. `EAGOLD_R10V2PreLiveFeatureEnabled()` retorna `false` nesta etapa. Portanto, o commit não transforma o R10 v2 em executor live/demo.
+
+A execução agora exige simultaneamente `EconomicExecutionAllowed`, `AUTHORIZED`, `PreExecutionGate`, `PreLiveGate` e `executionEligible`.
+
+Isso cria uma separação importante entre:
+- **desenvolvido** — adapter e execução bilateral já existem;
+- **validado** — invariantes e pré-condições são auditados;
+- **habilitado** — ainda NÃO está aberto.
+
+Commits:
+- `82cea83027bcc4eafb99bb83f0a6fb50eec72abd` — Add explicit R10 v2 pre-live gate
+- `9f3ec7ccc3825d3281d2977c167aae61f481de17` — Integrate R10 v2 pre-live execution gate
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.30.
+
+### Próxima etapa — ETAPA 13.30: Test Matrix / Failure Injection
+
+Antes de abrir a execução, vamos testar sistematicamente os caminhos `NO_OPPORTUNITY`, `BLOCKED`, `AUTHORIZED`, falha de preflight, falha de BUY, falha de SELL bilateral, capital insuficiente, R11 bloqueado, broker capacity, duplicate guard e reconciliation. O objetivo será demonstrar que cada falha termina no estado de segurança correto.
