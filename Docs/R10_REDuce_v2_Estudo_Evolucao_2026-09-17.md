@@ -2895,3 +2895,100 @@ A ETAPA 13.19 deve ser compilada no MetaEditor local antes de abrir a execução
 **ETAPA 13.20 — Bilateral Execution & Reconciliation**
 
 Objetivo: implementar o Balanced Reduce com duas pernas e tornar o resultado parcial de uma das pernas uma condição explícita de reconciliação, sem permitir execução bilateral presumida.
+
+
+## CHECKPOINT — ETAPA 13.19 COMPILE GATE
+
+**Status:** VALIDADO PELO METAEDITOR
+
+O usuário confirmou compilação da versão atual com:
+
+```
+0 erros
+```
+
+Portanto, a cadeia das ETAPAS 13.16 → 13.19 permanece estruturalmente íntegra após a correção do identificador `MagicNumber`.
+
+Última correção:
+- `71d455e2df1ba40a000589183289306fe2712b18` — Fix R10 v2 validation magic identifier
+
+Checkpoint:
+- Decision Contract: OK
+- Pre-Execution Gate: OK
+- Capital Reservation Boundary: OK
+- Single-Target Execution Adapter: OK
+- MetaEditor: **0 erros**
+- R10 v2 execution remains gated by `executionEligible=false`
+- Balanced execution remains outside 13.19
+
+---
+
+## ETAPA 13.20 — BILATERAL EXECUTION & RECONCILIATION — INÍCIO
+
+Objetivo desta etapa:
+
+Implementar a execução do **Balanced Reduce** como uma transação bilateral observável, sem assumir atomicidade inexistente no broker.
+
+Contrato:
+
+```
+BUY ticket + SELL ticket
+        ↓
+common q
+        ↓
+leg 1
+        ↓
+leg 2
+        ↓
+resultado bilateral
+        ↓
+Action Contract
+        ↓
+R10 Reconciliation
+```
+
+Estados esperados:
+
+1. `COMPLETED` — ambas as pernas executadas.
+2. `PARTIAL` — somente uma perna executada ou volumes divergentes.
+3. `FAILED` — nenhuma perna executada.
+4. `BLOCKED` — pré-condições inválidas.
+
+Invariantes:
+
+- nunca assumir atomicidade entre dois `OrderClose`;
+- nunca executar a segunda perna sem registrar o resultado da primeira;
+- não mascarar execução unilateral como Balanced completo;
+- capital deve ser conciliado com o resultado real;
+- qualquer assimetria bilateral deve interromper o restante da cadeia econômica;
+- a reconciliação existente permanece autoridade pós-execução.
+
+### ETAPA 13.20 — desenho operacional
+
+O adapter bilateral deverá:
+
+- revalidar ownership dos dois tickets;
+- verificar direção BUY/SELL;
+- verificar `authorizedLots >= Lot`;
+- verificar reserva de capital quando exigida;
+- executar a primeira perna através do Execution Core;
+- capturar resultado realizado;
+- revalidar o segundo ticket após a primeira execução;
+- executar a segunda perna somente se ainda válida;
+- classificar o resultado bilateral;
+- deixar a reconciliação corrigir o estado observável do broker.
+
+**Não será criada falsa atomicidade.**
+
+### Próxima fronteira
+
+A implementação de 13.20 será feita separando:
+
+```
+Bilateral Execution Adapter
+        ≠
+Reconciliation Authority
+```
+
+O primeiro executa e classifica.  
+O segundo reconstrói o estado real após qualquer execução parcial.
