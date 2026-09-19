@@ -3481,3 +3481,21 @@ Commits:
 - `7583b742e8ddb9a78c3cddc64b1f6cb20b78ac47` — Fix pre-live validation safety boolean
 
 **Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.37.
+
+
+## ETAPA 13.37 — CONTROLLED ENABLEMENT — IMPLEMENTADA
+
+Foi criado `Core/EAGOLD_R10_V2_ControlledEnablement.mqh` como fronteira explícita de habilitação do R10 v2, com três modos: `OFF`, `SHADOW` e `CONTROLLED`.
+
+O modo padrão permanece `OFF`. `SHADOW` não permite mutação econômica. `CONTROLLED` só permite atravessar a fronteira quando `PreExecution`, `PreLive`, `executionEligible` e `EconomicExecutionAllowed` estão simultaneamente verdadeiros. O módulo não cria bypass para Safety Audit, Reconciliation, Idempotency, Capital, R11 ou Execution Core.
+
+Foi adicionada também uma invariável de enablement: OFF nunca pode autorizar execução; SHADOW nunca pode autorizar execução; CONTROLLED depende de toda a cadeia de gates existente.
+
+**Importante:** a implementação não habilita o R10 v2 automaticamente. O retorno do modo mestre continua explicitamente `OFF`, portanto a execução real permanece desabilitada.
+
+Commits:
+- `efac4aafd5550978db50b930839beb70fcafc7d1` — Add R10 v2 controlled enablement boundary
+- `29fe788e4d649fb969ed6b38c2eef5d333868454` — Integrate R10 v2 controlled enablement boundary
+- `bf15553ac99a9d2d5f21ef664f1eb1c23161bfdc` — Harden R10 v2 controlled enablement invariants
+
+**Compile Gate:** compilar e confirmar 0 erros antes de qualquer alteração de modo.
