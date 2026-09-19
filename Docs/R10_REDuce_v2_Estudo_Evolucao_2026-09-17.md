@@ -3080,3 +3080,49 @@ A próxima etapa não adicionará uma nova estratégia econômica. Ela fechará 
    - nenhuma perda projetada deve ser contabilizada como perda realizada.
 
 A 13.21 será a última camada de segurança antes de discutir a abertura controlada de `executionEligible`.
+
+
+## ETAPA 13.21 — EXECUTION / RECONCILIATION HARDENING — IMPLEMENTADA
+
+A camada de execução recebeu proteção contra reentrada e reutilização indevida de um contrato após mutação do broker.
+
+### Idempotência
+
+O adapter mantém a identidade da última execução: timestamp, ticket 1, ticket 2 e authorizedLots.
+
+Após uma mutação, PARTIAL bloqueia nova execução até reconciliação; COMPLETED consome o tick pelo Action Contract; o mesmo contrato não pode ser submetido novamente enquanto a guarda estiver ativa.
+
+### Reentrada após PARTIAL
+
+A guarda é liberada somente depois que EAGOLD_R10ReconcileIfRequired() retorna TRUE. A reconciliação continua sendo o ponto de transição entre o estado pós-broker e um novo estado elegível para decisão.
+
+### Reserva órfã
+
+A reserva possui identidade própria: ticket 1 + ticket 2 + amount. O adapter exige correspondência antes da mutação.
+
+### Revalidação
+
+Imediatamente antes do broker são verificados ticket, Symbol, MagicNumber, direção e volume disponível. Para Balanced, a BUY é revalidada antes da primeira mutação e a SELL entre as duas pernas.
+
+### Resultado econômico
+
+A projeção do Decision Contract permanece distinta do resultado real. Somente o retorno do Execution Core pode alimentar o consumo da reserva.
+
+### Estado atual
+
+executionEligible=false permanece intacto. Portanto, 13.21 fortalece a execução sem abrir ainda o caminho de execução econômica real.
+
+Commits:
+- 1da2d287afae8a9f5fe1e3ab1b43d65a0c325050 — Harden R10 v2 execution idempotency
+- a9cb5f3725db1d8fe316cdd1b1ac0b631d876941 — Fix R10 v2 idempotency guard syntax
+- a8dcb206ba2f51d8f36c1b1d7f07885d78ace937 — Release R10 v2 execution guard after reconciliation
+- 901d2e145a3592492c7c0b78564b0c97e97af3aa — Revalidate R10 v2 single target before execution
+- c9f8312cf0a6e369290e7ed873e450945926a04b — Revalidate R10 v2 balanced buy leg
+
+**Compile Gate:** o usuário confirmou 0 erros antes desta etapa. A versão final da 13.21 deve ser compilada novamente antes da próxima fronteira.
+
+## PRÓXIMA ETAPA — 13.22: BACKTEST COMPARATIVO
+
+Após a validação de compilação, a próxima fase será medir em cenário controlado o comportamento do ZETAGOLD atual versus R10 v2 em modo experimental, sem colocar capital real em risco.
+
+Métricas: Gross Exposure, Net Exposure, Drawdown, Recovery Load, número de reduções, volume reduzido, perda realizada pelas reduções, capital consumido/liberado, ciclos concluídos, tempo de recuperação, bloqueios e divergências de reconciliação.
