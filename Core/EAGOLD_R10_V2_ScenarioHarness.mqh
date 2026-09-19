@@ -207,4 +207,93 @@ void EAGOLD_R10V2ScenarioHarnessRun()
    Print(EA_NAME," R10 v2 SCENARIO HARNESS READY");
 }
 
+//==================================================================
+// ETAPA 13.32 — INVARIANT / FAILURE TESTS
+//==================================================================
+struct EAGOLD_R10V2ScenarioTestResult
+{
+   int total;
+   int passed;
+   int failed;
+};
+
+void EAGOLD_R10V2ScenarioAssert(
+   string name,
+   bool condition,
+   EAGOLD_R10V2ScenarioTestResult &r)
+{
+   r.total++;
+   if(condition)
+   {
+      r.passed++;
+      Print(EA_NAME," R10 v2 TEST PASS: ",name);
+   }
+   else
+   {
+      r.failed++;
+      Print(EA_NAME," R10 v2 TEST FAIL: ",name);
+   }
+}
+
+void EAGOLD_R10V2ScenarioInvariantTests()
+{
+   EAGOLD_R10V2ScenarioTestResult r;
+   r.total=0; r.passed=0; r.failed=0;
+
+   EAGOLD_R10V2ScenarioState s;
+   EAGOLD_R10V2ScenarioProjection p;
+
+   EAGOLD_R10V2ScenarioStateReset(s);
+   s.buyLots=10.0; s.sellLots=8.0;
+   s.grossExposure=18.0; s.netExposure=2.0;
+   s.recoveryLoad=180.0;
+   s.buyProfit=20.0; s.sellProfit=-60.0;
+
+   bool balanced=EAGOLD_R10V2ScenarioProjectBalanced(s,1.0,p);
+   EAGOLD_R10V2ScenarioAssert("BALANCED_VALID",balanced,r);
+   EAGOLD_R10V2ScenarioAssert("BALANCED_GROSS_RELIEF",p.grossRelief>0.0,r);
+   EAGOLD_R10V2ScenarioAssert("BALANCED_NET_PRESERVED",p.netInvariant,r);
+   EAGOLD_R10V2ScenarioAssert("BALANCED_GROSS_AFTER_LT_BEFORE",
+                              p.grossAfter<s.grossExposure,r);
+
+   EAGOLD_R10V2ScenarioAssert("BALANCED_OVERSELL_REJECTED",
+                              !EAGOLD_R10V2ScenarioProjectBalanced(s,9.0,p),r);
+
+   EAGOLD_R10V2ScenarioStateReset(s);
+   s.buyLots=5.0; s.sellLots=0.0;
+   s.grossExposure=5.0; s.netExposure=5.0;
+   s.recoveryLoad=100.0; s.buyProfit=-50.0;
+
+   EAGOLD_R10V2ScenarioAssert("DIRECTIONAL_VALID",
+                              EAGOLD_R10V2ScenarioProject(s,OP_BUY,1.0,p),r);
+   EAGOLD_R10V2ScenarioAssert("DIRECTIONAL_GROSS_RELIEF",
+                              p.grossRelief>0.0,r);
+   EAGOLD_R10V2ScenarioAssert("DIRECTIONAL_OVERREDUCE_REJECTED",
+                              !EAGOLD_R10V2ScenarioProject(s,OP_BUY,6.0,p),r);
+   EAGOLD_R10V2ScenarioAssert("DIRECTIONAL_INVALID_SIDE_REJECTED",
+                              !EAGOLD_R10V2ScenarioProject(s,OP_SELL,1.0,p),r);
+   EAGOLD_R10V2ScenarioAssert("BELOW_LOT_REJECTED",
+                              !EAGOLD_R10V2ScenarioProject(s,OP_BUY,Lot*0.5,p),r);
+
+   EAGOLD_R10V2ScenarioStateReset(s);
+   s.buyLots=-1.0; s.sellLots=2.0;
+   s.grossExposure=1.0; s.netExposure=-3.0;
+   EAGOLD_R10V2ScenarioAssert("NEGATIVE_VOLUME_REJECTED",
+                              !EAGOLD_R10V2ScenarioProject(s,OP_SELL,1.0,p),r);
+
+   EAGOLD_R10V2ScenarioStateReset(s);
+   s.buyLots=4.0; s.sellLots=4.0;
+   s.grossExposure=8.0; s.netExposure=0.0;
+   s.recoveryLoad=80.0;
+   EAGOLD_R10V2ScenarioAssert("BALANCED_EXACT_LIMIT",
+                              EAGOLD_R10V2ScenarioProjectBalanced(s,4.0,p),r);
+   EAGOLD_R10V2ScenarioAssert("BALANCED_EXACT_LIMIT_NET",
+                              p.netInvariant,r);
+   EAGOLD_R10V2ScenarioAssert("BALANCED_EXACT_LIMIT_GROSS",
+                              p.grossRelief>0.0,r);
+
+   Print(EA_NAME," R10 v2 INVARIANT TEST SUMMARY total=",r.total,
+         " passed=",r.passed," failed=",r.failed);
+}
+
 #endif
