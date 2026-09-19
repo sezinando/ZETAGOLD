@@ -3227,3 +3227,29 @@ Commit:
 ### Próxima etapa — ETAPA 13.26: Backtest comparativo real
 
 Com a cadeia transacional fechada, o próximo trabalho será construir a comparação de trajetória sem CSV pesado: caminho atual versus projeção R10 v2, com métricas agregadas de exposição, redução, recovery load, capital e resultados observados.
+
+
+## ETAPA 13.26 — BACKTEST COMPARATIVO REAL — IMPLEMENTADA
+
+A comparação foi elevada de métricas pontuais para uma comparação de trajetória sobre o mesmo estado observado pelo EA. Em cada avaliação, o lado **baseline** representa o estado real do broker naquele instante; o lado **R10 v2** representa somente a projeção determinística contida no Decision Contract.
+
+Foram adicionados acumuladores in-memory para:
+- exposição GROSS acumulada do baseline e do R10 v2 projetado;
+- exposição NET acumulada do baseline e do R10 v2 projetado;
+- gross relief acumulado;
+- recovery-load relief acumulado;
+- capital requerido acumulado.
+
+O resumo é emitido no Journal no `OnDeinit()`. Não foi introduzido CSV, arquivo de telemetria ou mutação de broker.
+
+A comparação é deliberadamente assimétrica no sentido correto: o baseline é observado; o R10 v2 é projetado. Portanto, esta etapa mede **impacto estrutural potencial na mesma trajetória**, e não afirma um lucro contrafactual que não foi observado.
+
+Commits:
+- `da5ccb5a77687f7dcd8e55ff1583af9cb70e2f68` — Add same-trajectory R10 v2 comparative backtest metrics
+- `1bb19de900041871ce358e29af52d2017ca1f6d0` — Print R10 v2 comparative summary at tester shutdown
+
+**Compile Gate:** compilar e confirmar 0 erros antes da próxima etapa.
+
+### Próxima etapa — ETAPA 13.27: Shadow × Real
+
+Depois do backtest comparativo, vamos separar explicitamente decisão projetada e execução observada, permitindo medir divergências entre `AUTHORIZED`, `PARTIAL`, `COMPLETED` e `BLOCKED`, sem transformar a projeção em execução automática.
