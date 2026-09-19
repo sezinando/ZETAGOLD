@@ -202,6 +202,36 @@ void EAGOLD_R10V2ComparativeRecordExecution(EAGOLD_ActionResult result)
       g_r10V2ComparativeMetrics.failed++;
 }
 
+
+void EAGOLD_R10V2ComparativeRecordTrajectory(
+   double baselineGross,
+   double baselineNet,
+   double projectedGross,
+   double projectedNet,
+   double projectedGrossRelief,
+   double projectedRecoveryLoadRelief,
+   double projectedCapitalRequired)
+{
+   g_r10V2ComparativeMetrics.baselineGrossExposure=baselineGross;
+   g_r10V2ComparativeMetrics.baselineNetExposure=baselineNet;
+
+   g_r10V2ComparativeMetrics.baselineGrossCumulative+=baselineGross;
+   g_r10V2ComparativeMetrics.baselineNetCumulative+=baselineNet;
+   g_r10V2ComparativeMetrics.v2ProjectedGrossCumulative+=projectedGross;
+   g_r10V2ComparativeMetrics.v2ProjectedNetCumulative+=projectedNet;
+
+   g_r10V2ComparativeMetrics.grossReliefCumulative+=MathMax(0.0,projectedGrossRelief);
+   g_r10V2ComparativeMetrics.recoveryLoadReliefCumulative+=MathMax(0.0,projectedRecoveryLoadRelief);
+   g_r10V2ComparativeMetrics.capitalRequiredCumulative+=MathMax(0.0,projectedCapitalRequired);
+
+   if(g_r10V2ComparativeMetrics.minimumGrossExposure<=0.0 ||
+      baselineGross<g_r10V2ComparativeMetrics.minimumGrossExposure)
+      g_r10V2ComparativeMetrics.minimumGrossExposure=baselineGross;
+
+   if(baselineGross>g_r10V2ComparativeMetrics.maximumGrossExposure)
+      g_r10V2ComparativeMetrics.maximumGrossExposure=baselineGross;
+}
+
 void EAGOLD_R10V2ComparativeJournalSummary()
 {
    Print(EA_NAME,
