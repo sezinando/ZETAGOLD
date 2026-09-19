@@ -21,6 +21,20 @@ void EAGOLD_R1ResetCycleLatch()
    g_eagoldR1BasketWasActive=false;
 }
 
+void EAGOLD_R1RearmFromBrokerFlat()
+{
+   // Broker census is authoritative: if no EAGOLD order exists, a stale
+   // in-memory cycle latch must never prevent a fresh admission.
+   if(CountEAGOLDOrders()!=0)
+      return;
+
+   if(!g_eagoldR1CycleArmed || g_eagoldR1BasketWasActive)
+      Print(EA_NAME," RULE 1 CYCLE: BROKER_FLAT -> R1_REARM (double check).");
+
+   g_eagoldR1CycleArmed=true;
+   g_eagoldR1BasketWasActive=false;
+}
+
 void EAGOLD_R1ObserveCycle()
 {
    int livePositions=CountDirectionPositions(OP_BUY)+CountDirectionPositions(OP_SELL);
