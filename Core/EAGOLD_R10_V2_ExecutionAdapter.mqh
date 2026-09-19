@@ -110,7 +110,7 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
    double realized=0.0;
    if(!CloseMarketOrderLots(contract.targetTicket,contract.authorizedLots,realized))
    {
-      if(EAGOLD_R10V2CapitalReservationActive())
+      if(reservationCreated)
          EAGOLD_R10V2CapitalReleaseTransaction();
       return(EAGOLD_ACTION_FAILED);
    }
@@ -235,7 +235,7 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
          double consumed=MathMax(0.0,-realizedBuy);
          if(consumed>0.0)
             EAGOLD_R10V2CapitalConsumeReservation(consumed);
-         else
+         else if(reservationCreated)
             EAGOLD_R10V2CapitalReleaseTransaction();
       }
       EAGOLD_R10V2ExecutionMark(contract,true);
