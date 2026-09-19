@@ -378,6 +378,19 @@ extern double P10_33_ZGMinConfidence=0.20;
 // [10.34] ZGMinEdge
 extern double P10_34_ZGMinEdge=0.50;
 
+input string INPUT_GROUP_DUAL_CYCLE="=== 11 ZG / DUAL CYCLE MANAGER ===";
+// [11.01] EnableDualCycle
+// Master switch. FALSE is the safe/default mode.
+extern bool P11_01_EnableDualCycle=false;
+// [11.02] DualCycleShadowMode
+// TRUE logs candidates only; FALSE permits the secondary seed.
+extern bool P11_02_DualCycleShadowMode=true;
+// [11.03] DualCycleUseR1AdmissionGates
+extern bool P11_03_DualCycleUseR1AdmissionGates=true;
+// [11.04] DualCycleMaxGrossExposureLots
+// Additional cycle is blocked when the resulting gross exposure would exceed this value.
+extern double P11_04_DualCycleMaxGrossExposureLots=2.00;
+
 // -----------------------------------------------------------------------------
 // Indexed input names exposed in the MT4 Inputs window.
 // Internal source compatibility is preserved through aliases.
@@ -416,6 +429,10 @@ extern double P10_34_ZGMinEdge=0.50;
 #define ZG_NormalMomentumWeight P10_32_ZGNormalMomentumWeight
 #define ZG_MinConfidence P10_33_ZGMinConfidence
 #define ZG_MinEdge P10_34_ZGMinEdge
+#define EnableDualCycle P11_01_EnableDualCycle
+#define DualCycleShadowMode P11_02_DualCycleShadowMode
+#define DualCycleUseR1AdmissionGates P11_03_DualCycleUseR1AdmissionGates
+#define DualCycleMaxGrossExposureLots P11_04_DualCycleMaxGrossExposureLots
 #define MagicNumber P01_01_MagicNumber
 #define RequireCleanLegacyOwnership P01_02_RequireCleanLegacyOwnership
 #define EnableLegacyReattach P01_03_EnableLegacyReattach
