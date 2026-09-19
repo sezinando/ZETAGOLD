@@ -381,7 +381,7 @@ extern double P10_34_ZGMinEdge=0.50;
 input string INPUT_GROUP_DUAL_CYCLE="=== 11 ZG / DUAL CYCLE MANAGER ===";
 // [11.01] EnableDualCycle
 // Master switch. FALSE is the safe/default mode.
-extern bool P11_01_EnableDualCycle=false;
+extern bool P11_01_EnableDualCycle=true;
 // [11.02] DualCycleShadowMode
 // TRUE logs candidates only; FALSE permits the secondary seed.
 extern bool P11_02_DualCycleShadowMode=true;
