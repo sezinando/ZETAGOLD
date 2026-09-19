@@ -3030,3 +3030,53 @@ Commits ETAPA 13.20:
 - `793c6c0d19e0a0887262437743c422e3fdcc582d` — Route R10 v2 execution through bilateral adapter
 
 **Importante:** a execução continua protegida por `executionEligible=false` no Decision Plan atual. A implementação bilateral, portanto, não ativa operações reais por si só.
+
+
+## CHECKPOINT — ETAPA 13.20 COMPILE GATE
+
+**Status:** IMPLEMENTAÇÃO CONCLUÍDA; validação estrutural reforçada.
+
+A ETAPA 13.20 mantém a execução bilateral não-atômica e agora possui endurecimento adicional da fronteira de execução:
+
+- identidade da reserva vinculada a `targetTicket`/`targetTicket2`;
+- valor mínimo da reserva validado antes da mutação;
+- target single-target revalidado contra Symbol, MagicNumber, direção e volume imediatamente antes do `CloseMarketOrderLots`;
+- Balanced continua exigindo BUY/SELL distintos;
+- falha de uma perna não é convertida em sucesso bilateral;
+- `PARTIAL` continua exigindo reconciliação.
+
+Commits adicionais:
+- `57fb1025f8d64a90763c233cad14cf463b4c3c48` — Harden R10 v2 reservation identity
+- `49b90c8778427dfba397dc77fe31b1ab77ba5165` — Harden R10 v2 execution revalidation
+- `6e662c634c665f015b17392f00a164ad9d6aaf35` — Enforce R10 v2 reservation identity before close
+
+**Compile Gate:** usuário confirmou **0 erros** na versão anterior antes desta rodada de hardening. A versão com estes três commits deve passar novamente pelo MetaEditor antes da abertura de `executionEligible`.
+
+---
+
+## ETAPA 13.21 — EXECUTION / RECONCILIATION HARDENING — INÍCIO
+
+A próxima etapa não adicionará uma nova estratégia econômica. Ela fechará as propriedades de segurança da execução:
+
+1. **Idempotência**
+   - impedir repetição do mesmo contrato após execução;
+   - impedir dupla utilização da mesma reserva.
+
+2. **Reentrada**
+   - ação concluída deve consumir o tick;
+   - ação parcial deve bloquear até reconciliação;
+   - contrato antigo não pode ser reutilizado contra estado novo.
+
+3. **Reserva órfã**
+   - identificar reserva ativa incompatível com o contrato atual;
+   - não executar usando reserva de outro target.
+
+4. **Estado broker × contrato**
+   - comparar volume esperado com volume observável;
+   - nunca inferir sucesso sem confirmação.
+
+5. **Reconciliação de capital**
+   - resultado real do broker deve prevalecer sobre projeção;
+   - nenhuma perda projetada deve ser contabilizada como perda realizada.
+
+A 13.21 será a última camada de segurança antes de discutir a abertura controlada de `executionEligible`.
