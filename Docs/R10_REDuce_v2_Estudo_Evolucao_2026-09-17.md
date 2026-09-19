@@ -3378,3 +3378,35 @@ Commits:
 ### Próxima etapa — ETAPA 13.32: Cenários de invariantes e falhas
 
 Vamos expandir o harness para testar automaticamente, em memória, os limites de volume, redução maior que a posição, balanced sem uma das pernas, capital insuficiente, preservação de NET, redução de GROSS e rejeição de projeções inválidas.
+
+
+## ETAPA 13.32 — INVARIANTS + FAILURE SCENARIOS — IMPLEMENTADA
+
+O Scenario Harness foi expandido para executar testes determinísticos de invariantes e rejeições, sempre em memória e sem broker mutation.
+
+Testes adicionados:
+- balanced válido;
+- GROSS relief positivo;
+- NET preservado no balanced;
+- GROSS após menor que antes;
+- balanced acima do volume disponível rejeitado;
+- directional válido;
+- directional com volume acima da posição rejeitado;
+- directional na direção inexistente rejeitado;
+- redução abaixo de `Lot` rejeitada;
+- volume negativo rejeitado;
+- balanced no limite exato de volume;
+- preservação de NET e redução de GROSS no limite.
+
+Cada caso produz `PASS` ou `FAIL` no Journal e um resumo `total / passed / failed`.
+
+**Nota de auditoria:** o cenário `BALANCED_EXACT_LIMIT` verifica apenas a projeção matemática. A política R11 pode deliberadamente preservar um lote mínimo em uma execução real; portanto, o resultado do harness não substitui as capacidades de R11, broker e Execution Core.
+
+Commit:
+- `33260f3ed39e089da215ac6df557e5fdc3e5ed7c` — Add R10 v2 invariant and failure scenarios
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.33.
+
+### Próxima etapa — ETAPA 13.33: Paired Trajectory
+
+Depois de validar as invariantes isoladas, vamos introduzir uma trajetória temporal determinística em memória: estados sucessivos de mercado/exposição, decisões R10 v2 e evolução projetada, mantendo o caminho alternativo separado do estado real.
