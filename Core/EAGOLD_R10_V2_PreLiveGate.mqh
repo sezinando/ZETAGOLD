@@ -41,7 +41,7 @@ string EAGOLD_R10V2PreLiveReasonName(EAGOLD_R10V2PreLiveReason reason)
 // backtest/simulation switch. Default is OFF.
 bool EAGOLD_R10V2PreLiveFeatureEnabled()
 {
-   return(false);
+   return(P09_12_R10V2PreLiveEnable);
 }
 
 bool EAGOLD_R10V2PreLiveGate(
