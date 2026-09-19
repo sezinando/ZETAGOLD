@@ -296,4 +296,163 @@ void EAGOLD_R10V2ScenarioInvariantTests()
          " passed=",r.passed," failed=",r.failed);
 }
 
+   
+//==================================================================
+// ETAPA 13.33 — PAIRED TRAJECTORY HARNESS
+//==================================================================
+struct EAGOLD_R10V2TrajectoryStep
+{
+   int index;
+   double buyBefore;
+   double sellBefore;
+   double buyAfter;
+   double sellAfter;
+   double grossBefore;
+   double grossAfter;
+   double netBefore;
+   double netAfter;
+   double reduction;
+   double grossRelief;
+   double netDelta;
+   bool valid;
+   bool grossInvariant;
+   bool netInvariant;
+   bool volumeInvariant;
+};
+
+struct EAGOLD_R10V2TrajectoryResult
+{
+   int totalSteps;
+   int validSteps;
+   int failedSteps;
+   double initialGross;
+   double finalGross;
+   double initialNet;
+   double finalNet;
+   double cumulativeGrossRelief;
+   double cumulativeNetDelta;
+   bool grossMonotonic;
+   bool balancedNetInvariant;
+};
+
+void EAGOLD_R10V2TrajectoryStepReset(EAGOLD_R10V2TrajectoryStep &t)
+{
+   t.index=0;
+   t.buyBefore=0.0; t.sellBefore=0.0;
+   t.buyAfter=0.0; t.sellAfter=0.0;
+   t.grossBefore=0.0; t.grossAfter=0.0;
+   t.netBefore=0.0; t.netAfter=0.0;
+   t.reduction=0.0;
+   t.grossRelief=0.0;
+   t.netDelta=0.0;
+   t.valid=false;
+   t.grossInvariant=false;
+   t.netInvariant=false;
+   t.volumeInvariant=false;
+}
+
+bool EAGOLD_R10V2TrajectoryBalancedStep(
+   double buyLots,
+   double sellLots,
+   double reduction,
+   EAGOLD_R10V2TrajectoryStep &t)
+{
+   EAGOLD_R10V2TrajectoryStepReset(t);
+
+   if(buyLots<0.0 || sellLots<0.0)
+      return(false);
+   if(reduction<Lot)
+      return(false);
+   if(reduction>buyLots || reduction>sellLots)
+      return(false);
+
+   t.buyBefore=buyLots;
+   t.sellBefore=sellLots;
+   t.grossBefore=buyLots+sellLots;
+   t.netBefore=buyLots-sellLots;
+   t.reduction=reduction;
+
+   t.buyAfter=buyLots-reduction;
+   t.sellAfter=sellLots-reduction;
+   t.grossAfter=t.buyAfter+t.sellAfter;
+   t.netAfter=t.buyAfter-t.sellAfter;
+
+   t.grossRelief=t.grossBefore-t.grossAfter;
+   t.netDelta=t.netAfter-t.netBefore;
+
+   t.volumeInvariant=(t.buyAfter>=0.0 && t.sellAfter>=0.0);
+   t.grossInvariant=(t.grossAfter<t.grossBefore);
+   t.netInvariant=(MathAbs(t.netDelta)<=Lot*0.5);
+   t.valid=(t.volumeInvariant && t.grossInvariant && t.netInvariant);
+
+   return(t.valid);
+}
+
+void EAGOLD_R10V2TrajectoryHarnessRun()
+{
+   EAGOLD_R10V2TrajectoryResult r;
+   r.totalSteps=0;
+   r.validSteps=0;
+   r.failedSteps=0;
+   r.initialGross=0.0;
+   r.finalGross=0.0;
+   r.initialNet=0.0;
+   r.finalNet=0.0;
+   r.cumulativeGrossRelief=0.0;
+   r.cumulativeNetDelta=0.0;
+   r.grossMonotonic=true;
+   r.balancedNetInvariant=true;
+
+   double buy=10.0;
+   double sell=8.0;
+   r.initialGross=buy+sell;
+   r.initialNet=buy-sell;
+
+   for(int i=1;i<=4;i++)
+   {
+      EAGOLD_R10V2TrajectoryStep step;
+      bool ok=EAGOLD_R10V2TrajectoryBalancedStep(buy,sell,1.0,step);
+
+      r.totalSteps++;
+      if(ok) r.validSteps++;
+      else r.failedSteps++;
+
+      if(step.grossAfter>=step.grossBefore)
+         r.grossMonotonic=false;
+      if(MathAbs(step.netDelta)>Lot*0.5)
+         r.balancedNetInvariant=false;
+
+      r.cumulativeGrossRelief+=step.grossRelief;
+      r.cumulativeNetDelta+=step.netDelta;
+
+      Print(EA_NAME," R10 v2 TRAJECTORY T",i,
+            " BUY ",DoubleToString(step.buyBefore,2),"->",DoubleToString(step.buyAfter,2),
+            " SELL ",DoubleToString(step.sellBefore,2),"->",DoubleToString(step.sellAfter,2),
+            " GROSS ",DoubleToString(step.grossBefore,2),"->",DoubleToString(step.grossAfter,2),
+            " NET ",DoubleToString(step.netBefore,2),"->",DoubleToString(step.netAfter,2),
+            " REDUCE=",DoubleToString(step.reduction,2),
+            " RESULT=",ok ? "PASS" : "FAIL");
+
+      buy=step.buyAfter;
+      sell=step.sellAfter;
+   }
+
+   r.finalGross=buy+sell;
+   r.finalNet=buy-sell;
+
+   Print(EA_NAME,
+         " R10 v2 PAIRED TRAJECTORY SUMMARY",
+         " steps=",r.totalSteps,
+         " valid=",r.validSteps,
+         " failed=",r.failedSteps,
+         " gross ",DoubleToString(r.initialGross,2),
+         "->",DoubleToString(r.finalGross,2),
+         " net ",DoubleToString(r.initialNet,2),
+         "->",DoubleToString(r.finalNet,2),
+         " cumulativeGrossRelief=",DoubleToString(r.cumulativeGrossRelief,2),
+         " cumulativeNetDelta=",DoubleToString(r.cumulativeNetDelta,2),
+         " grossMonotonic=",r.grossMonotonic ? "PASS" : "FAIL",
+         " balancedNetInvariant=",r.balancedNetInvariant ? "PASS" : "FAIL");
+}
+
 #endif
