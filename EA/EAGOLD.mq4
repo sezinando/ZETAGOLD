@@ -141,7 +141,11 @@ if(EAGOLD_EconomicExecutionAllowed() &&
    g_r10V2PreExecutionGate &&
    g_r10V2DecisionContract.executionEligible)
 {
-   EAGOLD_ActionResult r10V2Result=EAGOLD_R10V2ExecuteSingle(g_r10V2DecisionContract,g_r10V2PreExecutionGate);
+   EAGOLD_ActionResult r10V2Result=EAGOLD_ACTION_BLOCKED;
+   if(g_r10V2DecisionContract.opportunity==EAGOLD_R10V2_OPP_BALANCED_REDUCTION)
+      r10V2Result=EAGOLD_R10V2ExecuteBalanced(g_r10V2DecisionContract,g_r10V2PreExecutionGate);
+   else
+      r10V2Result=EAGOLD_R10V2ExecuteSingle(g_r10V2DecisionContract,g_r10V2PreExecutionGate);
    if(r10V2Result!=EAGOLD_ACTION_BLOCKED)
       EAGOLD_ApplyActionResult(r10V2Result,"R10V2","PARTIAL_CLOSE",g_r10V2DecisionContract.direction,g_r10V2DecisionContract.authorizedLots);
 }
