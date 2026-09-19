@@ -3515,3 +3515,16 @@ Commits:
 - `b5fc14ef83f950984d851c39ef099f0a5012d148` — Run R10 v2 enablement matrix at initialization
 
 **Compile Gate:** pendente de compilação no MetaEditor; não há alteração para habilitar execução real.
+
+
+## ETAPA 13.39 — RUNTIME DIAGNOSTIC — IMPLEMENTADA
+
+Criado `Core/EAGOLD_R10_V2_RuntimeDiagnostic.mqh` e integrado ao `OnTick()` sob `EnableModularizationDebug`. O diagnóstico expõe modo, oportunidade, estado do contrato, PreExecution, PreLive, Safety, reconciliação, eligibility, autorização econômica, capital disponível e capacidade R11.
+
+O diagnóstico é somente observacional: não altera estado, não reserva capital e não executa ordens. O modo mestre continua retornando `OFF` por padrão e a execução continua condicionada à cadeia de gates existente.
+
+Commits:
+- `e8cca7b6da7facd94c2f5361d060f78fd53109e1` — Add R10 v2 runtime diagnostic gate
+- `81a500076bacf89b3d2106e4e783eedaf0e78396` — Integrate R10 v2 runtime gate diagnostic
+
+**Compile Gate:** aguardando compilação no MetaEditor.
