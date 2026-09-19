@@ -14,6 +14,48 @@
 // after any partial bilateral result.
 //==================================================================
 
+// Re-entry guard. It is deliberately local to the execution adapter:
+// once a broker mutation occurs, the same contract cannot be submitted
+// again until the next broker census/reconciliation boundary.
+bool g_r10V2ExecutionAwaitingReconciliation=false;
+datetime g_r10V2LastExecutionTimestamp=0;
+int g_r10V2LastExecutionTicket=-1;
+int g_r10V2LastExecutionTicket2=-1;
+double g_r10V2LastExecutionLots=0.0;
+
+void EAGOLD_R10V2ExecutionResetAfterReconciliation()
+{
+   g_r10V2ExecutionAwaitingReconciliation=false;
+}
+
+bool EAGOLD_R10V2ExecutionDuplicate(const EAGOLD_R10V2DecisionContract &contract)
+{
+   if(g_r10V2ExecutionAwaitingReconciliation)
+      return(true);
+
+   if(contract.timestamp!=g_r10V2LastExecutionTimestamp)
+      return(false);
+   if(contract.targetTicket!=g_r10V2LastExecutionTicket)
+      return(false);
+   if(contract.targetTicket2!=g_r10V2LastExecutionTicket2)
+      return(false);
+   if(MathAbs(contract.authorizedLots-g_r10V2LastExecutionLots)>Lot*0.5)
+      return(false);
+
+   return(true);
+}
+
+void EAGOLD_R10V2ExecutionMark(
+   const EAGOLD_R10V2DecisionContract &contract,
+   bool requiresReconciliation)
+{
+   g_r10V2LastExecutionTimestamp=contract.timestamp;
+   g_r10V2LastExecutionTicket=contract.targetTicket;
+   g_r10V2LastExecutionTicket2=contract.targetTicket2;
+   g_r10V2LastExecutionLots=contract.authorizedLots;
+   g_r10V2ExecutionAwaitingReconciliation=requiresReconciliation;
+}
+
 EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
    const EAGOLD_R10V2DecisionContract &contract,
    bool preExecutionGate)
@@ -22,6 +64,10 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
       return(EAGOLD_ACTION_BLOCKED);
    if(contract.state!=EAGOLD_R10V2_DECISION_AUTHORIZED ||
       contract.action!=EAGOLD_R10V2_HANDOFF_PARTIAL_CLOSE)
+      return(EAGOLD_ACTION_BLOCKED);
+
+   if(EAGOLD_R10V2ExecutionDuplicate(contract))
+      return(EAGOLD_ACTION_BLOCKED);
       return(EAGOLD_ACTION_BLOCKED);
    if(contract.opportunity==EAGOLD_R10V2_OPP_BALANCED_REDUCTION)
       return(EAGOLD_ACTION_BLOCKED);
@@ -66,6 +112,7 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
          EAGOLD_R10V2CapitalReleaseTransaction();
    }
 
+   EAGOLD_R10V2ExecutionMark(contract,true);
    return(EAGOLD_ACTION_PARTIAL);
 }
 
@@ -84,6 +131,9 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
    if(contract.state!=EAGOLD_R10V2_DECISION_AUTHORIZED ||
       contract.action!=EAGOLD_R10V2_HANDOFF_PARTIAL_CLOSE ||
       contract.opportunity!=EAGOLD_R10V2_OPP_BALANCED_REDUCTION)
+      return(EAGOLD_ACTION_BLOCKED);
+
+   if(EAGOLD_R10V2ExecutionDuplicate(contract))
       return(EAGOLD_ACTION_BLOCKED);
 
    if(contract.targetTicket<0 || contract.targetTicket2<0 ||
@@ -156,6 +206,7 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
          else
             EAGOLD_R10V2CapitalReleaseTransaction();
       }
+      EAGOLD_R10V2ExecutionMark(contract,true);
       return(EAGOLD_ACTION_PARTIAL);
    }
 
@@ -173,6 +224,7 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
 
    // Even with both legs successful, the action changed broker state.
    // Returning COMPLETED consumes the current economic tick.
+   EAGOLD_R10V2ExecutionMark(contract,false);
    return(EAGOLD_ACTION_COMPLETED);
 }
 
