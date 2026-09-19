@@ -205,6 +205,19 @@ if(EnableModularizationDebug)
 // ETAPA 13.19 — execution adapter is wired but remains dormant while
 // executionEligible=false. Balanced remains reserved for ETAPA 13.20.
 EAGOLD_R10V2EnableMode r10V2EnableMode=EAGOLD_R10V2ControlledEnableMode();
+bool r10V2Armed=false;
+if(EAGOLD_R10V2ControlledEnableMode()==EAGOLD_R10V2_ENABLE_CONTROLLED)
+{
+   r10V2Armed=EAGOLD_R10V2ArmControlledExecution(
+      EAGOLD_R10V2ControlledEnableMode(),
+      g_r10V2PreExecutionGate,
+      g_r10V2PreLiveGate,
+      (safetyReason==EAGOLD_R10V2_SAFETY_OK),
+      EAGOLD_R10ReconciliationRequired(),
+      EAGOLD_R10V2ExecutionDuplicate(g_r10V2DecisionContract),
+      g_r10V2DecisionContract);
+}
+
 bool r10V2ControlledExecutionAllowed=EAGOLD_R10V2ControlledExecutionAllowed(
    r10V2EnableMode,
    g_r10V2PreExecutionGate,
@@ -221,18 +234,6 @@ if(r10V2EnableMode!=EAGOLD_R10V2_ENABLE_OFF &&
 if(EnableModularizationDebug)
    EAGOLD_R10V2ReleaseReadinessSnapshot(safetyReason);
 
-bool r10V2Armed=false;
-if(EAGOLD_R10V2ControlledEnableMode()==EAGOLD_R10V2_ENABLE_CONTROLLED)
-{
-   r10V2Armed=EAGOLD_R10V2ArmControlledExecution(
-      EAGOLD_R10V2ControlledEnableMode(),
-      g_r10V2PreExecutionGate,
-      g_r10V2PreLiveGate,
-      (safetyReason==EAGOLD_R10V2_SAFETY_OK),
-      EAGOLD_R10ReconciliationRequired(),
-      EAGOLD_R10V2ExecutionDuplicate(g_r10V2DecisionContract),
-      g_r10V2DecisionContract);
-}
 if(EnableModularizationDebug)
    EAGOLD_R10V2RuntimeDiagnostic(
       r10V2EnableMode,
