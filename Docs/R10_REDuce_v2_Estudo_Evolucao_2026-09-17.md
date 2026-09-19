@@ -3448,3 +3448,20 @@ A medição permanece em memória/Journal, sem CSV e sem habilitar execução do
 Commit: `9f608da92f682f566c31c73a9f2b3ff80aaf594c` — Expand R10 v2 comparative backtest metrics
 
 **Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.35.
+
+
+## ETAPA 13.35 — CALIBRATION — IMPLEMENTADA
+
+Foi adicionado `Core/EAGOLD_R10_V2_Calibration.mqh`, um laboratório determinístico de sensibilidade dos parâmetros principais do R10 v2.
+
+O laboratório mantém o estado idêntico para cada teste e percorre os ratios 1/4, 1/5, 1/6, 1/7, 1/8 e 1/10. Para cada configuração mede candidate lots, desired/authorized lots, GROSS relief e capital requerido, respeitando normalização de lote e `R10V2MaxReductionLots`.
+
+A etapa é deliberadamente **calibration/sensitivity**, não optimization: nenhum parâmetro é declarado vencedor ou recomendado nesta etapa. O objetivo é produzir evidência sobre a sensibilidade do mecanismo antes de qualquer calibração final.
+
+A execução ocorre no laboratório em memória durante `OnInit`; não altera ordens, não reserva capital real, não altera R11 e não produz CSV.
+
+Commits:
+- `c35f614fd60de525c767a26877e08d63206155fb` — Add R10 v2 parameter calibration laboratory
+- `ba74ad0ec86954adfe85fd265de4f38eda0d756b` — Integrate R10 v2 calibration laboratory
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.36.
