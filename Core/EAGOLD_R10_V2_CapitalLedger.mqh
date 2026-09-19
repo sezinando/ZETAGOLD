@@ -170,6 +170,26 @@ bool EAGOLD_R10V2CapitalReservationActive()
    return(g_r10V2CapitalLedger.reservationActive);
 }
 
+bool EAGOLD_R10V2CapitalReservationMatches(
+   int ticket,
+   int ticket2,
+   double minimumAmount)
+{
+   if(!g_r10V2CapitalLedger.reservationActive)
+      return(false);
+
+   if(g_r10V2CapitalLedger.reservationTicket!=ticket)
+      return(false);
+
+   if(g_r10V2CapitalLedger.reservationTicket2!=ticket2)
+      return(false);
+
+   if(g_r10V2CapitalLedger.reservationAmount+0.01<minimumAmount)
+      return(false);
+
+   return(true);
+}
+
 double EAGOLD_R10V2CapitalReservationAmount()
 {
    return(MathMax(0.0,g_r10V2CapitalLedger.reservationAmount));
