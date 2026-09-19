@@ -78,4 +78,23 @@ bool EAGOLD_R10V2ControlledModeSafe(
       economicExecutionAllowed));
 }
 
+
+bool EAGOLD_R10V2ControlledEnablementInvariant(
+   EAGOLD_R10V2EnableMode mode,
+   bool preExecutionOk,
+   bool preLiveOk,
+   bool executionEligible,
+   bool economicExecutionAllowed)
+{
+   if(mode==EAGOLD_R10V2_ENABLE_OFF)
+      return(!EAGOLD_R10V2ControlledExecutionAllowed(
+         mode,preExecutionOk,preLiveOk,executionEligible,economicExecutionAllowed));
+
+   if(mode==EAGOLD_R10V2_ENABLE_SHADOW)
+      return(!EAGOLD_R10V2ControlledExecutionAllowed(
+         mode,preExecutionOk,preLiveOk,executionEligible,economicExecutionAllowed));
+
+   return(true);
+}
+
 #endif
