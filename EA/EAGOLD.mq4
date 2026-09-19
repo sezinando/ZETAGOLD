@@ -19,6 +19,7 @@
 #include "../Core/EAGOLD_R10_V2_ComparativeMetrics.mqh"
 #include "../Core/EAGOLD_R10_V2_SafetyAudit.mqh"
 #include "../Core/EAGOLD_R10_V2_PreLiveGate.mqh"
+#include "../Core/EAGOLD_R10_V2_TestMatrix.mqh"
 bool IsR13Order();
 bool IsR13OwnershipConfigurationValid();
 bool EAGOLDValidateOwnershipConfiguration();
@@ -156,6 +157,18 @@ g_r10V2PreLiveGate=EAGOLD_R10V2PreLiveGate(
 if(g_r10V2DecisionContract.state==EAGOLD_R10V2_DECISION_AUTHORIZED &&
    !g_r10V2PreLiveGate)
    Print(EA_NAME," R10 v2 PRE-LIVE GATE: ",EAGOLD_R10V2PreLiveReasonName(g_r10V2PreLiveReason));
+
+// ETAPA 13.30 — test matrix inventory. No failure is injected into
+// the broker here; this only records the expected safety semantics.
+if(EnableModularizationDebug)
+{
+   EAGOLD_R10V2TestExpectation testExpectation;
+   EAGOLD_R10V2TestExpectationBuild(EAGOLD_R10V2_TEST_AUTHORIZED,testExpectation);
+   Print(EA_NAME," R10 v2 TEST MATRIX READY: ",
+         EAGOLD_R10V2TestCaseName(testExpectation.testCase),
+         " mutation=",testExpectation.expectedBrokerMutation,
+         " reconciliation=",testExpectation.expectedReconciliation);
+}
 
 // ETAPA 13.19 — execution adapter is wired but remains dormant while
 // executionEligible=false. Balanced remains reserved for ETAPA 13.20.
