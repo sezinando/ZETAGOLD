@@ -22,6 +22,111 @@ void EAGOLD_R1ResetCycleLatch()
    ZG_AdmissionDirectionReset();
 }
 
+bool EAGOLD_R1ReconcilePendingWithIntelligence()
+{
+   if(!ZG_DirectionFilterEnabled())
+      return(true);
+
+   if(CountDirectionPositions(OP_BUY)>0 || CountDirectionPositions(OP_SELL)>0)
+      return(true);
+
+   int intelligenceDirection=g_zgIntelligenceDecision.Direction;
+   if(intelligenceDirection!=ZG_DIR_BUY && intelligenceDirection!=ZG_DIR_SELL)
+      return(true);
+
+   int latchedDirection=ZG_EconomicCreationDirection();
+   if(latchedDirection!=ZG_DIR_BUY && latchedDirection!=ZG_DIR_SELL)
+      return(true);
+
+   if(latchedDirection==intelligenceDirection)
+      return(true);
+
+   int currentPendingDirection=-1;
+   if(CountDirectionPending(OP_BUY)>0 && CountDirectionPending(OP_SELL)==0)
+      currentPendingDirection=ZG_DIR_BUY;
+   else if(CountDirectionPending(OP_SELL)>0 && CountDirectionPending(OP_BUY)==0)
+      currentPendingDirection=ZG_DIR_SELL;
+   else
+      return(true);
+
+   if(currentPendingDirection==intelligenceDirection)
+      return(true);
+
+   if(!IsTradeAllowed() || IsTradeContextBusy())
+   {
+      Print(EA_NAME," R1 REGIME FLIP: trade context unavailable. pending direction remains unchanged.");
+      return(false);
+   }
+
+   Print(EA_NAME," R1 REGIME FLIP: pending direction invalidated. latched=",
+         (latchedDirection==ZG_DIR_BUY?"BUY":"SELL"),
+         " intelligence=",(intelligenceDirection==ZG_DIR_BUY?"BUY":"SELL"),
+         " -> replacing unactivated pending.");
+
+   bool deletedAll=true;
+   for(int i=OrdersTotal()-1;i>=0;i--)
+   {
+      if(!OrderSelect(i,SELECT_BY_POS,MODE_TRADES))
+         continue;
+      if(!IsEAGOLDOrder())
+         continue;
+      int type=OrderType();
+      if(type!=OP_BUYSTOP && type!=OP_SELLSTOP)
+         continue;
+
+      int ticket=OrderTicket();
+      ResetLastError();
+      if(!OrderDelete(ticket,clrNONE))
+      {
+         int err=GetLastError();
+         Print(EA_NAME," R1 REGIME FLIP: failed to delete pending ticket=",ticket,
+               " err=",err);
+         deletedAll=false;
+      }
+      else
+         Print(EA_NAME," R1 REGIME FLIP: deleted obsolete pending ticket=",ticket);
+   }
+
+   if(!deletedAll)
+   {
+      EAGOLD_R10RequestReconciliation();
+      return(false);
+   }
+
+   RefreshRates();
+   bool intelligenceBuy=(intelligenceDirection==ZG_DIR_BUY);
+   double price=NormalizePrice(intelligenceBuy?
+      Ask+PointsToPrice(FirstStep):
+      Bid-PointsToPrice(FirstStep));
+
+   int ticket=SendPending(
+      intelligenceBuy?OP_BUYSTOP:OP_SELLSTOP,
+      price,
+      Lot,
+      intelligenceBuy?"EAGOLD ZG FIRST BUY":"EAGOLD ZG FIRST SELL");
+
+   if(ticket<=0)
+   {
+      Print(EA_NAME," R1 REGIME FLIP: replacement seed failed. direction=",
+            (intelligenceBuy?"BUY":"SELL"),
+            " lastError=",GetLastError());
+      g_eagoldR1CycleArmed=true;
+      ZG_AdmissionDirectionReset();
+      return(false);
+   }
+
+   ZG_AdmissionDirectionLatch(intelligenceDirection);
+   g_eagoldR1CycleArmed=false;
+
+   Print(EA_NAME," R1 REGIME FLIP: replacement seed created direction=",
+         (intelligenceBuy?"BUY":"SELL"),
+         " ticket=",ticket,
+         " edge=",DoubleToString(g_zgIntelligenceDecision.Edge,2),
+         " confidence=",DoubleToString(g_zgIntelligenceDecision.Confidence,2));
+   CreateEngineActionMarker("R1","REGIME_FLIP",intelligenceBuy?OP_BUY:OP_SELL,Lot);
+   return(true);
+}
+
 bool EAGOLD_R1RepairFlatPendingAnomaly(const EAGOLD_BrokerIntegrity &c)
 {
    if(!c.valid || c.positions>0)
