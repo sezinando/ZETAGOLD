@@ -2992,3 +2992,41 @@ Reconciliation Authority
 
 O primeiro executa e classifica.  
 O segundo reconstrói o estado real após qualquer execução parcial.
+
+
+### ETAPA 13.20 — implementação concluída
+
+Foi adicionado ao Execution Adapter o fluxo bilateral:
+
+```
+Validate
+   ↓
+Reserve (if required)
+   ↓
+BUY leg
+   ↓
+Re-read SELL ticket
+   ↓
+SELL leg
+   ↓
+Combined capital reconciliation
+   ↓
+Action Contract
+```
+
+A execução bilateral não é tratada como atômica.
+
+- falha na primeira perna → `FAILED`;
+- primeira perna executada e segunda não executada → `PARTIAL`;
+- ambas executadas → `COMPLETED`;
+- qualquer `PARTIAL` aciona `HALT_FOR_RECONCILIATION`.
+
+A segunda perna somente é tentada depois que o resultado da primeira foi obtido e o ticket oposto foi novamente validado.
+
+A reconciliação continua separada do adapter e continua sendo a autoridade sobre o estado efetivamente existente no broker.
+
+Commits ETAPA 13.20:
+- `9b7d062a993f203b2d80fc828bc7463be5346235` — Add R10 v2 bilateral execution adapter
+- `793c6c0d19e0a0887262437743c422e3fdcc582d` — Route R10 v2 execution through bilateral adapter
+
+**Importante:** a execução continua protegida por `executionEligible=false` no Decision Plan atual. A implementação bilateral, portanto, não ativa operações reais por si só.
