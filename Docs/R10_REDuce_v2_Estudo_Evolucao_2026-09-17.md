@@ -3499,3 +3499,19 @@ Commits:
 - `bf15553ac99a9d2d5f21ef664f1eb1c23161bfdc` — Harden R10 v2 controlled enablement invariants
 
 **Compile Gate:** compilar e confirmar 0 erros antes de qualquer alteração de modo.
+
+
+## ETAPA 13.38 — ENABLEMENT TEST MATRIX — IMPLEMENTADA
+
+Foi criada `Core/EAGOLD_R10_V2_EnablementTestMatrix.mqh`. A matriz é puramente in-memory e não executa operações de broker.
+
+Casos cobertos: OFF com todos os gates OK, OFF bloqueado; SHADOW com todos os gates OK e com bloqueio econômico; CONTROLLED com todos os gates OK; falha isolada de PreExecution, PreLive, `executionEligible` e `EconomicExecutionAllowed`; falha simultânea de gates; e invariantes dos modos OFF/SHADOW/CONTROLLED.
+
+A matriz é executada no `OnInit()` somente quando `EnableModularizationDebug` está ativo. Ela é diagnóstica: não altera o modo mestre e não autoriza execução.
+
+Commits:
+- `9506ab2d19d7e0eee6a5b60d3b9c15da7bf015db` — Add R10 v2 enablement test matrix
+- `83d36164bca2a1e2a8f9c0000f5a07c3b8db8ad5` — Integrate R10 v2 enablement test matrix diagnostics
+- `b5fc14ef83f950984d851c39ef099f0a5012d148` — Run R10 v2 enablement matrix at initialization
+
+**Compile Gate:** pendente de compilação no MetaEditor; não há alteração para habilitar execução real.
