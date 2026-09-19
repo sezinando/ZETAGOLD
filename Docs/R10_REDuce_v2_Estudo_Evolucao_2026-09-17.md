@@ -3151,3 +3151,29 @@ Commits:
 ### Próxima etapa — ETAPA 13.23: Stress / Edge Cases
 
 Após o compile gate, vamos testar as fronteiras que podem invalidar uma redução: volume abaixo do mínimo, lot step, ticket desaparecido, preço alterado, spread, reserva insuficiente, reserva incompatível, primeira perna bilateral executada e segunda falhada, e reentrada após PARTIAL.
+
+
+## ETAPA 13.23 — STRESS / EDGE CASES — IMPLEMENTADA
+
+A primeira fronteira de stress foi aplicada ao `R10 v2 Execution Adapter`, com foco em uma falha crítica de transação: uma reserva de capital criada pelo próprio adapter não pode permanecer presa quando a revalidação imediatamente anterior à mutação do broker rejeita o alvo.
+
+Foi introduzido o controle `reservationCreated`. Quando o adapter cria a reserva e posteriormente detecta incompatibilidade do ticket, volume ou estado do broker, a reserva criada naquela tentativa é liberada antes de retornar `BLOCKED`. Uma reserva preexistente de outra decisão não é apropriada nem liberada pelo adapter.
+
+Fluxo protegido:
+
+`RESERVE → PREFLIGHT REVALIDATION → BLOCKED → RELEASE`
+
+ou, somente quando todas as pré-condições permanecem válidas:
+
+`RESERVE → REVALIDATE → BROKER MUTATION → CONSUME/RELEASE`
+
+Isso elimina uma classe de **reserva órfã** e preserva a identidade da reserva.
+
+Commit:
+- `be1836384a8f0b29aa141cccd6a050276c409af3` — Harden R10 v2 reservation rollback on preflight rejection
+
+**Compile Gate:** compilar no MetaEditor e confirmar 0 erros antes da ETAPA 13.24.
+
+### Próxima etapa — ETAPA 13.24: Falha bilateral
+
+Testaremos especificamente `BUY OK → SELL FAIL`, `BUY FAIL`, revalidação do segundo ticket e o caminho `PARTIAL → RECONCILIATION → HALT`, garantindo que nenhuma tentativa automática de reconstruir a simetria seja feita pelo R10 v2.
