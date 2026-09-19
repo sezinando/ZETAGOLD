@@ -1,6 +1,6 @@
 #ifndef EAGOLD_CONFIG_MQH
 #define EAGOLD_CONFIG_MQH
-#define EAGOLD_VERSION "0.117"
+#define EAGOLD_VERSION "0.118"
 #define EAGOLD_R13_DEFAULT_COMMENT "EAGOLD_RECOVERY_SATELLITE"
 #define EAGOLD_EXPIRY_DATE D'2026.12.31 00:00'
 double g_panelMinProfit=0.0; double g_panelMaxProfit=0.0; double g_panelMaxLots=0.0; bool g_panelInitialized=false; bool EAGOLD_TradingAllowed(){return(TimeCurrent()<EAGOLD_EXPIRY_DATE);}
@@ -308,10 +308,114 @@ extern bool P09_12_R10V2PreLiveEnable=false;
 // [08.01] PersistenceWorstEquityStep
 extern double P08_01_PersistenceWorstEquityStep=5.00;
 
+input string INPUT_GROUP_INTELLIGENCE="=== 10 ZG / INTELLIGENCE ENGINE ===";
+// [10.01] EnableZGIntelligence
+extern bool P10_01_EnableZGIntelligence=true;
+// [10.02] ZGIntelligenceShadowMode
+extern bool P10_02_ZGIntelligenceShadowMode=true;
+// [10.03] ZGEnableDirectionFilter
+extern bool P10_03_ZGEnableDirectionFilter=false;
+// [10.04] ZGEnableGridIntelligence
+extern bool P10_04_ZGEnableGridIntelligence=false;
+// [10.05] ZGShadowLogEnabled
+extern bool P10_05_ZGShadowLogEnabled=true;
+// [10.06] ZGShadowFileName
+extern string P10_06_ZGShadowFileName="ZETAGOLD_Intelligence_Shadow.csv";
+// [10.07] ZGTimeframe
+extern int P10_07_ZGTimeframe=PERIOD_H1;
+// [10.08] ZGMinBarsRequired
+extern int P10_08_ZGMinBarsRequired=300;
+// [10.09] ZGATRPeriod
+extern int P10_09_ZGATRPeriod=14;
+// [10.10] ZGEMAFast
+extern int P10_10_ZGEMAFast=21;
+// [10.11] ZGEMASlow
+extern int P10_11_ZGEMASlow=50;
+// [10.12] ZGADXPeriod
+extern int P10_12_ZGADXPeriod=14;
+// [10.13] ZGBBPeriod
+extern int P10_13_ZGBBPeriod=20;
+// [10.14] ZGBBDeviation
+extern double P10_14_ZGBBDeviation=2.0;
+// [10.15] ZGRangeLookback
+extern int P10_15_ZGRangeLookback=120;
+// [10.16] ZGSlopeLookback
+extern int P10_16_ZGSlopeLookback=5;
+// [10.17] ZGMomentumLookback
+extern int P10_17_ZGMomentumLookback=6;
+// [10.18] ZGMomentumAccelLookback
+extern int P10_18_ZGMomentumAccelLookback=3;
+// [10.19] ZGMinADX
+extern double P10_19_ZGMinADX=18.0;
+// [10.20] ZGMinTrendSlope
+extern double P10_20_ZGMinTrendSlope=0.08;
+// [10.21] ZGMomentumNeutralBand
+extern double P10_21_ZGMomentumNeutralBand=0.05;
+// [10.22] ZGMomentumAccelerationBand
+extern double P10_22_ZGMomentumAccelerationBand=0.05;
+// [10.23] ZGExtremeRangeHigh
+extern double P10_23_ZGExtremeRangeHigh=0.80;
+// [10.24] ZGExtremeRangeLow
+extern double P10_24_ZGExtremeRangeLow=0.20;
+// [10.25] ZGExtremeBBZ
+extern double P10_25_ZGExtremeBBZ=1.25;
+// [10.26] ZGExtremeExtensionATR
+extern double P10_26_ZGExtremeExtensionATR=1.50;
+// [10.27] ZGTrendWeight
+extern double P10_27_ZGTrendWeight=1.00;
+// [10.28] ZGMomentumWeight
+extern double P10_28_ZGMomentumWeight=1.00;
+// [10.29] ZGAccelerationWeight
+extern double P10_29_ZGAccelerationWeight=0.75;
+// [10.30] ZGContinuationWeight
+extern double P10_30_ZGContinuationWeight=1.25;
+// [10.31] ZGExhaustionWeight
+extern double P10_31_ZGExhaustionWeight=1.25;
+// [10.32] ZGNormalMomentumWeight
+extern double P10_32_ZGNormalMomentumWeight=0.50;
+// [10.33] ZGMinConfidence
+extern double P10_33_ZGMinConfidence=0.20;
+// [10.34] ZGMinEdge
+extern double P10_34_ZGMinEdge=0.50;
+
 // -----------------------------------------------------------------------------
 // Indexed input names exposed in the MT4 Inputs window.
 // Internal source compatibility is preserved through aliases.
 // -----------------------------------------------------------------------------
+#define EnableZGIntelligence P10_01_EnableZGIntelligence
+#define ZG_IntelligenceShadowMode P10_02_ZGIntelligenceShadowMode
+#define ZG_EnableDirectionFilter P10_03_ZGEnableDirectionFilter
+#define ZG_EnableGridIntelligence P10_04_ZGEnableGridIntelligence
+#define ZG_ShadowLogEnabled P10_05_ZGShadowLogEnabled
+#define ZG_ShadowFileName P10_06_ZGShadowFileName
+#define ZG_Timeframe P10_07_ZGTimeframe
+#define ZG_MinBarsRequired P10_08_ZGMinBarsRequired
+#define ZG_ATRPeriod P10_09_ZGATRPeriod
+#define ZG_EMAFast P10_10_ZGEMAFast
+#define ZG_EMASlow P10_11_ZGEMASlow
+#define ZG_ADXPeriod P10_12_ZGADXPeriod
+#define ZG_BBPeriod P10_13_ZGBBPeriod
+#define ZG_BBDeviation P10_14_ZGBBDeviation
+#define ZG_RangeLookback P10_15_ZGRangeLookback
+#define ZG_SlopeLookback P10_16_ZGSlopeLookback
+#define ZG_MomentumLookback P10_17_ZGMomentumLookback
+#define ZG_MomentumAccelLookback P10_18_ZGMomentumAccelLookback
+#define ZG_MinADX P10_19_ZGMinADX
+#define ZG_MinTrendSlope P10_20_ZGMinTrendSlope
+#define ZG_MomentumNeutralBand P10_21_ZGMomentumNeutralBand
+#define ZG_MomentumAccelerationBand P10_22_ZGMomentumAccelerationBand
+#define ZG_ExtremeRangeHigh P10_23_ZGExtremeRangeHigh
+#define ZG_ExtremeRangeLow P10_24_ZGExtremeRangeLow
+#define ZG_ExtremeBBZ P10_25_ZGExtremeBBZ
+#define ZG_ExtremeExtensionATR P10_26_ZGExtremeExtensionATR
+#define ZG_TrendWeight P10_27_ZGTrendWeight
+#define ZG_MomentumWeight P10_28_ZGMomentumWeight
+#define ZG_AccelerationWeight P10_29_ZGAccelerationWeight
+#define ZG_ContinuationWeight P10_30_ZGContinuationWeight
+#define ZG_ExhaustionWeight P10_31_ZGExhaustionWeight
+#define ZG_NormalMomentumWeight P10_32_ZGNormalMomentumWeight
+#define ZG_MinConfidence P10_33_ZGMinConfidence
+#define ZG_MinEdge P10_34_ZGMinEdge
 #define MagicNumber P01_01_MagicNumber
 #define RequireCleanLegacyOwnership P01_02_RequireCleanLegacyOwnership
 #define EnableLegacyReattach P01_03_EnableLegacyReattach
