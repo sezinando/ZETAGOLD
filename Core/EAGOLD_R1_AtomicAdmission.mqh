@@ -19,6 +19,7 @@ void EAGOLD_R1ResetCycleLatch()
 {
    g_eagoldR1CycleArmed=true;
    g_eagoldR1BasketWasActive=false;
+   ZG_AdmissionDirectionReset();
 }
 
 bool EAGOLD_R1RepairFlatPendingAnomaly(const EAGOLD_BrokerIntegrity &c)
@@ -104,6 +105,7 @@ void EAGOLD_R1RearmFromBrokerFlat()
 
    g_eagoldR1CycleArmed=true;
    g_eagoldR1BasketWasActive=false;
+   ZG_AdmissionDirectionReset();
 }
 
 void EAGOLD_R1ObserveCycle()
@@ -175,6 +177,7 @@ EAGOLD_ActionResult EAGOLD_CreateFirstOrdersAtomic()
       }
 
       g_eagoldR1CycleArmed=false;
+      ZG_AdmissionDirectionLatch(selectedDirection==OP_BUY?ZG_DIR_BUY:ZG_DIR_SELL);
       R1Decision("PASS",selectedDirection==OP_BUY?"INTELLIGENCE_BUY":"INTELLIGENCE_SELL");
       Print(EA_NAME," RULE 1 INTELLIGENCE: one-sided seed created. Direction=",
             (selectedDirection==OP_BUY?"BUY":"SELL")," ticket=",selectedTicket,
