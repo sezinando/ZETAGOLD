@@ -42,6 +42,16 @@ struct EAGOLD_R10V2ComparativeMetrics
    double minimumGrossExposure;
    double maximumGrossExposure;
 
+   // Same-trajectory comparison: baseline is the broker-visible state
+   // actually observed; v2 is the deterministic projection of the contract.
+   double baselineGrossCumulative;
+   double v2ProjectedGrossCumulative;
+   double baselineNetCumulative;
+   double v2ProjectedNetCumulative;
+   double grossReliefCumulative;
+   double recoveryLoadReliefCumulative;
+   double capitalRequiredCumulative;
+
    datetime firstTimestamp;
    datetime lastTimestamp;
 };
@@ -71,6 +81,13 @@ void EAGOLD_R10V2ComparativeReset()
    g_r10V2ComparativeMetrics.baselineNetExposure=0.0;
    g_r10V2ComparativeMetrics.minimumGrossExposure=0.0;
    g_r10V2ComparativeMetrics.maximumGrossExposure=0.0;
+   g_r10V2ComparativeMetrics.baselineGrossCumulative=0.0;
+   g_r10V2ComparativeMetrics.v2ProjectedGrossCumulative=0.0;
+   g_r10V2ComparativeMetrics.baselineNetCumulative=0.0;
+   g_r10V2ComparativeMetrics.v2ProjectedNetCumulative=0.0;
+   g_r10V2ComparativeMetrics.grossReliefCumulative=0.0;
+   g_r10V2ComparativeMetrics.recoveryLoadReliefCumulative=0.0;
+   g_r10V2ComparativeMetrics.capitalRequiredCumulative=0.0;
    g_r10V2ComparativeMetrics.firstTimestamp=0;
    g_r10V2ComparativeMetrics.lastTimestamp=0;
 }
@@ -88,6 +105,12 @@ void EAGOLD_R10V2ComparativeObserve(
 
    g_r10V2ComparativeMetrics.baselineGrossExposure=ctx.grossExposure;
    g_r10V2ComparativeMetrics.baselineNetExposure=ctx.netExposure;
+   g_r10V2ComparativeMetrics.baselineGrossCumulative+=ctx.grossExposure;
+   g_r10V2ComparativeMetrics.baselineNetCumulative+=ctx.netExposure;
+   g_r10V2ComparativeMetrics.v2ProjectedGrossCumulative+=
+      (contract.state==EAGOLD_R10V2_DECISION_AUTHORIZED ? contract.grossAfter : ctx.grossExposure);
+   g_r10V2ComparativeMetrics.v2ProjectedNetCumulative+=
+      (contract.state==EAGOLD_R10V2_DECISION_AUTHORIZED ? contract.netAfter : ctx.netExposure);
 
    if(g_r10V2ComparativeMetrics.minimumGrossExposure<=0.0 ||
       ctx.grossExposure<g_r10V2ComparativeMetrics.minimumGrossExposure)
@@ -114,6 +137,9 @@ void EAGOLD_R10V2ComparativeObserve(
    g_r10V2ComparativeMetrics.netDeltaProjected+=contract.netDelta;
    g_r10V2ComparativeMetrics.recoveryLoadReliefProjected+=MathMax(0.0,contract.recoveryLoadRelief);
    g_r10V2ComparativeMetrics.capitalRequiredProjected+=MathMax(0.0,contract.capitalReservationRequired);
+   g_r10V2ComparativeMetrics.grossReliefCumulative+=MathMax(0.0,contract.grossRelief);
+   g_r10V2ComparativeMetrics.recoveryLoadReliefCumulative+=MathMax(0.0,contract.recoveryLoadRelief);
+   g_r10V2ComparativeMetrics.capitalRequiredCumulative+=MathMax(0.0,contract.capitalReservationRequired);
    g_r10V2ComparativeMetrics.capitalCapacityLots+=MathMax(0.0,contract.capitalCapacity);
    g_r10V2ComparativeMetrics.r11CapacityLots+=MathMax(0.0,contract.r11Capacity);
 }
@@ -142,6 +168,10 @@ void EAGOLD_R10V2ComparativeJournalSummary()
       " grossReliefProjected=",DoubleToString(g_r10V2ComparativeMetrics.grossReliefProjected,DigitsLots),
       " recoveryLoadReliefProjected=",DoubleToString(g_r10V2ComparativeMetrics.recoveryLoadReliefProjected,2),
       " capitalRequiredProjected=",DoubleToString(g_r10V2ComparativeMetrics.capitalRequiredProjected,2),
+      " baselineGrossCum=",DoubleToString(g_r10V2ComparativeMetrics.baselineGrossCumulative,2),
+      " v2GrossCum=",DoubleToString(g_r10V2ComparativeMetrics.v2ProjectedGrossCumulative,2),
+      " baselineNetCum=",DoubleToString(g_r10V2ComparativeMetrics.baselineNetCumulative,2),
+      " v2NetCum=",DoubleToString(g_r10V2ComparativeMetrics.v2ProjectedNetCumulative,2),
       " completed=",g_r10V2ComparativeMetrics.completed,
       " partial=",g_r10V2ComparativeMetrics.partial,
       " failed=",g_r10V2ComparativeMetrics.failed);
