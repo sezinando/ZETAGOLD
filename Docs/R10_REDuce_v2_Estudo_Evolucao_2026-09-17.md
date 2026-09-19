@@ -3253,3 +3253,24 @@ Commits:
 ### Próxima etapa — ETAPA 13.27: Shadow × Real
 
 Depois do backtest comparativo, vamos separar explicitamente decisão projetada e execução observada, permitindo medir divergências entre `AUTHORIZED`, `PARTIAL`, `COMPLETED` e `BLOCKED`, sem transformar a projeção em execução automática.
+
+
+## ETAPA 13.27 — SHADOW × REAL — IMPLEMENTADA
+
+Foi criada a primeira medição explícita da distância entre a decisão R10 v2 e o resultado de execução. O comparador registra o estado do Decision Contract e, quando houver tentativa de execução, classifica o resultado como `BLOCKED`, `PARTIAL`, `COMPLETED` ou `FAILED`.
+
+Também é contabilizado o caso `AUTHORIZED + no execution`, que neste estágio é o caminho esperado enquanto `executionEligible=false`.
+
+Divergência operacional é registrada quando uma decisão autorizada chega à execução e termina em `BLOCKED` ou `FAILED`. `PARTIAL` não é tratado como divergência automaticamente: é um resultado transacional previsto que exige reconciliação.
+
+O resumo continua sendo Journal-only e não altera a autoridade de R10, R11, R13, Action Contract ou Execution Core.
+
+Commits:
+- `853a8b3489feb0d3167537bb366cac227aa09645` — Add R10 v2 shadow versus real comparison metrics
+- `34dd4e77e1385dd1387bf49fed950c5519b28e1e` — Record R10 v2 decision versus execution outcome
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.28.
+
+### Próxima etapa — ETAPA 13.28: Validação de segurança
+
+Vamos consolidar os invariantes de segurança: ownership, volumes, GROSS/NET, capital, R11, Action Contract, idempotência, reconciliação e ausência de execução duplicada.
