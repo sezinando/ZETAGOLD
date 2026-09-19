@@ -68,7 +68,6 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
 
    if(EAGOLD_R10V2ExecutionDuplicate(contract))
       return(EAGOLD_ACTION_BLOCKED);
-      return(EAGOLD_ACTION_BLOCKED);
    if(contract.opportunity==EAGOLD_R10V2_OPP_BALANCED_REDUCTION)
       return(EAGOLD_ACTION_BLOCKED);
    if(contract.targetTicket<0 ||
