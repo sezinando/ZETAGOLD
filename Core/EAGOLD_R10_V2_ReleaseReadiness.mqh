@@ -4,7 +4,7 @@
 // ETAPA 13.42/13.43 — release readiness and invariant snapshot.
 // Read-only. This does not switch execution on.
 
-bool EAGOLD_R10V2ReleaseReadinessSnapshot()
+bool EAGOLD_R10V2ReleaseReadinessSnapshot(EAGOLD_R10V2SafetyReason safetyReason)
 {
    bool modeSafe=EAGOLD_R10V2ControlledModeSafe(
       EAGOLD_R10V2ControlledEnableMode(),
@@ -13,7 +13,7 @@ bool EAGOLD_R10V2ReleaseReadinessSnapshot()
       g_r10V2DecisionContract.executionEligible,
       EAGOLD_EconomicExecutionAllowed());
 
-   bool safetyOk=(EAGOLD_R10V2SafetyReasonName(EAGOLD_R10V2_SAFETY_OK)=="OK");
+   bool safetyOk=(safetyReason==EAGOLD_R10V2_SAFETY_OK);
 
    Print(EA_NAME,
          " R10 V2 READINESS | mode=",
