@@ -3427,3 +3427,24 @@ A trajetória continua exclusivamente laboratorial: sem broker mutation, reserva
 Commit: `35f32b041eb3f853833cfb34c9caf4d7a5234253` — Add R10 v2 paired trajectory harness
 
 **Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.34.
+
+
+## ETAPA 13.34 — COMPARATIVE BACKTEST — IMPLEMENTADA
+
+A medição comparativa foi expandida para acompanhar, na mesma trajetória histórica observada pelo EA, o estado baseline e a projeção determinística do R10 v2.
+
+Novas métricas:
+- mínimo/máximo de GROSS projetado;
+- mínimo/máximo de NET projetado;
+- diferença acumulada `Baseline GROSS - Projected GROSS`;
+- diferença acumulada de NET projetado contra NET observado;
+- maior alívio instantâneo de GROSS projetado;
+- violações da invariável de NET no Balanced.
+
+O baseline continua sendo o estado broker-visible real. O R10 v2 continua sendo uma projeção; portanto, os números não são apresentados como lucro adicional realizado nem como resultado de uma reexecução histórica.
+
+A medição permanece em memória/Journal, sem CSV e sem habilitar execução do R10 v2.
+
+Commit: `9f608da92f682f566c31c73a9f2b3ff80aaf594c` — Expand R10 v2 comparative backtest metrics
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.35.
