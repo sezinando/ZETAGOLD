@@ -3274,3 +3274,32 @@ Commits:
 ### Próxima etapa — ETAPA 13.28: Validação de segurança
 
 Vamos consolidar os invariantes de segurança: ownership, volumes, GROSS/NET, capital, R11, Action Contract, idempotência, reconciliação e ausência de execução duplicada.
+
+
+## ETAPA 13.28 — VALIDAÇÃO DE SEGURANÇA — IMPLEMENTADA
+
+Foi adicionada uma auditoria runtime somente-leitura em `Core/EAGOLD_R10_V2_SafetyAudit.mqh`.
+
+Invariantes verificados:
+- `GROSS = BUY lots + SELL lots`;
+- `NET = BUY lots - SELL lots`;
+- volumes de contrato não negativos e `AUTHORIZED <= DESIRED <= CANDIDATE`;
+- `AUTHORIZED` não excede Capital, Exposure, R11 ou Broker Capacity;
+- ledger sem `Reserved`, `Consumed` ou `Remaining` negativos;
+- reserva ativa deve possuir valor positivo;
+- reconciliação pendente exige `HALT_FOR_RECONCILIATION`.
+
+Durante a auditoria também foi corrigido um ponto transacional relevante no Execution Adapter: uma falha de execução não pode liberar uma reserva que foi criada por outra decisão. O adapter só libera automaticamente uma reserva quando `reservationCreated=true`; uma reserva preexistente permanece sob sua própria identidade.
+
+A auditoria não bloqueia nem executa uma operação por si só: ela apenas reporta a violação. A autoridade de execução continua pertencendo ao gate/adapter/Execution Core.
+
+Commits:
+- `f57d62914cdf6b3cb984e09eb3116b80b9c57466` — Fix R10 v2 reservation ownership on execution failure
+- `786f47a794a6f7130894e228d0e3166fe7ac9bcf` — Add R10 v2 runtime safety invariant audit
+- `0a4733a0138f1dd5604e56741c76ba9518d9edce` — Integrate R10 v2 safety invariant audit
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.29.
+
+### Próxima etapa — ETAPA 13.29: Pre-Live Gate
+
+Antes de considerar qualquer abertura de `executionEligible`, vamos consolidar o gate final: execução explicitamente autorizada, condições mínimas de ambiente, proteção contra execução duplicada, reconciliação obrigatória e capacidade de desligamento imediato.
