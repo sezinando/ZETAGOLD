@@ -3349,3 +3349,32 @@ Commits:
 ### Próxima etapa — ETAPA 13.31: Paired Backtest / Scenario Harness
 
 Com a matriz definida, o próximo passo é transformar os casos em cenários determinísticos em memória, sem CSV e sem broker mutation, permitindo testar quantitativamente as decisões R10 v2 antes de qualquer abertura do Pre-Live.
+
+
+## ETAPA 13.31 — PAIRED SCENARIO HARNESS — IMPLEMENTADA
+
+Foi criado `Core/EAGOLD_R10_V2_ScenarioHarness.mqh`, um laboratório determinístico em memória para projeção de redução. Ele não consulta nem altera ordens, não reserva capital, não chama R11 e não gera CSV.
+
+O harness permite testar separadamente:
+- redução direcional;
+- redução bilateral equilibrada;
+- GROSS antes/depois;
+- NET antes/depois;
+- alívio de exposição;
+- recovery load projetado;
+- capital requerido projetado;
+- invariantes de NET e GROSS.
+
+Foram incluídos dois smoke scenarios no `OnInit`: `BUY 10 / SELL 8` com redução bilateral de 1 lote e `BUY 5 / SELL 0` com redução direcional de 1 lote. Os cenários são apenas aritméticos e servem para validar a mecânica do laboratório.
+
+Importante: o harness **não é ainda um backtest completo**. Ele não avança candles nem constrói uma trajetória alternativa de mercado. É uma base determinística para o próximo estágio de cenários e testes quantitativos.
+
+Commits:
+- `6664ca96b38152dcf4cbcb0c352ba2ca7b2fb8fc` — Add R10 v2 deterministic paired scenario harness
+- `504d65fee6f7ab41bc88b0f5cc8f2a7a76057943` — Run R10 v2 deterministic scenario harness
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.32.
+
+### Próxima etapa — ETAPA 13.32: Cenários de invariantes e falhas
+
+Vamos expandir o harness para testar automaticamente, em memória, os limites de volume, redução maior que a posição, balanced sem uma das pernas, capital insuficiente, preservação de NET, redução de GROSS e rejeição de projeções inválidas.
