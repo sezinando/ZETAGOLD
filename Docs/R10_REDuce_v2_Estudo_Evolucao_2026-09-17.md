@@ -3528,3 +3528,10 @@ Commits:
 - `81a500076bacf89b3d2106e4e783eedaf0e78396` — Integrate R10 v2 runtime gate diagnostic
 
 **Compile Gate:** aguardando compilação no MetaEditor.
+
+
+## ETAPA 13.40 — INTEGRATED AUTHORIZATION TEST — IMPLEMENTADA
+
+Criado `Core/EAGOLD_R10_V2_IntegrationTest.mqh`. O teste exercita a cadeia booleana de autorização em memória: PreExecution, PreLive, `executionEligible`, Economic Execution, além dos modos OFF/SHADOW/CONTROLLED. Executado no `OnInit()` somente com `EnableModularizationDebug`.
+
+Commits: `6003172a47e052a79c273edea74dcc7f33d4953d`, `010cbde0b33e87b348fd013292aaed242ebca3f1`.
