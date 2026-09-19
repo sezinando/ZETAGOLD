@@ -3465,3 +3465,19 @@ Commits:
 - `ba74ad0ec86954adfe85fd265de4f38eda0d756b` — Integrate R10 v2 calibration laboratory
 
 **Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.36.
+
+
+## ETAPA 13.36 — PRE-LIVE VALIDATION — IMPLEMENTADA
+
+Foi criado `Core/EAGOLD_R10_V2_PreLiveValidation.mqh`, consolidando em um único gate de prontidão os controles já construídos: feature switch, Decision Contract, Pre-Execution Validation, Safety Audit, reconciliação pendente, idempotência, capital/capacidades e identidade mínima do alvo.
+
+O gate é somente de validação. Ele não habilita execução por si só e não realiza mutação de broker, reserva de capital ou alteração de R11.
+
+A integração foi corrigida para utilizar diretamente o resultado do Safety Audit como condição de segurança. O `PreLiveGate` existente continua separado e a execução permanece condicionada simultaneamente ao Pre-Live, Pre-Execution e `executionEligible`.
+
+Commits:
+- `8c1c7f7c530fa9bd716be21429579ddbdbdd86c2` — Add R10 v2 consolidated pre-live validation
+- `d533d2f1a20262d4f58c12aa4325c153582b0ac2` — Integrate R10 v2 consolidated pre-live validation
+- `7583b742e8ddb9a78c3cddc64b1f6cb20b78ac47` — Fix pre-live validation safety boolean
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.37.
