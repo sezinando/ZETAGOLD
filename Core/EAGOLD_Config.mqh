@@ -19,7 +19,7 @@ extern double P02_02_Multiplier=1.10;
 // [02.03] DigitsLots
 extern int P02_03_DigitsLots=2;
 // [02.04] LotIncrement
-extern double P02_04_LotIncrement=0.02;
+extern double P02_04_LotIncrement=0.00;
 // [02.05] MaxOpenLot
 extern double P02_05_MaxOpenLot=3.00;
 // [02.06] TakeProfit
