@@ -45,6 +45,6 @@ void ZG_IntelligenceEvaluate(ZG_DirectionDecision &d){
 }
 bool ZG_IntelligenceEvaluateOnNewBar(ZG_DirectionDecision &d){if(!ZG_IsNewBar())return false;ZG_IntelligenceEvaluate(d);return true;}
 // Admission uses the last closed H1 state. WAIT means no new direction is admitted.
-bool ZG_IntelligenceAdmissionAllowed(int direction){if(!ZG_DirectionFilterEnabled())return true;if(direction==OP_BUY)return(g_zgIntelligenceDecision.Direction==ZG_DIR_BUY);if(direction==OP_SELL)return(g_zgIntelligenceDecision.Direction==ZG_DIR_SELL);return false;}
+bool ZG_IntelligenceAdmissionAllowed(ZG_DirectionDecision &d,int direction){if(!ZG_DirectionFilterEnabled())return true;if(direction==OP_BUY)return(d.Direction==ZG_DIR_BUY);if(direction==OP_SELL)return(d.Direction==ZG_DIR_SELL);return false;}
 #endif
 #endif#endif
