@@ -60,6 +60,17 @@ EAGOLD_ActionResult EAGOLD_R7EnsureMissingDirectionTransactional()
    if(CountEAGOLDOrders()==0)
       return(EAGOLD_ACTION_BLOCKED);
 
+   // With Intelligence Direction Filter enabled, R7 may only recreate the
+   // direction selected by Engine 0. It must never reintroduce the opposite
+   // machine after a one-sided R1 admission.
+   if(ZG_DirectionFilterEnabled())
+   {
+      int selectedDirection=g_zgIntelligenceDecision.Direction;
+      if(selectedDirection!=ZG_DIR_BUY&&selectedDirection!=ZG_DIR_SELL)
+         return(EAGOLD_ACTION_BLOCKED);
+      return(EAGOLD_R7EnsureDirectionTransactional(selectedDirection));
+   }
+
    EAGOLD_ActionResult buyResult=EAGOLD_R7EnsureDirectionTransactional(OP_BUY);
    if(buyResult!=EAGOLD_ACTION_BLOCKED)
       return(buyResult);
