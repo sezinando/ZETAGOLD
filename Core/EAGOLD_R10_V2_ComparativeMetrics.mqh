@@ -59,6 +59,14 @@ struct EAGOLD_R10V2ComparativeMetrics
    double grossReliefCumulative;
    double recoveryLoadReliefCumulative;
    double capitalRequiredCumulative;
+   double projectedGrossMinimum;
+   double projectedGrossMaximum;
+   double projectedNetMinimum;
+   double projectedNetMaximum;
+   double grossProjectionGapCumulative;
+   double netProjectionGapCumulative;
+   double maximumInstantGrossRelief;
+   long   projectedNetInvariantViolations;
 
    datetime firstTimestamp;
    datetime lastTimestamp;
@@ -103,6 +111,14 @@ void EAGOLD_R10V2ComparativeReset()
    g_r10V2ComparativeMetrics.grossReliefCumulative=0.0;
    g_r10V2ComparativeMetrics.recoveryLoadReliefCumulative=0.0;
    g_r10V2ComparativeMetrics.capitalRequiredCumulative=0.0;
+   g_r10V2ComparativeMetrics.projectedGrossMinimum=0.0;
+   g_r10V2ComparativeMetrics.projectedGrossMaximum=0.0;
+   g_r10V2ComparativeMetrics.projectedNetMinimum=0.0;
+   g_r10V2ComparativeMetrics.projectedNetMaximum=0.0;
+   g_r10V2ComparativeMetrics.grossProjectionGapCumulative=0.0;
+   g_r10V2ComparativeMetrics.netProjectionGapCumulative=0.0;
+   g_r10V2ComparativeMetrics.maximumInstantGrossRelief=0.0;
+   g_r10V2ComparativeMetrics.projectedNetInvariantViolations=0;
    g_r10V2ComparativeMetrics.firstTimestamp=0;
    g_r10V2ComparativeMetrics.lastTimestamp=0;
 }
@@ -133,6 +149,36 @@ void EAGOLD_R10V2ComparativeObserve(
 
    if(ctx.grossExposure>g_r10V2ComparativeMetrics.maximumGrossExposure)
       g_r10V2ComparativeMetrics.maximumGrossExposure=ctx.grossExposure;
+
+   double projectedGross=ctx.grossExposure;
+   double projectedNet=ctx.netExposure;
+   if(contract.state==EAGOLD_R10V2_DECISION_AUTHORIZED)
+   {
+      projectedGross=contract.grossAfter;
+      projectedNet=contract.netAfter;
+      double instantRelief=MathMax(0.0,ctx.grossExposure-projectedGross);
+      if(instantRelief>g_r10V2ComparativeMetrics.maximumInstantGrossRelief)
+         g_r10V2ComparativeMetrics.maximumInstantGrossRelief=instantRelief;
+      if(contract.opportunity==EAGOLD_R10V2_OPP_BALANCED_REDUCTION &&
+         MathAbs(projectedNet-ctx.netExposure)>Lot*0.5)
+         g_r10V2ComparativeMetrics.projectedNetInvariantViolations++;
+   }
+
+   if(g_r10V2ComparativeMetrics.projectedGrossMinimum<=0.0 ||
+      projectedGross<g_r10V2ComparativeMetrics.projectedGrossMinimum)
+      g_r10V2ComparativeMetrics.projectedGrossMinimum=projectedGross;
+   if(projectedGross>g_r10V2ComparativeMetrics.projectedGrossMaximum)
+      g_r10V2ComparativeMetrics.projectedGrossMaximum=projectedGross;
+   if(g_r10V2ComparativeMetrics.projectedNetMinimum==0.0 ||
+      projectedNet<g_r10V2ComparativeMetrics.projectedNetMinimum)
+      g_r10V2ComparativeMetrics.projectedNetMinimum=projectedNet;
+   if(projectedNet>g_r10V2ComparativeMetrics.projectedNetMaximum)
+      g_r10V2ComparativeMetrics.projectedNetMaximum=projectedNet;
+
+   g_r10V2ComparativeMetrics.grossProjectionGapCumulative+=
+      (ctx.grossExposure-projectedGross);
+   g_r10V2ComparativeMetrics.netProjectionGapCumulative+=
+      (projectedNet-ctx.netExposure);
 
    if(contract.opportunity!=EAGOLD_R10V2_OPP_NONE)
       g_r10V2ComparativeMetrics.opportunities++;
@@ -259,7 +305,13 @@ void EAGOLD_R10V2ComparativeJournalSummary()
       " shadowCompleted=",g_r10V2ComparativeMetrics.shadowCompletedReal,
       " shadowFailed=",g_r10V2ComparativeMetrics.shadowFailedReal,
       " shadowNoExecution=",g_r10V2ComparativeMetrics.shadowNoExecution,
-      " shadowDivergence=",g_r10V2ComparativeMetrics.shadowExecutionDivergence);
+      " shadowDivergence=",g_r10V2ComparativeMetrics.shadowExecutionDivergence,
+      " projectedGrossMin=",DoubleToString(g_r10V2ComparativeMetrics.projectedGrossMinimum,2),
+      " projectedGrossMax=",DoubleToString(g_r10V2ComparativeMetrics.projectedGrossMaximum,2),
+      " grossProjectionGapCum=",DoubleToString(g_r10V2ComparativeMetrics.grossProjectionGapCumulative,2),
+      " netProjectionGapCum=",DoubleToString(g_r10V2ComparativeMetrics.netProjectionGapCumulative,2),
+      " maxInstantGrossRelief=",DoubleToString(g_r10V2ComparativeMetrics.maximumInstantGrossRelief,2),
+      " balancedNetInvariantViolations=",g_r10V2ComparativeMetrics.projectedNetInvariantViolations);
 }
 
 #endif
