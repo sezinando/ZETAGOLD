@@ -158,7 +158,7 @@ bool r10V2PreLiveValidationOk=EAGOLD_R10V2PreLiveValidation(
    g_r10V2DecisionContract,
    g_r10V2PreExecutionGate,
    g_r10V2PreExecutionReason,
-   safetyOk,
+   (safetyReason==EAGOLD_R10V2_SAFETY_OK),
    safetyReason,
    EAGOLD_R10ReconciliationRequired(),
    EAGOLD_R10V2ExecutionDuplicate(g_r10V2DecisionContract),
