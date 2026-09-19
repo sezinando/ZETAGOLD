@@ -35,7 +35,10 @@ string EAGOLD_R10V2EnableModeName(EAGOLD_R10V2EnableMode mode)
 // Controlled mode does not itself authorize a broker mutation.
 EAGOLD_R10V2EnableMode EAGOLD_R10V2ControlledEnableMode()
 {
-   return(EAGOLD_R10V2_ENABLE_OFF);
+   int configured=P09_11_R10V2EnableMode;
+   if(configured<0 || configured>2)
+      return(EAGOLD_R10V2_ENABLE_OFF);
+   return((EAGOLD_R10V2EnableMode)configured);
 }
 
 bool EAGOLD_R10V2ControlledExecutionAllowed(
