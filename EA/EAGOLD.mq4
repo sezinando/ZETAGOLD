@@ -20,6 +20,7 @@
 #include "../Core/EAGOLD_R10_V2_SafetyAudit.mqh"
 #include "../Core/EAGOLD_R10_V2_PreLiveGate.mqh"
 #include "../Core/EAGOLD_R10_V2_PreLiveValidation.mqh"
+#include "../Core/EAGOLD_R10_V2_ControlledEnablement.mqh"
 #include "../Core/EAGOLD_R10_V2_TestMatrix.mqh"
 #include "../Core/EAGOLD_R10_V2_ScenarioHarness.mqh"
 #include "../Core/EAGOLD_R10_V2_Calibration.mqh"
@@ -194,11 +195,22 @@ if(EnableModularizationDebug)
 
 // ETAPA 13.19 — execution adapter is wired but remains dormant while
 // executionEligible=false. Balanced remains reserved for ETAPA 13.20.
-if(EAGOLD_EconomicExecutionAllowed() &&
-   g_r10V2DecisionContract.state==EAGOLD_R10V2_DECISION_AUTHORIZED &&
-   g_r10V2PreExecutionGate &&
-   g_r10V2PreLiveGate &&
-   g_r10V2DecisionContract.executionEligible)
+EAGOLD_R10V2EnableMode r10V2EnableMode=EAGOLD_R10V2ControlledEnableMode();
+bool r10V2ControlledExecutionAllowed=EAGOLD_R10V2ControlledExecutionAllowed(
+   r10V2EnableMode,
+   g_r10V2PreExecutionGate,
+   g_r10V2PreLiveGate,
+   g_r10V2DecisionContract.executionEligible,
+   EAGOLD_EconomicExecutionAllowed());
+
+if(r10V2EnableMode!=EAGOLD_R10V2_ENABLE_OFF &&
+   EnableModularizationDebug)
+   Print(EA_NAME," R10 v2 ENABLE MODE=",
+         EAGOLD_R10V2EnableModeName(r10V2EnableMode),
+         " executionAllowed=",r10V2ControlledExecutionAllowed);
+
+if(r10V2ControlledExecutionAllowed &&
+   g_r10V2DecisionContract.state==EAGOLD_R10V2_DECISION_AUTHORIZED)
 {
    EAGOLD_ActionResult r10V2Result=EAGOLD_ACTION_BLOCKED;
    if(g_r10V2DecisionContract.opportunity==EAGOLD_R10V2_OPP_BALANCED_REDUCTION)
