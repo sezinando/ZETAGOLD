@@ -3410,3 +3410,20 @@ Commit:
 ### Próxima etapa — ETAPA 13.33: Paired Trajectory
 
 Depois de validar as invariantes isoladas, vamos introduzir uma trajetória temporal determinística em memória: estados sucessivos de mercado/exposição, decisões R10 v2 e evolução projetada, mantendo o caminho alternativo separado do estado real.
+
+
+## ETAPA 13.33 — PAIRED TRAJECTORY — IMPLEMENTADA
+
+O Scenario Harness agora possui uma trajetória temporal determinística em memória para Balanced Reduction.
+
+A trajetória parte de BUY=10.00 lots, SELL=8.00 lots, NET=+2.00 lots e GROSS=18.00 lots. Quatro passos sucessivos aplicam redução bilateral de 1.00 lot e alimentam o estado seguinte.
+
+Invariantes verificadas a cada passo: volumes pós-redução não negativos; GROSS estritamente menor; NET preservado no Balanced; redução não inferior a Lot; redução não superior a nenhuma das duas posições.
+
+O harness imprime cada transição e um resumo final com steps, valid, failed, gross inicial/final, net inicial/final, cumulativeGrossRelief, cumulativeNetDelta, grossMonotonic e balancedNetInvariant.
+
+A trajetória continua exclusivamente laboratorial: sem broker mutation, reserva de capital, R11 mutation ou CSV.
+
+Commit: `35f32b041eb3f853833cfb34c9caf4d7a5234253` — Add R10 v2 paired trajectory harness
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.34.
