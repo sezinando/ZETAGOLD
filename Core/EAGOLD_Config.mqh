@@ -83,6 +83,48 @@ extern bool EnableRecoveryStepMultiplier=true;
 extern double RecoveryStepMultiplier=1.15;
 extern double RecoveryStepMax=500.0;
 
+//==================================================================
+// ENGINE 0 — MARKET INTELLIGENCE / DIRECTION SELECTOR
+// Phase 1 is SHADOW ONLY. No order is created or blocked by Engine 0.
+//==================================================================
+input string INPUT_GROUP_INTELLIGENCE="=== ENGINE 0 / MARKET INTELLIGENCE ===";
+extern bool   EnableZGIntelligence=true;
+extern bool   ZG_ShadowLogEnabled=true;
+extern string ZG_ShadowFileName="ZETAGOLD_Intelligence_Shadow.csv";
+extern int    ZG_Timeframe=PERIOD_H1;
+extern int    ZG_MinBarsRequired=300;
+
+extern int    ZG_ATRPeriod=14;
+extern int    ZG_EMAFast=21;
+extern int    ZG_EMASlow=50;
+extern int    ZG_ADXPeriod=14;
+extern int    ZG_BBPeriod=20;
+extern double ZG_BBDeviation=2.0;
+extern int    ZG_RangeLookback=120;
+extern int    ZG_SlopeLookback=5;
+extern int    ZG_MomentumLookback=6;
+extern int    ZG_MomentumAccelLookback=3;
+
+extern double ZG_MinADX=18.0;
+extern double ZG_MinTrendSlope=0.08;
+extern double ZG_MomentumNeutralBand=0.05;
+extern double ZG_MomentumAccelerationBand=0.05;
+
+extern double ZG_ExtremeRangeHigh=0.80;
+extern double ZG_ExtremeRangeLow=0.20;
+extern double ZG_ExtremeBBZ=1.25;
+extern double ZG_ExtremeExtensionATR=1.50;
+
+extern double ZG_TrendWeight=1.00;
+extern double ZG_MomentumWeight=1.00;
+extern double ZG_AccelerationWeight=0.75;
+extern double ZG_ContinuationWeight=1.25;
+extern double ZG_ExhaustionWeight=1.25;
+extern double ZG_NormalMomentumWeight=0.50;
+
+extern double ZG_MinConfidence=0.20;
+extern double ZG_MinEdge=0.50;
+
 input string INPUT_GROUP_UI="=== UI / PANEL ===";
 extern int PanelBackgroundX=260;
 extern int PanelBackgroundY=8;
