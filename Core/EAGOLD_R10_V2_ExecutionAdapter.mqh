@@ -83,6 +83,7 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
       OrderLots()+Lot*0.5<contract.authorizedLots)
       return(EAGOLD_ACTION_BLOCKED);
 
+   bool reservationCreated=false;
    if(contract.capitalReservationRequired>0.0 &&
       !EAGOLD_R10V2CapitalReservationActive())
    {
@@ -92,6 +93,7 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
             contract.targetTicket2,
             contract.timestamp))
          return(EAGOLD_ACTION_BLOCKED);
+      reservationCreated=true;
    }
 
    if(contract.capitalReservationRequired>0.0 &&
@@ -99,7 +101,11 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
          contract.targetTicket,
          contract.targetTicket2,
          contract.capitalReservationRequired))
+   {
+      if(reservationCreated)
+         EAGOLD_R10V2CapitalReleaseTransaction();
       return(EAGOLD_ACTION_BLOCKED);
+   }
 
    double realized=0.0;
    if(!CloseMarketOrderLots(contract.targetTicket,contract.authorizedLots,realized))
@@ -148,6 +154,7 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
       contract.authorizedLots<Lot)
       return(EAGOLD_ACTION_BLOCKED);
 
+   bool reservationCreated=false;
    if(contract.capitalReservationRequired>0.0 &&
       !EAGOLD_R10V2CapitalReservationActive())
    {
@@ -157,6 +164,7 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
             contract.targetTicket2,
             contract.timestamp))
          return(EAGOLD_ACTION_BLOCKED);
+      reservationCreated=true;
    }
 
    if(contract.capitalReservationRequired>0.0 &&
@@ -164,7 +172,11 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
          contract.targetTicket,
          contract.targetTicket2,
          contract.capitalReservationRequired))
+   {
+      if(reservationCreated)
+         EAGOLD_R10V2CapitalReleaseTransaction();
       return(EAGOLD_ACTION_BLOCKED);
+   }
 
    // Revalidate BUY immediately before leg 1.
    if(!OrderSelect(contract.targetTicket,SELECT_BY_TICKET,MODE_TRADES))
@@ -172,7 +184,11 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
    if(!IsEAGOLDOrder() || OrderSymbol()!=Symbol() ||
       OrderMagicNumber()!=MagicNumber || OrderType()!=OP_BUY ||
       OrderLots()+Lot*0.5<contract.authorizedLots)
+   {
+      if(reservationCreated)
+         EAGOLD_R10V2CapitalReleaseTransaction();
       return(EAGOLD_ACTION_BLOCKED);
+   }
 
    // Leg 1: BUY. Execution Core is authoritative.
    double realizedBuy=0.0;
