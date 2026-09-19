@@ -65,9 +65,13 @@ EAGOLD_ActionResult EAGOLD_R7EnsureMissingDirectionTransactional()
    // machine after a one-sided R1 admission.
    if(ZG_DirectionFilterEnabled())
    {
-      int selectedDirection=ZG_EconomicCreationDirection();
-      if(selectedDirection!=ZG_DIR_BUY&&selectedDirection!=ZG_DIR_SELL)
+      int intelligenceDirection=ZG_EconomicCreationDirection();
+      if(intelligenceDirection!=ZG_DIR_BUY&&intelligenceDirection!=ZG_DIR_SELL)
          return(EAGOLD_ACTION_BLOCKED);
+
+      // Engine 0 uses ZG_DIR_* (+1/-1); R7 execution uses MT4 OP_*
+      // (OP_BUY=0 / OP_SELL=1). Convert explicitly at the boundary.
+      int selectedDirection=(intelligenceDirection==ZG_DIR_BUY?OP_BUY:OP_SELL);
       return(EAGOLD_R7EnsureDirectionTransactional(selectedDirection));
    }
 
