@@ -3126,3 +3126,28 @@ Commits:
 Após a validação de compilação, a próxima fase será medir em cenário controlado o comportamento do ZETAGOLD atual versus R10 v2 em modo experimental, sem colocar capital real em risco.
 
 Métricas: Gross Exposure, Net Exposure, Drawdown, Recovery Load, número de reduções, volume reduzido, perda realizada pelas reduções, capital consumido/liberado, ciclos concluídos, tempo de recuperação, bloqueios e divergências de reconciliação.
+
+
+## ETAPA 13.22 — BACKTEST COMPARATIVO — IMPLEMENTADA
+
+Foi criada a fronteira `Core/EAGOLD_R10_V2_ComparativeMetrics.mqh` para medição in-memory / Journal-only. Nenhum CSV foi adicionado e nenhuma mutação de broker ocorre nesta camada.
+
+O módulo observa o mesmo Decision Contract usado pelo EA e acumula: avaliações, oportunidades, candidatos, autorizações, bloqueios, candidateLots, desiredLots, authorizedLots, gross relief projetado, delta de NET, recovery-load relief, capital requerido/capacidade e resultados de execução quando uma execução futura estiver habilitada.
+
+Isso permite separar três coisas:
+
+1. estado real observado;
+2. decisão R10 v2 projetada;
+3. resultado real de uma eventual execução.
+
+A métrica não transforma projeção em lucro hipotético. Portanto, não há claim de P/L contrafactual nesta etapa.
+
+Commits:
+- `b28c92b1d923588b13fe40f3144a39ff3a4772e6` — Add R10 v2 comparative backtest metrics
+- `20df42711a9cde43ebb1ead35c1523b657e3c9ae` — Integrate R10 v2 comparative measurement
+
+**Compile Gate:** usuário confirmou 0 erros antes desta implementação. A nova versão deve ser compilada no MetaEditor antes da próxima etapa.
+
+### Próxima etapa — ETAPA 13.23: Stress / Edge Cases
+
+Após o compile gate, vamos testar as fronteiras que podem invalidar uma redução: volume abaixo do mínimo, lot step, ticket desaparecido, preço alterado, spread, reserva insuficiente, reserva incompatível, primeira perna bilateral executada e segunda falhada, e reentrada após PARTIAL.
