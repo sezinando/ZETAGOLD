@@ -301,6 +301,10 @@ extern bool P09_08_R10V2EnableBalancedReduction=true;
 extern bool P09_09_R10V2EnablePositionAdjustment=true;
 // [09.10] R10V2EnableDirectionalReduction
 extern bool P09_10_R10V2EnableDirectionalReduction=false;
+// [09.11] R10V2EnableMode — explicit master switch; OFF is mandatory default
+extern int P09_11_R10V2EnableMode=0;
+// [09.12] R10V2PreLiveEnable — explicit pre-live switch; false is mandatory default
+extern bool P09_12_R10V2PreLiveEnable=false;
 // [08.01] PersistenceWorstEquityStep
 extern double P08_01_PersistenceWorstEquityStep=5.00;
 
