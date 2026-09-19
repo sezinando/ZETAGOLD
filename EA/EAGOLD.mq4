@@ -151,6 +151,7 @@ if(EAGOLD_EconomicExecutionAllowed() &&
       r10V2Result=EAGOLD_R10V2ExecuteBalanced(g_r10V2DecisionContract,g_r10V2PreExecutionGate);
    else
       r10V2Result=EAGOLD_R10V2ExecuteSingle(g_r10V2DecisionContract,g_r10V2PreExecutionGate);
+   EAGOLD_R10V2ComparativeRecordDecisionVsExecution(g_r10V2DecisionContract.state,true,r10V2Result);
    if(r10V2Result!=EAGOLD_ACTION_BLOCKED)
    {
       EAGOLD_R10V2ComparativeRecordExecution(r10V2Result);
