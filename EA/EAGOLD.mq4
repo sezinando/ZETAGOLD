@@ -22,6 +22,7 @@
 #include "../Core/EAGOLD_R10_V2_PreLiveValidation.mqh"
 #include "../Core/EAGOLD_R10_V2_ControlledEnablement.mqh"
 #include "../Core/EAGOLD_R10_V2_EnablementTestMatrix.mqh"
+#include "../Core/EAGOLD_R10_V2_RuntimeDiagnostic.mqh"
 #include "../Core/EAGOLD_R10_V2_TestMatrix.mqh"
 #include "../Core/EAGOLD_R10_V2_ScenarioHarness.mqh"
 #include "../Core/EAGOLD_R10_V2_Calibration.mqh"
@@ -211,6 +212,21 @@ if(r10V2EnableMode!=EAGOLD_R10V2_ENABLE_OFF &&
    Print(EA_NAME," R10 v2 ENABLE MODE=",
          EAGOLD_R10V2EnableModeName(r10V2EnableMode),
          " executionAllowed=",r10V2ControlledExecutionAllowed);
+
+if(EnableModularizationDebug)
+   EAGOLD_R10V2RuntimeDiagnostic(
+      r10V2EnableMode,
+      g_r10V2PreExecutionGate,
+      g_r10V2PreExecutionReason,
+      g_r10V2PreLiveGate,
+      g_r10V2PreLiveReason,
+      safetyReason,
+      reconciliationRequiredBefore,
+      g_r10V2DecisionContract.executionEligible,
+      EAGOLD_EconomicExecutionAllowed(),
+      EAGOLD_R10V2CapitalAvailable(),
+      g_r10V2R11Capacity,
+      r10V2ControlledExecutionAllowed);
 
 if(r10V2ControlledExecutionAllowed &&
    g_r10V2DecisionContract.state==EAGOLD_R10V2_DECISION_AUTHORIZED)
