@@ -3535,3 +3535,30 @@ Commits:
 Criado `Core/EAGOLD_R10_V2_IntegrationTest.mqh`. O teste exercita a cadeia booleana de autorização em memória: PreExecution, PreLive, `executionEligible`, Economic Execution, além dos modos OFF/SHADOW/CONTROLLED. Executado no `OnInit()` somente com `EnableModularizationDebug`.
 
 Commits: `6003172a47e052a79c273edea74dcc7f33d4953d`, `010cbde0b33e87b348fd013292aaed242ebca3f1`.
+
+## ETAPAS 13.41–13.45 — FECHAMENTO DA CADEIA DE VALIDAÇÃO
+
+**13.41 — Regression Suite:** criada suíte determinística que executa os laboratórios de cenário, invariantes, trajetória e calibração sem broker.
+
+**13.42 — Failure Regression:** adicionada regressão dos semânticos de falha do Action Contract, incluindo PARTIAL/RECONCILIATION, BUY FAILURE e DUPLICATE.
+
+**13.43 — Release Readiness:** snapshot read-only consolidando modo, pre-live, safety, reconciliação e capital.
+
+**13.44 — Controlled Execution Boundary:** criado o único ponto autorizado a armar executionEligible=true. A fronteira exige CONTROLLED + PreLive habilitado + PreExecution + Safety + reconciliação limpa + contrato AUTHORIZED + capacidades válidas. Os defaults continuam OFF.
+
+**13.45 — Controlled Demo Readiness:** documentação operacional criada. A execução de um demo real continua dependente de alteração explícita dos switches no MT4, compilação e observação runtime; não foi feita habilitação automática nem aprovação de produção.
+
+Commits principais:
+- e2b92a250d847cce4d3b5e7ebf359c59cb64477d — Regression Suite
+- 21efccf0be1639735f63e81a9d0a951d9072205b — Integration
+- 79f1cf4737271e9ffc452334718f24c3c0f4b6fc — Failure Regression
+- 76fb824ce3e3ab5b3c3b2d02926491c738409b07 — Failure Integration
+- f6990df2877fb3330e2dade8a26964d1f4c92589 — Explicit mode/pre-live controls
+- 3b56e5ba1d515f5c5421d31c9c7bf248c8087e5c — Master mode input
+- aa745b95931bbcb433eb2cfc6eb331aef45c2658 — Pre-live input
+- 0ae06d679e26929828e85b1aadccdeab2fa5af4b — Controlled execution boundary
+- d8976de850c18a4f4b5dafe935ec34a35004cba6 — Boundary integration
+- 8f37cc776f1214962c3e8f3e4d3ea16c2557c542 — Boundary ordering fix
+- 0ba3fb4c2842c3cceb72fbdf26f2d3e7ea836182 — Controlled Demo Readiness
+
+**External validation:** MetaEditor compilation and actual MT4 demo runtime observation remain required; these cannot be verified from repository source alone.
