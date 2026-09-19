@@ -3201,3 +3201,29 @@ Commit:
 ### Próxima etapa — ETAPA 13.25: Reconciliation pós-R10 v2
 
 Vamos fechar o ciclo `PARTIAL → RECONCILIATION → RESET`, verificando também a fronteira de idempotência para que o contrato antigo não volte a executar após o estado do broker ter mudado.
+
+
+## ETAPA 13.25 — RECONCILIATION PÓS-R10 v2 — IMPLEMENTADA
+
+Foi fechada a fronteira entre `PARTIAL`, reconciliação e idempotência. O `OnTick()` agora captura se havia uma reconciliação efetivamente pendente antes de chamar `EAGOLD_R10ReconcileIfRequired()`.
+
+O guard de execução R10 v2 (`g_r10V2ExecutionAwaitingReconciliation`) somente é liberado quando:
+
+`reconciliationRequiredBefore == true` + `EAGOLD_R10ReconcileIfRequired() == true`.
+
+Se não havia reconciliação pendente, o guard não é artificialmente resetado. Se a reconciliação falhar, o tick permanece em `HALT_FOR_RECONCILIATION` e nenhuma nova ação econômica é liberada.
+
+Fluxo final:
+
+`PARTIAL → RequestReconciliation → próximo tick → Broker Census → COMPLETE → Reset Idempotency Guard → nova decisão`.
+
+Não existe reparo sintético de tickets/lotes: o census do broker continua sendo a autoridade.
+
+Commit:
+- `8c6d4b9d4bb1c9220d1d990f8cccbbe84fdcc1e7` — Release R10 v2 idempotency guard only after actual reconciliation
+
+**Compile Gate:** compilar e confirmar 0 erros antes da ETAPA 13.26.
+
+### Próxima etapa — ETAPA 13.26: Backtest comparativo real
+
+Com a cadeia transacional fechada, o próximo trabalho será construir a comparação de trajetória sem CSV pesado: caminho atual versus projeção R10 v2, com métricas agregadas de exposição, redução, recovery load, capital e resultados observados.
