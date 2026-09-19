@@ -163,13 +163,18 @@ EAGOLD_ActionResult EAGOLD_CreateFirstOrdersAtomic()
          return(EAGOLD_ACTION_BLOCKED);
       }
 
-      double selectedPrice=(selectedDirection==OP_BUY?
+      // Intelligence direction uses ZG_DIR_* values:
+      // BUY=+1 / SELL=-1. MT4 OP_BUY/OP_SELL use different values
+      // (0/1), so never compare the Intelligence enum directly with OP_*.
+      bool intelligenceBuy=(selectedDirection==ZG_DIR_BUY);
+      bool intelligenceSell=(selectedDirection==ZG_DIR_SELL);
+      double selectedPrice=(intelligenceBuy?
          NormalizePrice(Ask+PointsToPrice(FirstStep)):
          NormalizePrice(Bid-PointsToPrice(FirstStep)));
       int selectedTicket=SendPending(
-         selectedDirection==OP_BUY?OP_BUYSTOP:OP_SELLSTOP,
+         intelligenceBuy?OP_BUYSTOP:OP_SELLSTOP,
          selectedPrice,Lot,
-         selectedDirection==OP_BUY?"EAGOLD ZG FIRST BUY":"EAGOLD ZG FIRST SELL");
+         intelligenceBuy?"EAGOLD ZG FIRST BUY":"EAGOLD ZG FIRST SELL");
       if(selectedTicket<=0)
       {
          Print(EA_NAME," RULE 1 INTELLIGENCE: selected seed failed. Direction=",
@@ -178,13 +183,13 @@ EAGOLD_ActionResult EAGOLD_CreateFirstOrdersAtomic()
       }
 
       g_eagoldR1CycleArmed=false;
-      ZG_AdmissionDirectionLatch(selectedDirection==OP_BUY?ZG_DIR_BUY:ZG_DIR_SELL);
-      R1Decision("PASS",selectedDirection==OP_BUY?"INTELLIGENCE_BUY":"INTELLIGENCE_SELL");
+      ZG_AdmissionDirectionLatch(intelligenceBuy?ZG_DIR_BUY:ZG_DIR_SELL);
+      R1Decision("PASS",intelligenceBuy?"INTELLIGENCE_BUY":"INTELLIGENCE_SELL");
       Print(EA_NAME," RULE 1 INTELLIGENCE: one-sided seed created. Direction=",
-            (selectedDirection==OP_BUY?"BUY":"SELL")," ticket=",selectedTicket,
+            (intelligenceBuy?"BUY":"SELL")," ticket=",selectedTicket,
             " edge=",DoubleToString(g_zgIntelligenceDecision.Edge,2),
             " confidence=",DoubleToString(g_zgIntelligenceDecision.Confidence,2));
-      CreateEngineActionMarker("R1","ZG_SEED",selectedDirection,Lot);
+      CreateEngineActionMarker("R1","ZG_SEED",intelligenceBuy?OP_BUY:OP_SELL,Lot);
       return(EAGOLD_ACTION_COMPLETED);
    }
 
