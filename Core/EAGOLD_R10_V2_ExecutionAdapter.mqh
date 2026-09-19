@@ -42,6 +42,13 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
          return(EAGOLD_ACTION_BLOCKED);
    }
 
+   if(contract.capitalReservationRequired>0.0 &&
+      !EAGOLD_R10V2CapitalReservationMatches(
+         contract.targetTicket,
+         contract.targetTicket2,
+         contract.capitalReservationRequired))
+      return(EAGOLD_ACTION_BLOCKED);
+
    double realized=0.0;
    if(!CloseMarketOrderLots(contract.targetTicket,contract.authorizedLots,realized))
    {
