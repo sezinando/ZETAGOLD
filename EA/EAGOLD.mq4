@@ -150,6 +150,11 @@ if(!EAGOLD_R10V2SafetyAudit(g_r10V2Context,g_r10V2DecisionContract,safetyReason)
    Print(EA_NAME," R10 v2 SAFETY AUDIT BLOCKED: ",EAGOLD_R10V2SafetyReasonName(safetyReason));
 
 g_r10V2PreLiveGate=EAGOLD_R10V2PreLiveGate(
+   g_r10V2Context,
+   g_r10V2DecisionContract,
+   g_r10V2PreExecutionGate,
+   g_r10V2PreExecutionReason,
+   safetyReason,
    g_r10V2PreLiveReason);
 EAGOLD_R10V2PreLiveValidationReason g_r10V2PreLiveValidationReason;
 bool r10V2PreLiveValidationOk=EAGOLD_R10V2PreLiveValidation(
