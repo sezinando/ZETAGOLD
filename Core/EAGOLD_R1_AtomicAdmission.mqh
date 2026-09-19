@@ -28,19 +28,20 @@ bool EAGOLD_R1RepairFlatPendingAnomaly(const EAGOLD_BrokerIntegrity &c)
       return(true);
 
    int expectedPending=2;
+   int expectedDirection=ZG_DirectionFilterEnabled()?ZG_EconomicCreationDirection():ZG_DIR_WAIT;
    if(ZG_DirectionFilterEnabled())
-      expectedPending=(g_zgIntelligenceDecision.Direction==ZG_DIR_BUY || g_zgIntelligenceDecision.Direction==ZG_DIR_SELL)?1:0;
+      expectedPending=(expectedDirection==ZG_DIR_BUY || expectedDirection==ZG_DIR_SELL)?1:0;
 
    int actualPending=c.buyPending+c.sellPending;
    bool shapeOk=(actualPending==expectedPending);
 
    if(shapeOk && ZG_DirectionFilterEnabled())
    {
-      if(g_zgIntelligenceDecision.Direction==ZG_DIR_BUY && c.sellPending>0)
+      if(expectedDirection==ZG_DIR_BUY && c.sellPending>0)
          shapeOk=false;
-      if(g_zgIntelligenceDecision.Direction==ZG_DIR_SELL && c.buyPending>0)
+      if(expectedDirection==ZG_DIR_SELL && c.buyPending>0)
          shapeOk=false;
-      if(g_zgIntelligenceDecision.Direction==ZG_DIR_WAIT && actualPending>0)
+      if(expectedDirection==ZG_DIR_WAIT && actualPending>0)
          shapeOk=false;
    }
 
