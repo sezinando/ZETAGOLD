@@ -166,6 +166,14 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteBalanced(
          contract.capitalReservationRequired))
       return(EAGOLD_ACTION_BLOCKED);
 
+   // Revalidate BUY immediately before leg 1.
+   if(!OrderSelect(contract.targetTicket,SELECT_BY_TICKET,MODE_TRADES))
+      return(EAGOLD_ACTION_BLOCKED);
+   if(!IsEAGOLDOrder() || OrderSymbol()!=Symbol() ||
+      OrderMagicNumber()!=MagicNumber || OrderType()!=OP_BUY ||
+      OrderLots()+Lot*0.5<contract.authorizedLots)
+      return(EAGOLD_ACTION_BLOCKED);
+
    // Leg 1: BUY. Execution Core is authoritative.
    double realizedBuy=0.0;
    bool buyOk=CloseMarketOrderLots(
