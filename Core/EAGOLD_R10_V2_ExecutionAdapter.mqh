@@ -76,6 +76,13 @@ EAGOLD_ActionResult EAGOLD_R10V2ExecuteSingle(
       contract.authorizedLots<Lot)
       return(EAGOLD_ACTION_BLOCKED);
 
+   if(!OrderSelect(contract.targetTicket,SELECT_BY_TICKET,MODE_TRADES))
+      return(EAGOLD_ACTION_BLOCKED);
+   if(!IsEAGOLDOrder() || OrderSymbol()!=Symbol() ||
+      OrderMagicNumber()!=MagicNumber || OrderType()!=contract.direction ||
+      OrderLots()+Lot*0.5<contract.authorizedLots)
+      return(EAGOLD_ACTION_BLOCKED);
+
    if(contract.capitalReservationRequired>0.0 &&
       !EAGOLD_R10V2CapitalReservationActive())
    {
