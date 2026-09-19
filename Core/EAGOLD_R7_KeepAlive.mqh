@@ -65,7 +65,7 @@ EAGOLD_ActionResult EAGOLD_R7EnsureMissingDirectionTransactional()
    // machine after a one-sided R1 admission.
    if(ZG_DirectionFilterEnabled())
    {
-      int selectedDirection=g_zgIntelligenceDecision.Direction;
+      int selectedDirection=ZG_EconomicCreationDirection();
       if(selectedDirection!=ZG_DIR_BUY&&selectedDirection!=ZG_DIR_SELL)
          return(EAGOLD_ACTION_BLOCKED);
       return(EAGOLD_R7EnsureDirectionTransactional(selectedDirection));
