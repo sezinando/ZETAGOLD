@@ -60,7 +60,7 @@ bool EAGOLD_R10V2ValidationOwnedTicket(int ticket,int expectedDirection)
    if(ticket<0)return(false);
    if(!OrderSelect(ticket,SELECT_BY_TICKET,MODE_TRADES))return(false);
    if(OrderSymbol()!=Symbol())return(false);
-   if(OrderMagicNumber()!=Magic)return(false);
+   if(OrderMagicNumber()!=MagicNumber)return(false);
    if(OrderType()!=expectedDirection)return(false);
    if(OrderLots()<Lot)return(false);
    return(true);
