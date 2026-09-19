@@ -11,6 +11,26 @@ struct ZG_DirectionDecision {
  bool Extreme; bool Continuation; bool Exhaustion;
 };
 bool ZG_IntelligenceEnabled(){return(EnableZGIntelligence);}
+
+// Direction latched for the active economic cycle. Intelligence may refresh on
+// every H1 bar, but lifecycle/recovery order creation must not silently switch
+// sides inside an already admitted cycle.
+int g_zgAdmissionDirection=ZG_DIR_WAIT;
+
+void ZG_AdmissionDirectionReset(){g_zgAdmissionDirection=ZG_DIR_WAIT;}
+void ZG_AdmissionDirectionLatch(int direction){if(direction==ZG_DIR_BUY||direction==ZG_DIR_SELL)g_zgAdmissionDirection=direction;}
+bool ZG_AdmissionDirectionActive(){return(g_zgAdmissionDirection==ZG_DIR_BUY||g_zgAdmissionDirection==ZG_DIR_SELL);}
+int ZG_EconomicCreationDirection(){
+   if(!ZG_DirectionFilterEnabled())return(ZG_DIR_WAIT);
+   if(ZG_AdmissionDirectionActive())return(g_zgAdmissionDirection);
+   return(ZG_DIR_WAIT);
+}
+bool ZG_EconomicCreationAllowed(int direction){
+   if(!ZG_DirectionFilterEnabled())return(true);
+   int latched=ZG_EconomicCreationDirection();
+   if(latched==ZG_DIR_WAIT)return(false);
+   return((direction==OP_BUY&&latched==ZG_DIR_BUY)||(direction==OP_SELL&&latched==ZG_DIR_SELL));
+}
 bool ZG_DirectionFilterEnabled(){return(EnableZGIntelligence && ZG_EnableDirectionFilter && !ZG_IntelligenceShadowMode);}
 bool ZG_GridIntelligenceEnabled(){return(EnableZGIntelligence && ZG_EnableGridIntelligence && !ZG_IntelligenceShadowMode);}
 double ZG_Clamp(double v,double lo,double hi){if(v<lo)return(lo);if(v>hi)return(hi);return(v);}
