@@ -89,6 +89,9 @@ extern double RecoveryStepMax=500.0;
 //==================================================================
 input string INPUT_GROUP_INTELLIGENCE="=== ENGINE 0 / MARKET INTELLIGENCE ===";
 extern bool   EnableZGIntelligence=true;
+extern bool   ZG_IntelligenceShadowMode=true;
+extern bool   ZG_EnableDirectionFilter=false;
+extern bool   ZG_EnableGridIntelligence=false;
 extern bool   ZG_ShadowLogEnabled=true;
 extern string ZG_ShadowFileName="ZETAGOLD_Intelligence_Shadow.csv";
 extern int    ZG_Timeframe=PERIOD_H1;
