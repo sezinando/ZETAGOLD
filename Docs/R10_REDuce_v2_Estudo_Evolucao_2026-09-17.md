@@ -3177,3 +3177,27 @@ Commit:
 ### Próxima etapa — ETAPA 13.24: Falha bilateral
 
 Testaremos especificamente `BUY OK → SELL FAIL`, `BUY FAIL`, revalidação do segundo ticket e o caminho `PARTIAL → RECONCILIATION → HALT`, garantindo que nenhuma tentativa automática de reconstruir a simetria seja feita pelo R10 v2.
+
+
+## ETAPA 13.24 — FALHA BILATERAL — IMPLEMENTADA
+
+O segundo leg do Balanced Reduce foi endurecido antes da segunda mutação do broker. Depois de um `BUY OK`, o ticket SELL é novamente validado quanto a existência, propriedade pelo EA (`Symbol` + `MagicNumber`), direção `OP_SELL` e volume suficiente para o `authorizedLots`.
+
+Assim, o adapter não assume que o segundo ticket continua executável depois da primeira mutação.
+
+Caminhos definidos:
+
+- `BUY FAIL` → nenhuma simetria é fabricada; reserva criada pela tentativa é liberada.
+- `BUY OK + SELL inválido/FAIL` → `PARTIAL`, capital da perna efetivamente realizada é reconciliado e o adapter marca `requiresReconciliation=true`.
+- `BUY OK + SELL OK` → `COMPLETED`, resultado combinado é reconciliado e a reserva restante é liberada/consumida.
+
+A regra central permanece: **R10 v2 não tenta reconstruir a perna ausente**. Após uma execução parcial, a verdade volta para o broker census/reconciliation.
+
+Commit:
+- `d2cde3da39e38809b82670fbfb83c0e485bf5b32` — Harden R10 v2 bilateral sell-leg ownership validation
+
+**Compile Gate:** usuário confirmou 0 erros após a ETAPA 13.23; a alteração 13.24 deve ser compilada antes de avançar.
+
+### Próxima etapa — ETAPA 13.25: Reconciliation pós-R10 v2
+
+Vamos fechar o ciclo `PARTIAL → RECONCILIATION → RESET`, verificando também a fronteira de idempotência para que o contrato antigo não volte a executar após o estado do broker ter mudado.
