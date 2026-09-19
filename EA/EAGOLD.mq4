@@ -17,6 +17,7 @@
 #include "../Core/EAGOLD_R10_V2_R11Governor.mqh"
 #include "../Core/EAGOLD_R10_V2_StructuralProjection.mqh"
 #include "../Core/EAGOLD_R10_V2_ComparativeMetrics.mqh"
+#include "../Core/EAGOLD_R10_V2_SafetyAudit.mqh"
 bool IsR13Order();
 bool IsR13OwnershipConfigurationValid();
 bool EAGOLDValidateOwnershipConfiguration();
@@ -138,6 +139,10 @@ if(g_r10V2DecisionContract.state==EAGOLD_R10V2_DECISION_AUTHORIZED && !g_r10V2Pr
 // ETAPA 13.22 — journal-only comparative measurement. This is observational;
 // it does not mutate broker state or capital and does not enable execution.
 EAGOLD_R10V2ComparativeObserve(g_r10V2Context,g_r10V2DecisionContract);
+
+EAGOLD_R10V2SafetyReason safetyReason=EAGOLD_R10V2_SAFETY_OK;
+if(!EAGOLD_R10V2SafetyAudit(g_r10V2Context,g_r10V2DecisionContract,safetyReason))
+   Print(EA_NAME," R10 v2 SAFETY AUDIT BLOCKED: ",EAGOLD_R10V2SafetyReasonName(safetyReason));
 
 // ETAPA 13.19 — execution adapter is wired but remains dormant while
 // executionEligible=false. Balanced remains reserved for ETAPA 13.20.
