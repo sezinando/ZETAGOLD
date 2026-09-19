@@ -61,6 +61,44 @@ EAGOLD_ActionResult EAGOLD_CreateFirstOrdersAtomic()
       return(EAGOLD_ACTION_BLOCKED);
 
    RefreshRates();
+
+   // Intelligence-controlled admission: when the Direction Filter is enabled,
+   // R1 becomes one-sided. The selected side is chosen from the last closed
+   // H1 intelligence state; WAIT leaves the cycle flat.
+   if(ZG_DirectionFilterEnabled())
+   {
+      int selectedDirection=g_zgIntelligenceDecision.Direction;
+      if(selectedDirection!=ZG_DIR_BUY&&selectedDirection!=ZG_DIR_SELL)
+      {
+         R1Decision("BLOCK","INTELLIGENCE_WAIT");
+         Print(EA_NAME," RULE 1: intelligence filter WAIT. No new cycle admitted.");
+         return(EAGOLD_ACTION_BLOCKED);
+      }
+
+      double selectedPrice=(selectedDirection==OP_BUY?
+         NormalizePrice(Ask+PointsToPrice(FirstStep)):
+         NormalizePrice(Bid-PointsToPrice(FirstStep)));
+      int selectedTicket=SendPending(
+         selectedDirection==OP_BUY?OP_BUYSTOP:OP_SELLSTOP,
+         selectedPrice,Lot,
+         selectedDirection==OP_BUY?"EAGOLD ZG FIRST BUY":"EAGOLD ZG FIRST SELL");
+      if(selectedTicket<=0)
+      {
+         Print(EA_NAME," RULE 1 INTELLIGENCE: selected seed failed. Direction=",
+               (selectedDirection==OP_BUY?"BUY":"SELL"));
+         return(EAGOLD_ACTION_FAILED);
+      }
+
+      g_eagoldR1CycleArmed=false;
+      R1Decision("PASS",selectedDirection==OP_BUY?"INTELLIGENCE_BUY":"INTELLIGENCE_SELL");
+      Print(EA_NAME," RULE 1 INTELLIGENCE: one-sided seed created. Direction=",
+            (selectedDirection==OP_BUY?"BUY":"SELL")," ticket=",selectedTicket,
+            " edge=",DoubleToString(g_zgIntelligenceDecision.Edge,2),
+            " confidence=",DoubleToString(g_zgIntelligenceDecision.Confidence,2));
+      CreateEngineActionMarker("R1","ZG_SEED",selectedDirection,Lot);
+      return(EAGOLD_ACTION_COMPLETED);
+   }
+
    double buyPrice=NormalizePrice(Ask+PointsToPrice(FirstStep));
    double sellPrice=NormalizePrice(Bid-PointsToPrice(FirstStep));
 
