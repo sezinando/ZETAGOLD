@@ -19,6 +19,7 @@
 #include "../Core/EAGOLD_R10_V2_ComparativeMetrics.mqh"
 #include "../Core/EAGOLD_R10_V2_SafetyAudit.mqh"
 #include "../Core/EAGOLD_R10_V2_PreLiveGate.mqh"
+#include "../Core/EAGOLD_R10_V2_PreLiveValidation.mqh"
 #include "../Core/EAGOLD_R10_V2_TestMatrix.mqh"
 #include "../Core/EAGOLD_R10_V2_ScenarioHarness.mqh"
 #include "../Core/EAGOLD_R10_V2_Calibration.mqh"
@@ -149,12 +150,26 @@ if(!EAGOLD_R10V2SafetyAudit(g_r10V2Context,g_r10V2DecisionContract,safetyReason)
    Print(EA_NAME," R10 v2 SAFETY AUDIT BLOCKED: ",EAGOLD_R10V2SafetyReasonName(safetyReason));
 
 g_r10V2PreLiveGate=EAGOLD_R10V2PreLiveGate(
+   g_r10V2PreLiveReason);
+EAGOLD_R10V2PreLiveValidationReason g_r10V2PreLiveValidationReason;
+bool r10V2PreLiveValidationOk=EAGOLD_R10V2PreLiveValidation(
+   EAGOLD_R10V2PreLiveFeatureEnabled(),
    g_r10V2Context,
    g_r10V2DecisionContract,
    g_r10V2PreExecutionGate,
    g_r10V2PreExecutionReason,
+   safetyOk,
    safetyReason,
-   g_r10V2PreLiveReason);
+   EAGOLD_R10ReconciliationRequired(),
+   EAGOLD_R10V2ExecutionDuplicate(g_r10V2DecisionContract),
+   g_r10V2PreLiveValidationReason);
+if(!r10V2PreLiveValidationOk)
+{
+   g_r10V2PreLiveGate=false;
+   Print(EA_NAME," R10 v2 PRE-LIVE VALIDATION: ",
+         EAGOLD_R10V2PreLiveValidationReasonName(g_r10V2PreLiveValidationReason));
+}
+
 
 if(g_r10V2DecisionContract.state==EAGOLD_R10V2_DECISION_AUTHORIZED &&
    !g_r10V2PreLiveGate)
