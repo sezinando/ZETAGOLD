@@ -300,7 +300,7 @@ void ZG_IntelligenceLog(const ZG_DirectionDecision &d)
    FileWrite(h,
       TimeToString(TimeCurrent(),TIME_DATE|TIME_SECONDS),
       Symbol(),
-      tfToString(ZG_Timeframe),
+      ZG_TFToString(ZG_Timeframe),
       DoubleToString(iClose(Symbol(),ZG_Timeframe,1),Digits),
       d.Regime,
       DoubleToString(d.ATR,Digits),
@@ -325,7 +325,7 @@ void ZG_IntelligenceLog(const ZG_DirectionDecision &d)
    FileClose(h);
 }
 
-string tfToString(int tf)
+string ZG_TFToString(int tf)
 {
    if(tf==PERIOD_M1)return("M1");
    if(tf==PERIOD_M5)return("M5");
