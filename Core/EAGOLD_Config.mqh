@@ -1,6 +1,6 @@
 #ifndef EAGOLD_CONFIG_MQH
 #define EAGOLD_CONFIG_MQH
-#define EAGOLD_VERSION "0.118"
+#define EAGOLD_VERSION "0.119"
 #define EAGOLD_R13_DEFAULT_COMMENT "EAGOLD_RECOVERY_SATELLITE"
 #define EAGOLD_EXPIRY_DATE D'2026.12.31 00:00'
 double g_panelMinProfit=0.0; double g_panelMaxProfit=0.0; double g_panelMaxLots=0.0; bool g_panelInitialized=false; bool EAGOLD_TradingAllowed(){return(TimeCurrent()<EAGOLD_EXPIRY_DATE);}
@@ -312,9 +312,9 @@ input string INPUT_GROUP_INTELLIGENCE="=== 10 ZG / INTELLIGENCE ENGINE ===";
 // [10.01] EnableZGIntelligence
 extern bool P10_01_EnableZGIntelligence=true;
 // [10.02] ZGIntelligenceShadowMode
-extern bool P10_02_ZGIntelligenceShadowMode=true;
+extern bool P10_02_ZGIntelligenceShadowMode=false;
 // [10.03] ZGEnableDirectionFilter
-extern bool P10_03_ZGEnableDirectionFilter=false;
+extern bool P10_03_ZGEnableDirectionFilter=true;
 // [10.04] ZGEnableGridIntelligence
 extern bool P10_04_ZGEnableGridIntelligence=false;
 // [10.05] ZGShadowLogEnabled
