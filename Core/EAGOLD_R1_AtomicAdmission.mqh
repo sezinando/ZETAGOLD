@@ -99,7 +99,8 @@ bool EAGOLD_R1ReconcilePendingWithIntelligence()
       Ask+PointsToPrice(FirstStep):
       Bid-PointsToPrice(FirstStep));
 
-   int ticket=SendPending(
+   int ticket=EAGOLD_BasketSendPending(
+      1,
       intelligenceBuy?OP_BUYSTOP:OP_SELLSTOP,
       price,
       Lot,
@@ -284,7 +285,8 @@ EAGOLD_ActionResult EAGOLD_CreateFirstOrdersAtomic()
             " tradeAllowed=",EAGOLD_TradingAllowed(),
             " windowOpen=",EAGOLD_TradingWindowOpen(),
             " spreadPoints=",DoubleToString((Ask-Bid)/Point,1));
-      int selectedTicket=SendPending(
+      int selectedTicket=EAGOLD_BasketSendPending(
+         1,
          intelligenceBuy?OP_BUYSTOP:OP_SELLSTOP,
          selectedPrice,Lot,
          intelligenceBuy?"EAGOLD ZG FIRST BUY":"EAGOLD ZG FIRST SELL");
