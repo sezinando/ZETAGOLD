@@ -208,7 +208,8 @@ void EAGOLD_DualCycleObserve()
       return;
    }
 
-   int ticket=SendPending(
+   int ticket=EAGOLD_BasketSendPending(
+      2,
       isBuy?OP_BUYSTOP:OP_SELLSTOP,
       price,
       Lot,
