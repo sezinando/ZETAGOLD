@@ -51,6 +51,12 @@ bool EAGOLD_DualCycleCanConsider(int &selectedDirection,string &reason)
       return(false);
    }
 
+   if(ZG_ManualDirectionFilterEnabled())
+   {
+      reason="MANUAL_DIRECTION_LOCK";
+      return(false);
+   }
+
    if(!ZG_DirectionFilterEnabled())
    {
       reason="DIRECTION_FILTER_OFF";
