@@ -377,6 +377,8 @@ extern double P10_32_ZGNormalMomentumWeight=0.50;
 extern double P10_33_ZGMinConfidence=0.20;
 // [10.34] ZGMinEdge
 extern double P10_34_ZGMinEdge=0.50;
+// [10.35] ZGTradeDirectionMode — 0=BOTH, 1=ONLY BUY, 2=ONLY SELL
+extern int P10_35_ZGTradeDirectionMode=0;
 
 input string INPUT_GROUP_DUAL_CYCLE="=== 11 ZG / DUAL CYCLE MANAGER ===";
 // [11.01] EnableDualCycle
@@ -429,6 +431,7 @@ extern double P11_04_DualCycleMaxGrossExposureLots=2.00;
 #define ZG_NormalMomentumWeight P10_32_ZGNormalMomentumWeight
 #define ZG_MinConfidence P10_33_ZGMinConfidence
 #define ZG_MinEdge P10_34_ZGMinEdge
+#define ZG_TradeDirectionMode P10_35_ZGTradeDirectionMode
 #define EnableDualCycle P11_01_EnableDualCycle
 #define DualCycleShadowMode P11_02_DualCycleShadowMode
 #define DualCycleUseR1AdmissionGates P11_03_DualCycleUseR1AdmissionGates
