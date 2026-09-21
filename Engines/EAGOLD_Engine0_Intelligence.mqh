@@ -21,17 +21,27 @@ void ZG_AdmissionDirectionReset(){g_zgAdmissionDirection=ZG_DIR_WAIT;}
 void ZG_AdmissionDirectionLatch(int direction){if(direction==ZG_DIR_BUY||direction==ZG_DIR_SELL)g_zgAdmissionDirection=direction;}
 bool ZG_AdmissionDirectionActive(){return(g_zgAdmissionDirection==ZG_DIR_BUY||g_zgAdmissionDirection==ZG_DIR_SELL);}
 int ZG_EconomicCreationDirection(){
+   int effective=ZG_EffectiveAdmissionDirection();
+   if(effective!=ZG_DIR_WAIT)return(effective);
    if(!ZG_DirectionFilterEnabled())return(ZG_DIR_WAIT);
    if(ZG_AdmissionDirectionActive())return(g_zgAdmissionDirection);
    return(ZG_DIR_WAIT);
 }
 bool ZG_EconomicCreationAllowed(int direction){
+   if(!ZG_EntryDirectionAllowed(direction))return(false);
+   if(ZG_ManualDirectionFilterEnabled())return(true);
    if(!ZG_DirectionFilterEnabled())return(true);
    int latched=ZG_EconomicCreationDirection();
    if(latched==ZG_DIR_WAIT)return(false);
    return((direction==OP_BUY&&latched==ZG_DIR_BUY)||(direction==OP_SELL&&latched==ZG_DIR_SELL));
 }
 bool ZG_DirectionFilterEnabled(){return(EnableZGIntelligence && ZG_EnableDirectionFilter && !ZG_IntelligenceShadowMode);}
+bool ZG_ManualDirectionFilterEnabled(){return(ZG_TradeDirectionMode==1||ZG_TradeDirectionMode==2);}
+int ZG_ManualDirection(){if(ZG_TradeDirectionMode==1)return(ZG_DIR_BUY);if(ZG_TradeDirectionMode==2)return(ZG_DIR_SELL);return(ZG_DIR_WAIT);}
+string ZG_ManualDirectionName(){if(ZG_TradeDirectionMode==1)return("ONLY BUY");if(ZG_TradeDirectionMode==2)return("ONLY SELL");return("BOTH");}
+string ZG_DirectionName(int direction){if(direction==ZG_DIR_BUY)return("BUY");if(direction==ZG_DIR_SELL)return("SELL");return("WAIT");}
+int ZG_EffectiveAdmissionDirection(){int manual=ZG_ManualDirection();if(manual!=ZG_DIR_WAIT)return(manual);if(ZG_DirectionFilterEnabled()&&(g_zgIntelligenceDecision.Direction==ZG_DIR_BUY||g_zgIntelligenceDecision.Direction==ZG_DIR_SELL))return(g_zgIntelligenceDecision.Direction);return(ZG_DIR_WAIT);}
+bool ZG_EntryDirectionAllowed(int direction){if(direction!=OP_BUY&&direction!=OP_SELL)return(false);int manual=ZG_ManualDirection();if(manual==ZG_DIR_BUY&&direction!=OP_BUY)return(false);if(manual==ZG_DIR_SELL&&direction!=OP_SELL)return(false);return(true);}
 bool ZG_GridIntelligenceEnabled(){return(EnableZGIntelligence && ZG_EnableGridIntelligence && !ZG_IntelligenceShadowMode);}
 double ZG_Clamp(double v,double lo,double hi){if(v<lo)return(lo);if(v>hi)return(hi);return(v);}
 double ZG_SafeDiv(double a,double b){if(MathAbs(b)<0.000000001)return(0.0);return(a/b);}
@@ -65,5 +75,5 @@ void ZG_IntelligenceEvaluate(ZG_DirectionDecision &d){
 }
 bool ZG_IntelligenceEvaluateOnNewBar(ZG_DirectionDecision &d){if(!ZG_IsNewBar())return false;ZG_IntelligenceEvaluate(d);return true;}
 // Admission uses the last closed H1 state. WAIT means no new direction is admitted.
-bool ZG_IntelligenceAdmissionAllowed(ZG_DirectionDecision &d,int direction){if(!ZG_DirectionFilterEnabled())return true;if(direction==OP_BUY)return(d.Direction==ZG_DIR_BUY);if(direction==OP_SELL)return(d.Direction==ZG_DIR_SELL);return false;}
+bool ZG_IntelligenceAdmissionAllowed(ZG_DirectionDecision &d,int direction){if(!ZG_EntryDirectionAllowed(direction))return(false);if(ZG_ManualDirectionFilterEnabled())return(true);if(!ZG_DirectionFilterEnabled())return true;if(direction==OP_BUY)return(d.Direction==ZG_DIR_BUY);if(direction==OP_SELL)return(d.Direction==ZG_DIR_SELL);return false;}
 #endif
