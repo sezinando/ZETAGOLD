@@ -377,8 +377,14 @@ extern double P10_32_ZGNormalMomentumWeight=0.50;
 extern double P10_33_ZGMinConfidence=0.20;
 // [10.34] ZGMinEdge
 extern double P10_34_ZGMinEdge=0.50;
-// [10.35] ZGTradeDirectionMode — 0=BOTH, 1=ONLY BUY, 2=ONLY SELL
-extern int P10_35_ZGTradeDirectionMode=0;
+enum EAGOLD_TradeDirectionMode
+{
+   EAGOLD_DIRECTION_BOTH=0,
+   EAGOLD_DIRECTION_ONLY_BUY=1,
+   EAGOLD_DIRECTION_ONLY_SELL=2
+};
+// [10.35] ZGTradeDirectionMode — explicit entry direction selector
+extern EAGOLD_TradeDirectionMode P10_35_ZGTradeDirectionMode=EAGOLD_DIRECTION_BOTH;
 
 input string INPUT_GROUP_DUAL_CYCLE="=== 11 ZG / DUAL CYCLE MANAGER ===";
 // [11.01] EnableDualCycle
