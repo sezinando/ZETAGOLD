@@ -15,6 +15,7 @@ bool ZG_IntelligenceEnabled(){return(EnableZGIntelligence);}
 // Direction latched for the active economic cycle. Intelligence may refresh on
 // every H1 bar, but lifecycle/recovery order creation must not silently switch
 // sides inside an already admitted cycle.
+ZG_DirectionDecision g_zgIntelligenceDecision;
 int g_zgAdmissionDirection=ZG_DIR_WAIT;
 
 void ZG_AdmissionDirectionReset(){g_zgAdmissionDirection=ZG_DIR_WAIT;}
