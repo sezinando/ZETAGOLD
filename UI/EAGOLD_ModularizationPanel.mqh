@@ -135,6 +135,7 @@ void EAGOLD_ModPanelUpdate()
    EAGOLD_ModPanelLabel("TITLE",StringFormat("EAGOLD v%s | OPERATIONAL PANEL",EAGOLD_VERSION),row++,clrWhite);
    EAGOLD_ModPanelLabel("SEP1","----------------------------------------------",row++,clrDimGray);
    EAGOLD_ModPanelLabel("IDENT",MagicNumber==-1?StringFormat("SYMBOL %-8s   MAGIC %4d   | TODOS",Symbol(),MagicNumber):StringFormat("SYMBOL %-8s   MAGIC %4d",Symbol(),MagicNumber),row++,MagicNumber==-1?clrYellow:clrAqua);
+   EAGOLD_ModPanelLabel("DIRECTION",StringFormat("DIRECTION %-9s | OPER %-5s | INTEL %-5s",ZG_ManualDirectionName(),ZG_OperationalDirectionName(),ZG_DirectionName(g_zgIntelligenceDecision.Direction)),ZG_ManualDirectionFilterEnabled()?clrYellow:(ZG_DirectionFilterEnabled()?clrAqua:clrWhite));
    EAGOLD_ModPanelLabel("MARKET",StringFormat("BID %10s   ASK %10s",DoubleToString(Bid,Digits),DoubleToString(Ask,Digits)),row++,clrWhite);
    EAGOLD_ModPanelLabel("SPREAD",StringFormat("SPREAD %6.1f pts   LIMIT %3d",spreadPoints,SpreadLimit),row++,spreadAlert?clrTomato:clrLime);
    EAGOLD_ModPanelLabel("SEP2","----------------------------------------------",row++,clrDimGray);
@@ -180,7 +181,7 @@ void EAGOLD_ModPanelUpdate()
 
 void EAGOLD_ModPanelDelete()
 {
-   string ids[]={"TITLE","SEP1","IDENT","MARKET","SPREAD","SEP2","BUY","SELL","EXPOS","PENDING","SEP3","TOTAL","EQUITY","ACCUM","MIN","MAXPROFIT","LOTS","MAXLOTS","DD","SEP4","R13A","R13B","R13C","HEDGE","R11","REC","RECD","SEP5","BRX","TRAIL","TIME","SEP6","DBG1","DBG2","DBG3","DBG4","DBG5","DBG6","DBG7"};
+   string ids[]={"TITLE","SEP1","IDENT","DIRECTION","MARKET","SPREAD","SEP2","BUY","SELL","EXPOS","PENDING","SEP3","TOTAL","EQUITY","ACCUM","MIN","MAXPROFIT","LOTS","MAXLOTS","DD","SEP4","R13A","R13B","R13C","HEDGE","R11","REC","RECD","SEP5","BRX","TRAIL","TIME","SEP6","DBG1","DBG2","DBG3","DBG4","DBG5","DBG6","DBG7"};
    for(int i=0;i<ArraySize(ids);i++){string name=EAGOLD_MOD_PANEL_PREFIX+ids[i];if(ObjectFind(0,name)>=0)ObjectDelete(0,name);}
    string bg=EAGOLD_MOD_PANEL_PREFIX+"BG";if(ObjectFind(0,bg)>=0)ObjectDelete(0,bg);
 }
