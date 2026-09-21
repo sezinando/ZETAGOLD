@@ -37,8 +37,8 @@ bool ZG_EconomicCreationAllowed(int direction){
    return((direction==OP_BUY&&latched==ZG_DIR_BUY)||(direction==OP_SELL&&latched==ZG_DIR_SELL));
 }
 bool ZG_DirectionFilterEnabled(){return(EnableZGIntelligence && ZG_EnableDirectionFilter && !ZG_IntelligenceShadowMode);}
-bool ZG_ManualDirectionFilterEnabled(){return(ZG_TradeDirectionMode==1||ZG_TradeDirectionMode==2);}
-int ZG_ManualDirection(){if(ZG_TradeDirectionMode==1)return(ZG_DIR_BUY);if(ZG_TradeDirectionMode==2)return(ZG_DIR_SELL);return(ZG_DIR_WAIT);}
+bool ZG_ManualDirectionFilterEnabled(){return(ZG_TradeDirectionMode==EAGOLD_DIRECTION_ONLY_BUY||ZG_TradeDirectionMode==EAGOLD_DIRECTION_ONLY_SELL);}
+int ZG_ManualDirection(){if(ZG_TradeDirectionMode==EAGOLD_DIRECTION_ONLY_BUY)return(ZG_DIR_BUY);if(ZG_TradeDirectionMode==EAGOLD_DIRECTION_ONLY_SELL)return(ZG_DIR_SELL);return(ZG_DIR_WAIT);}
 string ZG_ManualDirectionName(){if(ZG_TradeDirectionMode==1)return("ONLY BUY");if(ZG_TradeDirectionMode==2)return("ONLY SELL");return("BOTH");}
 string ZG_DirectionName(int direction){if(direction==ZG_DIR_BUY)return("BUY");if(direction==ZG_DIR_SELL)return("SELL");return("WAIT");}
 string ZG_OperationalDirectionName(){if(ZG_ManualDirectionFilterEnabled())return(ZG_ManualDirectionName());if(ZG_DirectionFilterEnabled())return(ZG_DirectionName(g_zgIntelligenceDecision.Direction));return("BOTH");}
