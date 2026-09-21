@@ -24,6 +24,9 @@ void EAGOLD_R1ResetCycleLatch()
 
 bool EAGOLD_R1ReconcilePendingWithIntelligence()
 {
+   if(ZG_ManualDirectionFilterEnabled())
+      return(true);
+
    if(!ZG_DirectionFilterEnabled())
       return(true);
 
@@ -134,8 +137,8 @@ bool EAGOLD_R1RepairFlatPendingAnomaly(const EAGOLD_BrokerIntegrity &c)
       return(true);
 
    int expectedPending=2;
-   int expectedDirection=ZG_DirectionFilterEnabled()?ZG_EconomicCreationDirection():ZG_DIR_WAIT;
-   if(ZG_DirectionFilterEnabled())
+   int expectedDirection=ZG_EconomicCreationDirection();
+   if(ZG_ManualDirectionFilterEnabled() || ZG_DirectionFilterEnabled())
       expectedPending=(expectedDirection==ZG_DIR_BUY || expectedDirection==ZG_DIR_SELL)?1:0;
 
    int actualPending=c.buyPending+c.sellPending;
@@ -259,13 +262,13 @@ EAGOLD_ActionResult EAGOLD_CreateFirstOrdersAtomic()
    // Intelligence-controlled admission: when the Direction Filter is enabled,
    // R1 becomes one-sided. The selected side is chosen from the last closed
    // H1 intelligence state; WAIT leaves the cycle flat.
-   if(ZG_DirectionFilterEnabled())
+   if(ZG_ManualDirectionFilterEnabled() || ZG_DirectionFilterEnabled())
    {
-      int selectedDirection=g_zgIntelligenceDecision.Direction;
+      int selectedDirection=ZG_EffectiveAdmissionDirection();
       if(selectedDirection!=ZG_DIR_BUY&&selectedDirection!=ZG_DIR_SELL)
       {
-         R1Decision("BLOCK","INTELLIGENCE_WAIT");
-         Print(EA_NAME," RULE 1: intelligence filter WAIT. No new cycle admitted.");
+         R1Decision("BLOCK","DIRECTION_WAIT");
+         Print(EA_NAME," RULE 1: direction selector WAIT. No new cycle admitted.");
          return(EAGOLD_ACTION_BLOCKED);
       }
 
