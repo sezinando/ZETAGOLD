@@ -63,7 +63,7 @@ EAGOLD_ActionResult EAGOLD_R7EnsureMissingDirectionTransactional()
    // With Intelligence Direction Filter enabled, R7 may only recreate the
    // direction selected by Engine 0. It must never reintroduce the opposite
    // machine after a one-sided R1 admission.
-   if(ZG_DirectionFilterEnabled())
+   if(ZG_ManualDirectionFilterEnabled() || ZG_DirectionFilterEnabled())
    {
       int intelligenceDirection=ZG_EconomicCreationDirection();
       if(intelligenceDirection!=ZG_DIR_BUY&&intelligenceDirection!=ZG_DIR_SELL)
