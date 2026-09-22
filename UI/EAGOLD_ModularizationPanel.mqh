@@ -36,6 +36,13 @@ string EAGOLD_ModPanelBRXMode()
 }
 
 string EAGOLD_ModPanelR13Regime(){return(R13RegimeName(g_r13Observer.regime));}
+string EAGOLD_ModPanelOperationMode(){
+   if(ZG_ManualDirectionFilterEnabled())return(ZG_ManualDirectionName());
+   if(!ZG_DirectionFilterEnabled())return("BOTH");
+   if(g_zgIntelligenceDecision.Direction==ZG_DIR_BUY)return("BUY ONLY");
+   if(g_zgIntelligenceDecision.Direction==ZG_DIR_SELL)return("SELL ONLY");
+   return("WAIT");
+}
 
 void EAGOLD_ModPanelLabel(string id,string text,int row,color clr)
 {
@@ -135,7 +142,7 @@ void EAGOLD_ModPanelUpdate()
    EAGOLD_ModPanelLabel("TITLE",StringFormat("EAGOLD v%s | OPERATIONAL PANEL",EAGOLD_VERSION),row++,clrWhite);
    EAGOLD_ModPanelLabel("SEP1","----------------------------------------------",row++,clrDimGray);
    EAGOLD_ModPanelLabel("IDENT",MagicNumber==-1?StringFormat("SYMBOL %-8s   MAGIC %4d   | TODOS",Symbol(),MagicNumber):StringFormat("SYMBOL %-8s   MAGIC %4d",Symbol(),MagicNumber),row++,MagicNumber==-1?clrYellow:clrAqua);
-   EAGOLD_ModPanelLabel("DIRECTION",StringFormat("DIRECTION %-9s | OPER %-5s | INTEL %-5s",ZG_ManualDirectionName(),ZG_OperationalDirectionName(),ZG_DirectionName(g_zgIntelligenceDecision.Direction)),ZG_ManualDirectionFilterEnabled()?clrYellow:(ZG_DirectionFilterEnabled()?clrAqua:clrWhite));
+   EAGOLD_ModPanelLabel("DIRECTION",StringFormat("OPERATION %-9s | INTEL %-5s",EAGOLD_ModPanelOperationMode(),ZG_DirectionName(g_zgIntelligenceDecision.Direction)),row++,ZG_ManualDirectionFilterEnabled()?clrYellow:(ZG_DirectionFilterEnabled()?clrAqua:clrWhite));
    EAGOLD_ModPanelLabel("MARKET",StringFormat("BID %10s   ASK %10s",DoubleToString(Bid,Digits),DoubleToString(Ask,Digits)),row++,clrWhite);
    EAGOLD_ModPanelLabel("SPREAD",StringFormat("SPREAD %6.1f pts   LIMIT %3d",spreadPoints,SpreadLimit),row++,spreadAlert?clrTomato:clrLime);
    EAGOLD_ModPanelLabel("SEP2","----------------------------------------------",row++,clrDimGray);
