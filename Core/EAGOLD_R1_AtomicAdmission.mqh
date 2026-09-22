@@ -61,9 +61,31 @@ EAGOLD_ActionResult EAGOLD_CreateFirstOrdersAtomic()
       return(EAGOLD_ACTION_BLOCKED);
 
    RefreshRates();
+
+   if(EAGOLD_ManualDirectionFilterEnabled())
+   {
+      int selectedDirection=EAGOLD_SelectedDirection();
+      if(selectedDirection!=OP_BUY&&selectedDirection!=OP_SELL)return(EAGOLD_ACTION_BLOCKED);
+      double selectedPrice=(selectedDirection==OP_BUY?NormalizePrice(Ask+PointsToPrice(FirstStep)):NormalizePrice(Bid-PointsToPrice(FirstStep)));
+      if(EnableR1AdmissionGate)
+      {
+         string selectedReason="PASS";
+         if(!R1AdmissionAllowed(selectedDirection,Lot,selectedPrice,selectedReason))
+         {
+            R1Decision("BLOCK",(selectedDirection==OP_BUY?"BUY_":"SELL_")+selectedReason);
+            return(EAGOLD_ACTION_BLOCKED);
+         }
+      }
+      int selectedTicket=SendPending(selectedDirection==OP_BUY?OP_BUYSTOP:OP_SELLSTOP,selectedPrice,Lot,selectedDirection==OP_BUY?"EAGOLD R1 FIRST BUY":"EAGOLD R1 FIRST SELL");
+      if(selectedTicket<=0)return(EAGOLD_ACTION_FAILED);
+      g_eagoldR1CycleArmed=false;
+      Print(EA_NAME," RULE 1 MANUAL: initial ",EAGOLD_DirectionName(selectedDirection)," seed created. ticket=",selectedTicket);
+      CreateEngineActionMarker("R1","SEED",selectedDirection,Lot);
+      return(EAGOLD_ACTION_COMPLETED);
+   }
+
    double buyPrice=NormalizePrice(Ask+PointsToPrice(FirstStep));
    double sellPrice=NormalizePrice(Bid-PointsToPrice(FirstStep));
-
    if(EnableR1AdmissionGate)
    {
       string buyReason="PASS",sellReason="PASS";

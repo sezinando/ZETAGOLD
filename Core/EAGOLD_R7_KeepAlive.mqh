@@ -20,6 +20,7 @@
 
 EAGOLD_ActionResult EAGOLD_R7EnsureDirectionTransactional(int direction)
 {
+   if(!EAGOLD_EntryDirectionAllowed(direction))return(EAGOLD_ACTION_BLOCKED);
    if(CountEAGOLDOrders()==0)
       return(EAGOLD_ACTION_BLOCKED);
 

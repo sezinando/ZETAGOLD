@@ -1,6 +1,6 @@
 #ifndef EAGOLD_CONFIG_MQH
 #define EAGOLD_CONFIG_MQH
-#define EAGOLD_VERSION "0.116"
+#define EAGOLD_VERSION "0.122"
 #define EAGOLD_R13_DEFAULT_COMMENT "EAGOLD_RECOVERY_SATELLITE"
 #define EAGOLD_EXPIRY_DATE D'2026.12.31 00:00'
 double g_panelMinProfit=0.0; double g_panelMaxProfit=0.0; double g_panelMaxLots=0.0; bool g_panelInitialized=false; bool EAGOLD_TradingAllowed(){return(TimeCurrent()<EAGOLD_EXPIRY_DATE);}
@@ -11,6 +11,14 @@ extern int P01_01_MagicNumber=1101;
 extern bool P01_02_RequireCleanLegacyOwnership=true;
 // [01.03] EnableLegacyReattach
 extern bool P01_03_EnableLegacyReattach=false;
+extern string P01_04_StrategyComment="";
+enum EAGOLD_TradeDirectionMode
+{
+   EAGOLD_DIRECTION_BOTH=0,
+   EAGOLD_DIRECTION_ONLY_BUY=1,
+   EAGOLD_DIRECTION_ONLY_SELL=2
+};
+extern EAGOLD_TradeDirectionMode P01_05_TradeDirectionMode=EAGOLD_DIRECTION_BOTH;
 input string INPUT_GROUP_MONEY="=== 02 CORE MONEY / LOT PROGRESSION ===";
 // [02.01] Lot
 extern double P02_01_Lot=0.01;
@@ -315,6 +323,8 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define MagicNumber P01_01_MagicNumber
 #define RequireCleanLegacyOwnership P01_02_RequireCleanLegacyOwnership
 #define EnableLegacyReattach P01_03_EnableLegacyReattach
+#define StrategyComment P01_04_StrategyComment
+#define TradeDirectionMode P01_05_TradeDirectionMode
 #define Lot P02_01_Lot
 #define Multiplier P02_02_Multiplier
 #define DigitsLots P02_03_DigitsLots

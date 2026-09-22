@@ -133,6 +133,10 @@ void EAGOLD_ModPanelUpdate()
    int row=0;
    EAGOLD_ModPanelBackground(true,EnableModularizationDebug?670:550);
    EAGOLD_ModPanelLabel("TITLE",StringFormat("EAGOLD v%s | OPERATIONAL PANEL",EAGOLD_VERSION),row++,clrWhite);
+   EAGOLD_ModPanelLabel("DIRECTION",
+      StringFormat("DIRECTION %-9s",EAGOLD_OperationalDirectionName()),
+      row++,
+      EAGOLD_ManualDirectionFilterEnabled()?clrYellow:clrAqua);
    EAGOLD_ModPanelLabel("SEP1","----------------------------------------------",row++,clrDimGray);
    EAGOLD_ModPanelLabel("IDENT",MagicNumber==-1?StringFormat("SYMBOL %-8s   MAGIC %4d   | TODOS",Symbol(),MagicNumber):StringFormat("SYMBOL %-8s   MAGIC %4d",Symbol(),MagicNumber),row++,MagicNumber==-1?clrYellow:clrAqua);
    EAGOLD_ModPanelLabel("MARKET",StringFormat("BID %10s   ASK %10s",DoubleToString(Bid,Digits),DoubleToString(Ask,Digits)),row++,clrWhite);

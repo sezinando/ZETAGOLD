@@ -12,6 +12,36 @@ bool g_eagoldR7RestartAuthorized=false;
 void EAGOLD_R7BeginRestartAuthorization(){g_eagoldR7RestartAuthorized=true;}
 void EAGOLD_R7EndRestartAuthorization(){g_eagoldR7RestartAuthorized=false;}
 
+#define EAGOLD_MAX_ORDER_COMMENT_LENGTH 31
+string EAGOLD_CompactOrderComment(string technicalComment)
+{
+   string c=technicalComment;
+   int dir=-1;
+   if(StringFind(c,"BUY",0)>=0)dir=OP_BUY; else if(StringFind(c,"SELL",0)>=0)dir=OP_SELL;
+   if(StringFind(c,"R1",0)>=0)return("R1 "+(dir==OP_BUY?"BUY":(dir==OP_SELL?"SELL":"SEED")));
+   if(StringFind(c,"R4",0)>=0)return("R4 "+(dir==OP_BUY?"BUY":(dir==OP_SELL?"SELL":"NEXT")));
+   if(StringFind(c,"R7",0)>=0)return("R7 "+(dir==OP_BUY?"BUY":(dir==OP_SELL?"SELL":"RESTART")));
+   if(StringFind(c,"R9",0)>=0)return("R9 HEDGE");
+   if(StringFind(c,"R10",0)>=0)return("R10 RED");
+   if(StringFind(c,"R11",0)>=0)return("R11 "+(dir==OP_BUY?"BUY":(dir==OP_SELL?"SELL":"ACT")));
+   if(StringFind(c,"R13",0)>=0)return("R13 "+(dir==OP_BUY?"BUY":(dir==OP_SELL?"SELL":"ACT")));
+   if(StringFind(c,"BRX",0)>=0)return("BRX");
+   if(StringFind(c,"RECOVERY",0)>=0)return("REC "+(dir==OP_BUY?"BUY":(dir==OP_SELL?"SELL":"ACT")));
+   return(c);
+}
+string EAGOLD_BuildOrderComment(string technicalComment)
+{
+   string prefix=StrategyComment;
+   if(StringLen(prefix)<=0)return(technicalComment);
+   string compact=EAGOLD_CompactOrderComment(technicalComment);
+   int total=StringLen(prefix)+3+StringLen(compact);
+   if(total>EAGOLD_MAX_ORDER_COMMENT_LENGTH)
+   {
+      Print(EA_NAME," ORDER COMMENT: prefix exceeds MT4 31-char budget; preserving prefix only. prefix=",prefix);
+      return(prefix);
+   }
+   return(prefix+" | "+compact);
+}
 int SendPending(int type,double price,double lots,string comment)
 {
    if(!EAGOLD_NewOrderAdmissionAllowed())return(-1);
@@ -38,7 +68,8 @@ int SendPending(int type,double price,double lots,string comment)
    if(type==OP_BUYSTOP&&price<=Ask+stopLevel)return(-1);
    if(type==OP_SELLSTOP&&price>=Bid-stopLevel)return(-1);
    ResetLastError();
-   int ticket=OrderSend(Symbol(),type,lots,price,0,0,0,comment,MagicNumber,0,clrNONE);
+   string finalComment=EAGOLD_BuildOrderComment(comment);
+   int ticket=OrderSend(Symbol(),type,lots,price,0,0,0,finalComment,MagicNumber,0,clrNONE);
    if(ticket<0)Print(EA_NAME," OrderSend failed. type=",type," error=",GetLastError()," comment=",comment);
    else Print(EA_NAME," pending created. ticket=",ticket," type=",type," price=",DoubleToString(price,Digits)," lot=",DoubleToString(lots,DigitsLots)," comment=",comment);
    return(ticket);
@@ -51,7 +82,8 @@ int SendMarket(int type,double lots,string comment)
    lots=NormalizeLot(lots);
    double price=(type==OP_BUY?Ask:Bid);
    ResetLastError();
-   int ticket=OrderSend(Symbol(),type,lots,NormalizePrice(price),0,0,0,comment,MagicNumber,0,clrNONE);
+   string finalComment=EAGOLD_BuildOrderComment(comment);
+   int ticket=OrderSend(Symbol(),type,lots,NormalizePrice(price),0,0,0,finalComment,MagicNumber,0,clrNONE);
    if(ticket<0)Print(EA_NAME," market send failed. type=",type," error=",GetLastError()," comment=",comment);
    else Print(EA_NAME," market created. ticket=",ticket," type=",type," lot=",DoubleToString(lots,DigitsLots)," comment=",comment);
    return(ticket);
@@ -68,7 +100,8 @@ int SendMarketByMagic(int type,double lots,string comment,int magic)
    if(lots<Lot)return(-1);
    double price=(type==OP_BUY?Ask:Bid);
    ResetLastError();
-   int ticket=OrderSend(Symbol(),type,lots,NormalizePrice(price),0,0,0,comment,magic,0,clrNONE);
+   string finalComment=EAGOLD_BuildOrderComment(comment);
+   int ticket=OrderSend(Symbol(),type,lots,NormalizePrice(price),0,0,0,finalComment,magic,0,clrNONE);
    if(ticket<0)Print(EA_NAME," market send failed. type=",type," magic=",magic," error=",GetLastError()," comment=",comment);
    else Print(EA_NAME," market created. ticket=",ticket," type=",type," lot=",DoubleToString(lots,DigitsLots)," magic=",magic," comment=",comment);
    return(ticket);
