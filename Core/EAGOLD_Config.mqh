@@ -11,6 +11,56 @@ extern int P01_01_MagicNumber=1101;
 extern bool P01_02_RequireCleanLegacyOwnership=true;
 // [01.03] EnableLegacyReattach
 extern bool P01_03_EnableLegacyReattach=false;
+// [01.04] OrderCommentPrefix — informational only; never used for trade logic.
+extern string P01_04_OrderCommentPrefix="";
+
+#define EAGOLD_MAX_ORDER_COMMENT_LENGTH 31
+#define EAGOLD_ORDER_COMMENT_SEPARATOR " | "
+
+string EAGOLD_CompactOrderComment(string technicalComment)
+{
+   string c=technicalComment;
+   int dir=-1;
+   if(StringFind(c,"BUY",0)>=0)dir=OP_BUY;
+   else if(StringFind(c,"SELL",0)>=0)dir=OP_SELL;
+
+   // Most-specific tags first: R11/R10/R13 must not be classified as R1.
+   if(StringFind(c,"R13",0)>=0||StringFind(c,"RECOVERY_SATELLITE",0)>=0)return("R13"+(dir==OP_BUY?" BUY":(dir==OP_SELL?" SELL":"")));
+   if(StringFind(c,"R11",0)>=0||StringFind(c,"RECOVERY",0)>=0)return("R11"+(dir==OP_BUY?" BUY":(dir==OP_SELL?" SELL":" REC")));
+   if(StringFind(c,"R10",0)>=0)return("R10");
+   if(StringFind(c,"R9",0)>=0)return("R9");
+   if(StringFind(c,"R7",0)>=0)return("R7"+(dir==OP_BUY?" BUY":(dir==OP_SELL?" SELL":"")));
+   if(StringFind(c,"R4",0)>=0)return("R4"+(dir==OP_BUY?" BUY":(dir==OP_SELL?" SELL":"")));
+   if(StringFind(c,"R1",0)>=0)return("R1"+(dir==OP_BUY?" BUY":(dir==OP_SELL?" SELL":"")));
+   if(StringFind(c,"BRX",0)>=0)return("BRX");
+   return(c);
+}
+
+string EAGOLD_BuildOrderComment(string technicalComment)
+{
+   string compact=EAGOLD_CompactOrderComment(technicalComment);
+   string prefix=P01_04_OrderCommentPrefix;
+
+   if(StringLen(prefix)<=0)
+   {
+      if(StringLen(compact)>EAGOLD_MAX_ORDER_COMMENT_LENGTH)
+         return(StringSubstr(compact,0,EAGOLD_MAX_ORDER_COMMENT_LENGTH));
+      return(compact);
+   }
+
+   int separatorLength=StringLen(EAGOLD_ORDER_COMMENT_SEPARATOR);
+   int prefixBudget=EAGOLD_MAX_ORDER_COMMENT_LENGTH-separatorLength-StringLen(compact);
+
+   if(prefixBudget<=0)
+      return(StringSubstr(compact,0,EAGOLD_MAX_ORDER_COMMENT_LENGTH));
+
+   if(StringLen(prefix)>prefixBudget)
+      prefix=StringSubstr(prefix,0,prefixBudget);
+
+   return(prefix+EAGOLD_ORDER_COMMENT_SEPARATOR+compact);
+}
+
+
 input string INPUT_GROUP_MONEY="=== 02 CORE MONEY / LOT PROGRESSION ===";
 // [02.01] Lot
 extern double P02_01_Lot=0.01;

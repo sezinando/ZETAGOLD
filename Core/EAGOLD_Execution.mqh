@@ -16,7 +16,7 @@ int SendPending(int type,double price,double lots,string comment)
 {
    if(!EAGOLD_NewOrderAdmissionAllowed())return(-1);
 
-   bool isR7Restart=(StringFind(comment,"EAGOLD R7 RESTART",0)>=0);
+   bool isR7Restart=(StringFind(comment,"EAGOLD R7 RESTART",0)>=0||StringFind(comment,"R7 ",0)>=0);
    if(isR7Restart)
    {
       if(!g_eagoldR7RestartAuthorized)
@@ -38,7 +38,8 @@ int SendPending(int type,double price,double lots,string comment)
    if(type==OP_BUYSTOP&&price<=Ask+stopLevel)return(-1);
    if(type==OP_SELLSTOP&&price>=Bid-stopLevel)return(-1);
    ResetLastError();
-   int ticket=OrderSend(Symbol(),type,lots,price,0,0,0,comment,MagicNumber,0,clrNONE);
+   string orderComment=EAGOLD_BuildOrderComment(comment);
+   int ticket=OrderSend(Symbol(),type,lots,price,0,0,0,orderComment,MagicNumber,0,clrNONE);
    if(ticket<0)Print(EA_NAME," OrderSend failed. type=",type," error=",GetLastError()," comment=",comment);
    else Print(EA_NAME," pending created. ticket=",ticket," type=",type," price=",DoubleToString(price,Digits)," lot=",DoubleToString(lots,DigitsLots)," comment=",comment);
    return(ticket);
@@ -51,7 +52,8 @@ int SendMarket(int type,double lots,string comment)
    lots=NormalizeLot(lots);
    double price=(type==OP_BUY?Ask:Bid);
    ResetLastError();
-   int ticket=OrderSend(Symbol(),type,lots,NormalizePrice(price),0,0,0,comment,MagicNumber,0,clrNONE);
+   string orderComment=EAGOLD_BuildOrderComment(comment);
+   int ticket=OrderSend(Symbol(),type,lots,NormalizePrice(price),0,0,0,orderComment,MagicNumber,0,clrNONE);
    if(ticket<0)Print(EA_NAME," market send failed. type=",type," error=",GetLastError()," comment=",comment);
    else Print(EA_NAME," market created. ticket=",ticket," type=",type," lot=",DoubleToString(lots,DigitsLots)," comment=",comment);
    return(ticket);
@@ -68,7 +70,8 @@ int SendMarketByMagic(int type,double lots,string comment,int magic)
    if(lots<Lot)return(-1);
    double price=(type==OP_BUY?Ask:Bid);
    ResetLastError();
-   int ticket=OrderSend(Symbol(),type,lots,NormalizePrice(price),0,0,0,comment,magic,0,clrNONE);
+   string orderComment=EAGOLD_BuildOrderComment(comment);
+   int ticket=OrderSend(Symbol(),type,lots,NormalizePrice(price),0,0,0,orderComment,magic,0,clrNONE);
    if(ticket<0)Print(EA_NAME," market send failed. type=",type," magic=",magic," error=",GetLastError()," comment=",comment);
    else Print(EA_NAME," market created. ticket=",ticket," type=",type," lot=",DoubleToString(lots,DigitsLots)," magic=",magic," comment=",comment);
    return(ticket);
