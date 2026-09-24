@@ -52,7 +52,7 @@ bool EAGOLD_R10V2SafetyAudit(
       return(false);
    }
 
-   double expectedNet=ctx.buyLots-ctx.sellLots;
+   double expectedNet=MathAbs(ctx.buyLots-ctx.sellLots);
    if(MathAbs(ctx.netExposure-expectedNet)>Lot*0.5)
    {
       reason=EAGOLD_R10V2_SAFETY_EXPOSURE_BREACH;
