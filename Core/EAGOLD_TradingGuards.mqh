@@ -1,6 +1,8 @@
 #ifndef EAGOLD_TRADING_GUARDS_MQH
 #define EAGOLD_TRADING_GUARDS_MQH
 
+#include "EAGOLD_NewsRisk.mqh"
+
 // Central admission policy for NEW broker orders.
 // Existing market positions remain manageable. Pending orders are removed when
 // entry conditions are closed, because a pending order can otherwise be
@@ -83,6 +85,9 @@ bool EAGOLD_NewOrderAdmissionAllowed()
 int EAGOLD_SuspendInvalidPendingEntries()
 {
    EAGOLD_ResetEntrySuspension();
+
+   // News T-5 RED/FLAT is handled before economic engines run.
+   EAGOLD_NewsForceFlat();
 
    bool windowOpen=EAGOLD_TradingWindowOpen();
    bool spreadOpen=EAGOLD_SpreadAllowed();
