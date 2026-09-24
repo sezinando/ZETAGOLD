@@ -181,8 +181,12 @@ bool r10V2PreLiveValidationOk=EAGOLD_R10V2PreLiveValidation(
 if(!r10V2PreLiveValidationOk)
 {
    g_r10V2PreLiveGate=false;
-   Print(EA_NAME," R10 v2 PRE-LIVE VALIDATION: ",
-         EAGOLD_R10V2PreLiveValidationReasonName(g_r10V2PreLiveValidationReason));
+   // FEATURE_DISABLED is the expected default state for R10 v2.
+   // Keep the validation gate active, but avoid repeating this
+   // informational state on every tick in the Journal.
+   if(g_r10V2PreLiveValidationReason!=EAGOLD_R10V2_PRELIVE_VALIDATION_FEATURE_DISABLED)
+      Print(EA_NAME," R10 v2 PRE-LIVE VALIDATION: ",
+            EAGOLD_R10V2PreLiveValidationReasonName(g_r10V2PreLiveValidationReason));
 }
 
 
