@@ -50,6 +50,8 @@ bool EAGOLD_SpreadAllowed()
 
 bool EAGOLD_NewOrderAdmissionAllowed()
 {
+   if(!EAGOLD_NewsNewOrderAllowed())
+      return(false);
    if(EAGOLD_EntrySuspendedThisTick())
       return(false);
 
