@@ -116,6 +116,15 @@ extern int P02B_03_TradeStartMinute=0;
 extern int P02B_04_TradeEndHour=23;
 // [02B.05] TradeEndMinute
 extern int P02B_05_TradeEndMinute=59;
+extern bool P02B_06_EnableNewsFilter=true;
+extern string P02B_07_NewsSchedule="";
+extern string P02B_08_NewsCommandFile="ZETAGOLD_NEWS.txt";
+extern bool P02B_09_NewsFileEnabled=true;
+extern int P02B_10_NewsFileRefreshSeconds=5;
+extern int P02B_11_NewsPreBlockMinutes=30;
+extern int P02B_12_NewsFlatMinutesBefore=5;
+extern int P02B_13_NewsPostBlockMinutes=20;
+extern bool P02B_14_NewsFlatCloseR13=true;
 input string INPUT_GROUP_R1_ADMISSION="=== 03 R1 / FIRST ADMISSION CONTROL ===";
 // [03.01] EnableR1AdmissionGate
 extern bool P03_01_EnableR1AdmissionGate=false;
@@ -391,6 +400,15 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define TradeStartMinute P02B_03_TradeStartMinute
 #define TradeEndHour P02B_04_TradeEndHour
 #define TradeEndMinute P02B_05_TradeEndMinute
+#define EnableNewsFilter P02B_06_EnableNewsFilter
+#define NewsSchedule P02B_07_NewsSchedule
+#define NewsCommandFile P02B_08_NewsCommandFile
+#define NewsFileEnabled P02B_09_NewsFileEnabled
+#define NewsFileRefreshSeconds P02B_10_NewsFileRefreshSeconds
+#define NewsPreBlockMinutes P02B_11_NewsPreBlockMinutes
+#define NewsFlatMinutesBefore P02B_12_NewsFlatMinutesBefore
+#define NewsPostBlockMinutes P02B_13_NewsPostBlockMinutes
+#define NewsFlatCloseR13 P02B_14_NewsFlatCloseR13
 #define EnableR1AdmissionGate P03_01_EnableR1AdmissionGate
 #define EnableR1BrokerGuard P03_02_EnableR1BrokerGuard
 #define EnableR1LotGuard P03_03_EnableR1LotGuard
