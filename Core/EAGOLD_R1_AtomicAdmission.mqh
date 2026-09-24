@@ -34,8 +34,8 @@ void EAGOLD_R1ObserveCycle()
       return;
    }
 
-   // A previously active basket has now become flat. This is the only event
-   // that legitimately re-arms R1 for a new basket cycle.
+   // A previously active basket has now become flat. Re-arm only after
+   // a real market basket was active and is now flat.
    if(g_eagoldR1BasketWasActive)
    {
       if(!g_eagoldR1CycleArmed)
@@ -44,6 +44,20 @@ void EAGOLD_R1ObserveCycle()
          Print(EA_NAME," RULE 1 CYCLE: BASKET_FLAT -> R1_REARM.");
       }
       g_eagoldR1BasketWasActive=false;
+      return;
+   }
+
+   // If both seed pendings were created but neither was ever activated,
+   // deleting/cancelling those pendings means the attempted cycle never
+   // became active. Re-arm it once the basket is truly empty.
+   //
+   // This does not recreate entries on the same tick when a spread/time guard
+   // removed the pendings: EAGOLD_EntrySuspendedThisTick() is checked by the
+   // caller immediately after this observation.
+   if(!g_eagoldR1CycleArmed && CountEAGOLDOrders()==0)
+   {
+      g_eagoldR1CycleArmed=true;
+      Print(EA_NAME," RULE 1 CYCLE: SEEDS_CANCELLED -> R1_REARM.");
    }
 }
 
