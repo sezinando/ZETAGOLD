@@ -20,6 +20,8 @@ extern double P02_02_Multiplier=1.10;
 extern int P02_03_DigitsLots=2;
 // [02.04] LotIncrement
 extern double P02_04_LotIncrement=0.02;
+// [02.05] MaxOpenLot
+extern double P02_05_MaxOpenLot=3.00;
 // [02.06] TakeProfit
 extern double P02_06_TakeProfit=5.00;
 // [02.09] SpreadLimit
@@ -144,6 +146,17 @@ extern double P06_20_R13RecoveryCapitalFraction=1.00;
 input string INPUT_GROUP_ENGINE_MARKERS="=== 07 ENGINE ACTION MARKERS ===";
 // [07.07] EnableEngineActionMarkers
 extern bool P07_07_EnableEngineActionMarkers=true;
+input string INPUT_GROUP_R10_MARKERS="=== 07 R10 / ACTION MARKERS ===";
+// [07.01] EnableR10VisualMarker
+extern bool P07_01_EnableR10VisualMarker=true;
+// [07.03] R10MarkerFontSize
+extern int P07_03_R10MarkerFontSize=9;
+// [07.04] R10BuyMarkerColor
+extern color P07_04_R10BuyMarkerColor=clrLime;
+// [07.05] R10SellMarkerColor
+extern color P07_05_R10SellMarkerColor=clrTomato;
+// [07.06] R10MarkerOffsetPoints
+extern double P07_06_R10MarkerOffsetPoints=25.0;
 input string INPUT_GROUP_PANEL="=== 07 MODULAR PANEL / DEBUG ===";
 // [07.14] EnableModularizationPanel
 extern bool P07_14_EnableModularizationPanel=true;
@@ -188,6 +201,7 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define Multiplier P02_02_Multiplier
 #define DigitsLots P02_03_DigitsLots
 #define LotIncrement P02_04_LotIncrement
+#define MaxOpenLot P02_05_MaxOpenLot
 #define TakeProfit P02_06_TakeProfit
 #define SpreadLimit P02_09_SpreadLimit
 #define FirstStep P02A_01_FirstStep
@@ -217,6 +231,11 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define R10PairMinProfit P05_09_R10PairMinProfit
 #define R10PairMaxLots P05_10_R10PairMaxLots
 #define R10PairCooldownSeconds P05_11_R10PairCooldownSeconds
+#define EnableR10VisualMarker P07_01_EnableR10VisualMarker
+#define R10MarkerFontSize P07_03_R10MarkerFontSize
+#define R10BuyMarkerColor P07_04_R10BuyMarkerColor
+#define R10SellMarkerColor P07_05_R10SellMarkerColor
+#define R10MarkerOffsetPoints P07_06_R10MarkerOffsetPoints
 #define EnableRecoveryStepMultiplier P05_17_EnableRecoveryStepMultiplier
 #define RecoveryStepMultiplier P05_18_RecoveryStepMultiplier
 #define RecoveryStepMax P05_19_RecoveryStepMax
