@@ -3,14 +3,7 @@
 
 double RecoveryStepForLevel(int level){double step=RecoveryMinDistance;if(level<0)level=0;if(EnableRecoveryStepMultiplier&&RecoveryStepMultiplier>1.0){for(int i=0;i<level;i++){step*=RecoveryStepMultiplier;if(RecoveryStepMax>0.0&&step>=RecoveryStepMax){step=RecoveryStepMax;break;}}}if(RecoveryStepMax>0.0&&step>RecoveryStepMax)step=RecoveryStepMax;return(step);}
 int RecoveryLevel(int direction){int count=CountDirectionPositions(direction);if(count<=1)return(0);return(count-1);}
-double R10RecoveryDebt(){if(!g_r10RecoveryCycleActive)return(0.0);double debt=g_r10RecoveryStartEquity-g_r10RecoveryWorstEquity;if(debt<0.0)debt=0.0;return(debt);}
-double R10RecoveryRemainingDebt(){if(!g_r10RecoveryCycleActive)return(0.0);double remaining=g_r10RecoveryStartEquity-AccountEquity();if(remaining<0.0)remaining=0.0;return(remaining);}
-double R10RecoverySurplus(){if(!g_r10RecoveryCycleActive)return(0.0);double surplus=AccountEquity()-g_r10RecoveryStartEquity;if(surplus<0.0)surplus=0.0;return(surplus);}
-double R10RecoveryTarget(){double debt=R10RecoveryDebt();double target=MathMax(0.0,R10RecoveryProfitTarget);if(R10RecoveryDebtTargetPercent>0.0)target+=debt*(R10RecoveryDebtTargetPercent/100.0);return(target);}
-void R10RecoveryStartCycle(){g_r10RecoveryCycleActive=true;g_r10RecoveryStartEquity=AccountEquity();g_r10RecoveryWorstEquity=g_r10RecoveryStartEquity;Print(EA_NAME," R10.2 CYCLE START: equity=",DoubleToString(g_r10RecoveryStartEquity,2));CreateEngineActionMarker("R10.2","CYCLE",HeavyDirection(),0.0);}
-void R10RecoveryResetCycle(){if(g_r10RecoveryCycleActive){Print(EA_NAME," R10.2 CYCLE RESET: debt=",DoubleToString(R10RecoveryDebt(),2)," surplus=",DoubleToString(R10RecoverySurplus(),2));CreateEngineActionMarker("R10.2","REALIZE",HeavyDirection(),0.0);}g_r10RecoveryCycleActive=false;g_r10RecoveryStartEquity=0.0;g_r10RecoveryWorstEquity=0.0;}
-void R10RecoveryUpdateState(){if(!EnableR10RecoveryRealization)return;double equity=AccountEquity();if(CountEAGOLDOrders()==0){R10RecoveryResetCycle();return;}if(!g_r10RecoveryCycleActive)R10RecoveryStartCycle();if(equity<g_r10RecoveryWorstEquity)g_r10RecoveryWorstEquity=equity;}
-bool R10RecoveryAllowBasketClose(int direction){if(!EnableR10RecoveryRealization)return(true);if(!g_r10RecoveryCycleActive)return(true);double debt=R10RecoveryDebt();if(debt<R10RecoveryMinDebt)return(true);double remaining=R10RecoveryRemainingDebt();double surplus=R10RecoverySurplus();double target=R10RecoveryTarget();if(R10RecoveryRequireDebtRepaid&&remaining>0.01)return(false);if(surplus+0.01<target)return(false);return(true);}
+bool R10RecoveryAllowBasketClose(int direction){return(true);}
 double R11GrossExposureLots(){return(DirectionLots(OP_BUY)+DirectionLots(OP_SELL));}
 double R11NetExposureLots(){return(MathAbs(DirectionLots(OP_BUY)-DirectionLots(OP_SELL)));}
 double R11NetToGrossRatio(){double gross=R11GrossExposureLots();if(gross<=0.0)return(1.0);return(R11NetExposureLots()/gross);}
