@@ -14,24 +14,6 @@ bool g_eagoldEntrySuspendedThisTick=false;
 void EAGOLD_ResetEntrySuspension(){g_eagoldEntrySuspendedThisTick=false;}
 bool EAGOLD_EntrySuspendedThisTick(){return(g_eagoldEntrySuspendedThisTick);}
 
-bool EAGOLD_TradingWindowOpen()
-{
-   if(!EnableTradingTimeWindow)
-      return(true);
-
-   int start=(TradeStartHour*60)+TradeStartMinute;
-   int end=(TradeEndHour*60)+TradeEndMinute;
-   int now=(TimeHour(TimeCurrent())*60)+TimeMinute(TimeCurrent());
-
-   if(start==end)
-      return(true);
-
-   if(start<end)
-      return(now>=start && now<end);
-
-   return(now>=start || now<end);
-}
-
 bool EAGOLD_SpreadAllowed()
 {
    if(SpreadLimit<=0)
@@ -56,17 +38,6 @@ bool EAGOLD_NewOrderAdmissionAllowed()
    if(!EAGOLD_TradingAllowed())
       return(false);
 
-   if(!EAGOLD_TradingWindowOpen())
-   {
-      Print(EA_NAME,
-            " ENTRY BLOCKED: outside trading window. Start=",
-            IntegerToString(TradeStartHour),":",
-            StringFormat("%02d",TradeStartMinute),
-            " End=",IntegerToString(TradeEndHour),":",
-            StringFormat("%02d",TradeEndMinute));
-      return(false);
-   }
-
    return(EAGOLD_SpreadAllowed());
 }
 
@@ -82,9 +53,8 @@ int EAGOLD_SuspendInvalidPendingEntries()
 {
    EAGOLD_ResetEntrySuspension();
 
-   bool windowOpen=EAGOLD_TradingWindowOpen();
    bool spreadOpen=EAGOLD_SpreadAllowed();
-   if(windowOpen && spreadOpen)
+   if(spreadOpen)
       return(0);
 
    g_eagoldEntrySuspendedThisTick=true;
