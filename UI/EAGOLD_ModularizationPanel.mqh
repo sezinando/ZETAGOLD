@@ -156,7 +156,7 @@ void EAGOLD_ModPanelUpdate()
    EAGOLD_ModPanelLabel("R13C",StringFormat("R13 MEXP %5.2f   POS %2d   P/L %9s",g_r13Observer.masterExposureLots,g_r13Observer.satellitePositions,EAGOLD_ModPanelMoney(g_r13Observer.satelliteProfit)),row++,clrSilver);
    EAGOLD_ModPanelLabel("HEDGE",StringFormat("HEDGE     %s",g_r9HedgeActive?"ATIVO":"INATIVO"),row++,g_r9HedgeActive?clrYellow:clrSilver);
    EAGOLD_ModPanelLabel("R11",StringFormat("R11 STEP x %4.2f   L%-2d = %s",EnableRecoveryStepMultiplier?RecoveryStepMultiplier:1.00,displayLevel,EAGOLD_ModPanelLots(RecoveryStepForLevel(displayLevel))),row++,EnableRecoveryStepMultiplier?clrAqua:clrSilver);
-   EAGOLD_ModPanelLabel("REC",StringFormat("RECOVERY  B%-2d S%-2d L%-2d",RecoveryLevel(OP_BUY),RecoveryLevel(OP_SELL),recoveryLevel),row++,recoveryRemaining>0.0?clrYellow:clrLime);
+   EAGOLD_ModPanelLabel("REC",StringFormat("RECOVERY  B%-2d S%-2d L%-2d",RecoveryLevel(OP_BUY),RecoveryLevel(OP_SELL),recoveryLevel),row++,recoveryLevel>0?clrYellow:clrLime);
    EAGOLD_ModPanelLabel("SEP5","----------------------------------------------",row++,clrDimGray);
    EAGOLD_ModPanelLabel("BRX",StringFormat("BRX %-11s   DIR %6s   BI %6s",EAGOLD_ModPanelBRXMode(),EAGOLD_ModPanelMoney(BRXDirectionalMinProfit),EAGOLD_ModPanelMoney(BRXBidirectionalMinProfit)),row++,clrAqua);
    EAGOLD_ModPanelLabel("TRAIL",StringFormat("TRAIL %-3s   CD %5.1fs   STEP %5.1f",EAGOLD_ModPanelBool(EnableGlobalStopTrail),GlobalStopTrailCooldownSeconds,GlobalStopTrailMinStepPoints),row++,EnableGlobalStopTrail?clrAqua:clrSilver);
