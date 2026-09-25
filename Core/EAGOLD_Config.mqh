@@ -141,7 +141,6 @@ extern bool P06_18_EnableR13DirectionalComplementarity=true;
 extern double P06_19_R13MinDirectionalImbalance=0.01;
 // [06.20] R13RecoveryCapitalFraction
 extern double P06_20_R13RecoveryCapitalFraction=1.00;
-input string INPUT_GROUP_R10_MARKERS="=== 07 R10 / ACTION MARKERS ===";
 input string INPUT_GROUP_ENGINE_MARKERS="=== 07 ENGINE ACTION MARKERS ===";
 // [07.07] EnableEngineActionMarkers
 extern bool P07_07_EnableEngineActionMarkers=true;
