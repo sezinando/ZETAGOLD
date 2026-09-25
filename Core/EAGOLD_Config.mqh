@@ -20,18 +20,10 @@ extern double P02_02_Multiplier=1.10;
 extern int P02_03_DigitsLots=2;
 // [02.04] LotIncrement
 extern double P02_04_LotIncrement=0.02;
-// [02.05] MaxOpenLot
-extern double P02_05_MaxOpenLot=3.00;
 // [02.06] TakeProfit
 extern double P02_06_TakeProfit=5.00;
-// [02.07] SellProfit
-extern double P02_07_SellProfit=30.00;
-// [02.08] BasketLoss
-extern double P02_08_BasketLoss=100.00;
 // [02.09] SpreadLimit
 extern int P02_09_SpreadLimit=100;
-// [02.10] WaitSeconds
-extern int P02_10_WaitSeconds=0;
 input string INPUT_GROUP_GRID="=== 02A CORE GRID / DISTANCES ===";
 // [02A.01] FirstStep
 extern double P02A_01_FirstStep=160.0;
@@ -43,18 +35,10 @@ extern double P02A_03_SmartGrid1=280.0;
 extern double P02A_04_RecoveryMinDistance=340.0;
 // [02A.05] MiniGrid2
 extern double P02A_05_MiniGrid2=80.0;
-// [02A.06] SmartGrid2
-extern double P02A_06_SmartGrid2=60.0;
 // [02A.07] PendingStepTrail
 extern double P02A_07_PendingStepTrail=50.0;
 // [02A.08] BasketRestartStep
 extern double P02A_08_BasketRestartStep=160.0;
-// [02A.09] MaxTrades
-extern int P02A_09_MaxTrades=2000;
-// [02A.10] EnableCloseBy
-extern bool P02A_10_EnableCloseBy=true;
-// [02A.11] BuyProgressionTolerance
-extern double P02A_11_BuyProgressionTolerance=10.0;
 input string INPUT_GROUP_LIFECYCLE="=== 03 R4 / R5 / R7 LIFECYCLE ==="; input string INPUT_GROUP_GLOBAL_TRAIL="=== 03 GLOBAL STOP TRAIL CONTROL ===";
 // [03.09] EnableGlobalStopTrail
 extern bool P03_09_EnableGlobalStopTrail=true;
@@ -82,8 +66,6 @@ input string INPUT_GROUP_R9="=== 05 R9 / EXPOSURE CONTROLLER ===";
 extern bool P05_01_EnableR9Hedge=true;
 // [05.02] R9ExposureTriggerLots
 extern double P05_02_R9ExposureTriggerLots=1.00;
-// [05.03] R9TriggerLotMinimum
-extern double P05_03_R9TriggerLotMinimum=0.00;
 // [05.04] R9HedgeFraction
 extern double P05_04_R9HedgeFraction=0.6666666667;
 // [05.05] R9BalanceCap
@@ -160,33 +142,9 @@ extern double P06_19_R13MinDirectionalImbalance=0.01;
 // [06.20] R13RecoveryCapitalFraction
 extern double P06_20_R13RecoveryCapitalFraction=1.00;
 input string INPUT_GROUP_R10_MARKERS="=== 07 R10 / ACTION MARKERS ===";
-// [07.01] EnableR10VisualMarker
-extern bool P07_01_EnableR10VisualMarker=true;
-// [07.02] R10MarkerFont
-extern string P07_02_R10MarkerFont="Segoe UI Semibold";
-// [07.03] R10MarkerFontSize
-extern int P07_03_R10MarkerFontSize=9;
-// [07.04] R10BuyMarkerColor
-extern color P07_04_R10BuyMarkerColor=clrLime;
-// [07.05] R10SellMarkerColor
-extern color P07_05_R10SellMarkerColor=clrTomato;
-// [07.06] R10MarkerOffsetPoints
-extern double P07_06_R10MarkerOffsetPoints=25.0;
 input string INPUT_GROUP_ENGINE_MARKERS="=== 07 ENGINE ACTION MARKERS ===";
 // [07.07] EnableEngineActionMarkers
 extern bool P07_07_EnableEngineActionMarkers=true;
-// [07.08] EngineActionMarkerFont
-extern string P07_08_EngineActionMarkerFont="Impact";
-// [07.09] EngineActionMarkerFontSize
-extern int P07_09_EngineActionMarkerFontSize=9;
-// [07.10] EngineActionMarkerTextColor
-extern color P07_10_EngineActionMarkerTextColor=clrYellow;
-// [07.11] EngineActionMarkerBackgroundColor
-extern color P07_11_EngineActionMarkerBackgroundColor=clrBlack;
-// [07.12] EngineActionMarkerOffsetPips
-extern double P07_12_EngineActionMarkerOffsetPips=20.0;
-// [07.13] EngineActionMarkerStackStepPips
-extern double P07_13_EngineActionMarkerStackStepPips=20.0; double EngineActionMarkerOffsetPoints=100.0;
 input string INPUT_GROUP_PANEL="=== 07 MODULAR PANEL / DEBUG ===";
 // [07.14] EnableModularizationPanel
 extern bool P07_14_EnableModularizationPanel=true;
@@ -231,23 +189,15 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define Multiplier P02_02_Multiplier
 #define DigitsLots P02_03_DigitsLots
 #define LotIncrement P02_04_LotIncrement
-#define MaxOpenLot P02_05_MaxOpenLot
 #define TakeProfit P02_06_TakeProfit
-#define SellProfit P02_07_SellProfit
-#define BasketLoss P02_08_BasketLoss
 #define SpreadLimit P02_09_SpreadLimit
-#define WaitSeconds P02_10_WaitSeconds
 #define FirstStep P02A_01_FirstStep
 #define MiniGrid1 P02A_02_MiniGrid1
 #define SmartGrid1 P02A_03_SmartGrid1
 #define RecoveryMinDistance P02A_04_RecoveryMinDistance
 #define MiniGrid2 P02A_05_MiniGrid2
-#define SmartGrid2 P02A_06_SmartGrid2
 #define PendingStepTrail P02A_07_PendingStepTrail
 #define BasketRestartStep P02A_08_BasketRestartStep
-#define MaxTrades P02A_09_MaxTrades
-#define EnableCloseBy P02A_10_EnableCloseBy
-#define BuyProgressionTolerance P02A_11_BuyProgressionTolerance
 #define EnableGlobalStopTrail P03_09_EnableGlobalStopTrail
 #define GlobalStopTrailCooldownSeconds P03_10_GlobalStopTrailCooldownSeconds
 #define GlobalStopTrailMinStepPoints P03_11_GlobalStopTrailMinStepPoints
@@ -260,7 +210,6 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define BRXWeightedBEBufferPoints P04_07_BRXWeightedBEBufferPoints
 #define EnableR9Hedge P05_01_EnableR9Hedge
 #define R9ExposureTriggerLots P05_02_R9ExposureTriggerLots
-#define R9TriggerLotMinimum P05_03_R9TriggerLotMinimum
 #define R9HedgeFraction P05_04_R9HedgeFraction
 #define R9BalanceCap P05_05_R9BalanceCap
 #define EnableR10Reduce P05_06_EnableR10Reduce
@@ -297,31 +246,11 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define EnableR13DirectionalComplementarity P06_18_EnableR13DirectionalComplementarity
 #define R13MinDirectionalImbalance P06_19_R13MinDirectionalImbalance
 #define R13RecoveryCapitalFraction P06_20_R13RecoveryCapitalFraction
-#define EnableR10VisualMarker P07_01_EnableR10VisualMarker
-#define R10MarkerFont P07_02_R10MarkerFont
-#define R10MarkerFontSize P07_03_R10MarkerFontSize
-#define R10BuyMarkerColor P07_04_R10BuyMarkerColor
-#define R10SellMarkerColor P07_05_R10SellMarkerColor
-#define R10MarkerOffsetPoints P07_06_R10MarkerOffsetPoints
 #define EnableEngineActionMarkers P07_07_EnableEngineActionMarkers
-#define EngineActionMarkerFont P07_08_EngineActionMarkerFont
-#define EngineActionMarkerFontSize P07_09_EngineActionMarkerFontSize
-#define EngineActionMarkerTextColor P07_10_EngineActionMarkerTextColor
-#define EngineActionMarkerBackgroundColor P07_11_EngineActionMarkerBackgroundColor
-#define EngineActionMarkerOffsetPips P07_12_EngineActionMarkerOffsetPips
-#define EngineActionMarkerStackStepPips P07_13_EngineActionMarkerStackStepPips
 #define EnableModularizationPanel P07_14_EnableModularizationPanel
 #define EnableModularizationDebug P07_15_EnableModularizationDebug
 #define EnableChartBasketGuides P07_16_EnableChartBasketGuides
 #define ChartBasketGuideOffsetBars P07_17_ChartBasketGuideOffsetBars
-#define PanelBackgroundX P07_18_PanelBackgroundX
-#define PanelBackgroundY P07_19_PanelBackgroundY
-#define PanelBackgroundHeight P07_20_PanelBackgroundHeight
-#define PanelBottomY P07_21_PanelBottomY
-#define PanelBottomX1 P07_22_PanelBottomX1
-#define PanelBottomX2 P07_23_PanelBottomX2
-#define PanelBottomX3 P07_24_PanelBottomX3
-#define PanelBottomX4 P07_25_PanelBottomX4
 #define PanelBackgroundWidth P07_26_PanelBackgroundWidth
 #define PersistenceWorstEquityStep P08_01_PersistenceWorstEquityStep
 #endif
