@@ -55,17 +55,6 @@ extern int P02A_09_MaxTrades=2000;
 extern bool P02A_10_EnableCloseBy=true;
 // [02A.11] BuyProgressionTolerance
 extern double P02A_11_BuyProgressionTolerance=10.0;
-input string INPUT_GROUP_ENTRY_GUARDS="=== 02B / ENTRY TIME + SPREAD GUARDS ===";
-// [02B.01] EnableTradingTimeWindow
-extern bool P02B_01_EnableTradingTimeWindow=false;
-// [02B.02] TradeStartHour
-extern int P02B_02_TradeStartHour=0;
-// [02B.03] TradeStartMinute
-extern int P02B_03_TradeStartMinute=0;
-// [02B.04] TradeEndHour
-extern int P02B_04_TradeEndHour=23;
-// [02B.05] TradeEndMinute
-extern int P02B_05_TradeEndMinute=59;
 input string INPUT_GROUP_LIFECYCLE="=== 03 R4 / R5 / R7 LIFECYCLE ==="; input string INPUT_GROUP_GLOBAL_TRAIL="=== 03 GLOBAL STOP TRAIL CONTROL ===";
 // [03.09] EnableGlobalStopTrail
 extern bool P03_09_EnableGlobalStopTrail=true;
@@ -259,11 +248,6 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define MaxTrades P02A_09_MaxTrades
 #define EnableCloseBy P02A_10_EnableCloseBy
 #define BuyProgressionTolerance P02A_11_BuyProgressionTolerance
-#define EnableTradingTimeWindow P02B_01_EnableTradingTimeWindow
-#define TradeStartHour P02B_02_TradeStartHour
-#define TradeStartMinute P02B_03_TradeStartMinute
-#define TradeEndHour P02B_04_TradeEndHour
-#define TradeEndMinute P02B_05_TradeEndMinute
 #define EnableGlobalStopTrail P03_09_EnableGlobalStopTrail
 #define GlobalStopTrailCooldownSeconds P03_10_GlobalStopTrailCooldownSeconds
 #define GlobalStopTrailMinStepPoints P03_11_GlobalStopTrailMinStepPoints
