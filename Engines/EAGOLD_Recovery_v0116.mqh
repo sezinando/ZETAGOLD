@@ -3,7 +3,6 @@
 
 double RecoveryStepForLevel(int level){double step=RecoveryMinDistance;if(level<0)level=0;if(EnableRecoveryStepMultiplier&&RecoveryStepMultiplier>1.0){for(int i=0;i<level;i++){step*=RecoveryStepMultiplier;if(RecoveryStepMax>0.0&&step>=RecoveryStepMax){step=RecoveryStepMax;break;}}}if(RecoveryStepMax>0.0&&step>RecoveryStepMax)step=RecoveryStepMax;return(step);}
 int RecoveryLevel(int direction){int count=CountDirectionPositions(direction);if(count<=1)return(0);return(count-1);}
-bool R10RecoveryAllowBasketClose(int direction){return(true);}
 double R11GrossExposureLots(){return(DirectionLots(OP_BUY)+DirectionLots(OP_SELL));}
 double R11NetExposureLots(){return(MathAbs(DirectionLots(OP_BUY)-DirectionLots(OP_SELL)));}
 double R11NetToGrossRatio(){double gross=R11GrossExposureLots();if(gross<=0.0)return(1.0);return(R11NetExposureLots()/gross);}
