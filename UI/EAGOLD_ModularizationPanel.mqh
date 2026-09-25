@@ -134,7 +134,7 @@ void EAGOLD_ModPanelUpdate()
    EAGOLD_ModPanelLabel("SEP1","----------------------------------------------",row++,clrDimGray);
    EAGOLD_ModPanelLabel("IDENT",MagicNumber==-1?StringFormat("SYMBOL %-8s   MAGIC %4d   | TODOS",Symbol(),MagicNumber):StringFormat("SYMBOL %-8s   MAGIC %4d",Symbol(),MagicNumber),row++,MagicNumber==-1?clrYellow:clrAqua);
    EAGOLD_ModPanelLabel("MARKET",StringFormat("BID %10s   ASK %10s",DoubleToString(Bid,Digits),DoubleToString(Ask,Digits)),row++,clrWhite);
-   EAGOLD_ModPanelLabel("SPREAD",StringFormat("SPREAD %6.1f pts   LIMIT %3d",spreadPoints,SpreadLimit),row++,spreadAlert?clrTomato:clrLime);
+   EAGOLD_ModPanelLabel("SPREAD",StringFormat("SPREAD %8.1f pts",spreadPoints),row++,spreadAlert?clrTomato:clrLime);
    EAGOLD_ModPanelLabel("SEP2","----------------------------------------------",row++,clrDimGray);
    EAGOLD_ModPanelLabel("BUY",StringFormat("BUY  %3d pos   %6s lot   P/L %10s",buyCount,EAGOLD_ModPanelLots(buyLots),EAGOLD_ModPanelMoney(buyProfit)),row++,buyProfit>=0.0?clrLime:clrTomato);
    EAGOLD_ModPanelLabel("SELL",StringFormat("SELL %3d pos   %6s lot   P/L %10s",sellCount,EAGOLD_ModPanelLots(sellLots),EAGOLD_ModPanelMoney(sellProfit)),row++,sellProfit>=0.0?clrLime:clrTomato);
@@ -155,11 +155,11 @@ void EAGOLD_ModPanelUpdate()
    EAGOLD_ModPanelLabel("R13B",StringFormat("R13 ATR %7.1f   RNG %7.1f   DRIFT %7.1f",g_r13Observer.atrPoints,g_r13Observer.rangePoints,g_r13Observer.driftPoints),row++,clrAqua);
    EAGOLD_ModPanelLabel("R13C",StringFormat("R13 MEXP %5.2f   POS %2d   P/L %9s",g_r13Observer.masterExposureLots,g_r13Observer.satellitePositions,EAGOLD_ModPanelMoney(g_r13Observer.satelliteProfit)),row++,clrSilver);
    EAGOLD_ModPanelLabel("HEDGE",StringFormat("HEDGE     %s",g_r9HedgeActive?"ATIVO":"INATIVO"),row++,g_r9HedgeActive?clrYellow:clrSilver);
-   EAGOLD_ModPanelLabel("R11",StringFormat("R11 STEP x %4.2f   L%-2d = %s",EnableRecoveryStepMultiplier?RecoveryStepMultiplier:1.00,displayLevel,EAGOLD_ModPanelLots(RecoveryStepForLevel(displayLevel))),row++,EnableRecoveryStepMultiplier?clrAqua:clrSilver);
+   EAGOLD_ModPanelLabel("R11",StringFormat("R11 L%-2d   STEP %s",displayLevel,EAGOLD_ModPanelLots(RecoveryStepForLevel(displayLevel))),row++,EnableRecoveryStepMultiplier?clrAqua:clrSilver);
    EAGOLD_ModPanelLabel("REC",StringFormat("RECOVERY  B%-2d S%-2d L%-2d",RecoveryLevel(OP_BUY),RecoveryLevel(OP_SELL),recoveryLevel),row++,recoveryLevel>0?clrYellow:clrLime);
    EAGOLD_ModPanelLabel("SEP5","----------------------------------------------",row++,clrDimGray);
-   EAGOLD_ModPanelLabel("BRX",StringFormat("BRX %-11s   DIR %6s   BI %6s",EAGOLD_ModPanelBRXMode(),EAGOLD_ModPanelMoney(BRXDirectionalMinProfit),EAGOLD_ModPanelMoney(BRXBidirectionalMinProfit)),row++,clrAqua);
-   EAGOLD_ModPanelLabel("TRAIL",StringFormat("TRAIL %-3s   CD %5.1fs   STEP %5.1f",EAGOLD_ModPanelBool(EnableGlobalStopTrail),GlobalStopTrailCooldownSeconds,GlobalStopTrailMinStepPoints),row++,EnableGlobalStopTrail?clrAqua:clrSilver);
+   EAGOLD_ModPanelLabel("BRX",StringFormat("BRX %-11s",EAGOLD_ModPanelBRXMode()),row++,clrAqua);
+   EAGOLD_ModPanelLabel("TRAIL",StringFormat("TRAIL %s",EAGOLD_ModPanelBool(EnableGlobalStopTrail)),row++,EnableGlobalStopTrail?clrAqua:clrSilver);
    EAGOLD_ModPanelLabel("TIME",StringFormat("TIME      %s",TimeToString(TimeCurrent(),TIME_SECONDS)),row++,clrSilver);
    if(EnableModularizationDebug)
    {
