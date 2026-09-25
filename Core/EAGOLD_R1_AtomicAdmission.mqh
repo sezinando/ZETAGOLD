@@ -64,23 +64,6 @@ EAGOLD_ActionResult EAGOLD_CreateFirstOrdersAtomic()
    double buyPrice=NormalizePrice(Ask+PointsToPrice(FirstStep));
    double sellPrice=NormalizePrice(Bid-PointsToPrice(FirstStep));
 
-   if(EnableR1AdmissionGate)
-   {
-      string buyReason="PASS",sellReason="PASS";
-      bool buyAllowed=R1AdmissionAllowed(OP_BUY,Lot,buyPrice,buyReason);
-      bool sellAllowed=R1AdmissionAllowed(OP_SELL,Lot,sellPrice,sellReason);
-      if(!buyAllowed||!sellAllowed)
-      {
-         string reason=(!buyAllowed?"BUY_":"SELL_");
-         reason+=(!buyAllowed?buyReason:sellReason);
-         R1Decision("BLOCK",reason);
-         Print(EA_NAME," RULE 1: FIRST cycle blocked atomically. BUY=",buyReason," SELL=",sellReason);
-         CreateEngineActionMarker("R1.1","BLOCK",OP_BUY,Lot);
-         CreateEngineActionMarker("R1.1","BLOCK",OP_SELL,Lot);
-         return(EAGOLD_ACTION_BLOCKED);
-      }
-   }
-
    int buyTicket=SendPending(OP_BUYSTOP,buyPrice,Lot,"EAGOLD R1 FIRST BUY");
    if(buyTicket<=0)
    {
