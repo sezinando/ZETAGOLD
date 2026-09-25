@@ -66,23 +66,6 @@ extern int P02B_03_TradeStartMinute=0;
 extern int P02B_04_TradeEndHour=23;
 // [02B.05] TradeEndMinute
 extern int P02B_05_TradeEndMinute=59;
-input string INPUT_GROUP_R1_ADMISSION="=== 03 R1 / FIRST ADMISSION CONTROL ===";
-// [03.01] EnableR1AdmissionGate
-extern bool P03_01_EnableR1AdmissionGate=false;
-// [03.02] EnableR1BrokerGuard
-extern bool P03_02_EnableR1BrokerGuard=false;
-// [03.03] EnableR1LotGuard
-extern bool P03_03_EnableR1LotGuard=false;
-// [03.04] EnableR1MarginGuard
-extern bool P03_04_EnableR1MarginGuard=false;
-// [03.05] EnableR1TradePermissionGuard
-extern bool P03_05_EnableR1TradePermissionGuard=false;
-// [03.06] R1BrokerSafetyBufferPoints
-extern double P03_06_R1BrokerSafetyBufferPoints=0.0;
-// [03.07] R1MinFreeMarginAfterOrder
-extern double P03_07_R1MinFreeMarginAfterOrder=0.0;
-// [03.08] EnableR1DecisionLog
-extern bool P03_08_EnableR1DecisionLog=true;
 input string INPUT_GROUP_LIFECYCLE="=== 03 R4 / R5 / R7 LIFECYCLE ==="; input string INPUT_GROUP_GLOBAL_TRAIL="=== 03 GLOBAL STOP TRAIL CONTROL ===";
 // [03.09] EnableGlobalStopTrail
 extern bool P03_09_EnableGlobalStopTrail=true;
@@ -129,17 +112,6 @@ extern double P05_09_R10PairMinProfit=5.00;
 extern double P05_10_R10PairMaxLots=1.00;
 // [05.11] R10PairCooldownSeconds
 extern int P05_11_R10PairCooldownSeconds=30;
-input string INPUT_GROUP_R102="=== 05 R10.2 / RECOVERY REALIZATION ===";
-// [05.12] EnableR10RecoveryRealization
-extern bool P05_12_EnableR10RecoveryRealization=false;
-// [05.13] R10RecoveryMinDebt
-extern double P05_13_R10RecoveryMinDebt=100.0;
-// [05.14] R10RecoveryProfitTarget
-extern double P05_14_R10RecoveryProfitTarget=50.0;
-// [05.15] R10RecoveryDebtTargetPercent
-extern double P05_15_R10RecoveryDebtTargetPercent=0.0;
-// [05.16] R10RecoveryRequireDebtRepaid
-extern bool P05_16_R10RecoveryRequireDebtRepaid=true;
 input string INPUT_GROUP_R11="=== 05 R11 / RECOVERY STEP & EXPOSURE GOVERNOR ===";
 // [05.17] EnableRecoveryStepMultiplier
 extern bool P05_17_EnableRecoveryStepMultiplier=true;
@@ -157,25 +129,6 @@ extern double P05_22_R11BlockGrossExposureLots=12.00;
 extern double P05_23_R11MinNetToGrossRatio=0.10;
 // [05.24] R11MinRecoveryLotFactor
 extern double P05_24_R11MinRecoveryLotFactor=0.25;
-input string INPUT_GROUP_APG="=== 05A / ADAPTIVE PROFIT GUARD ===";
-// [05A.01] EnableAdaptiveProfitGuard
-extern bool P05A_01_EnableAdaptiveProfitGuard=false;
-// [05A.02] EnableAdaptiveProfitGuardExecution
-extern bool P05A_02_EnableAdaptiveProfitGuardExecution=false;
-// [05A.03] AdaptiveProfitGuardMinEquity
-extern double P05A_03_AdaptiveProfitGuardMinEquity=20.0;
-// [05A.04] AdaptiveProfitGuardMinGivebackPercent
-extern double P05A_04_AdaptiveProfitGuardMinGivebackPercent=25.0;
-// [05A.05] AdaptiveProfitGuardMinGrossLots
-extern double P05A_05_AdaptiveProfitGuardMinGrossLots=0.02;
-// [05A.06] AdaptiveProfitGuardReduceLots
-extern double P05A_06_AdaptiveProfitGuardReduceLots=0.01;
-// [05A.07] AdaptiveProfitGuardCooldownSeconds
-extern int P05A_07_AdaptiveProfitGuardCooldownSeconds=60;
-// [05A.08] AdaptiveProfitGuardMaxDailyLoss
-extern double P05A_08_AdaptiveProfitGuardMaxDailyLoss=0.0;
-// [05A.09] AdaptiveProfitGuardMaxCycleDD
-extern double P05A_09_AdaptiveProfitGuardMaxCycleDD=0.0;
 input string INPUT_GROUP_R13="=== 06 R13 / RECOVERY SATELLITE ===";
 // [06.01] EnableR13
 extern bool P06_01_EnableR13=true;
@@ -245,11 +198,6 @@ extern color P07_11_EngineActionMarkerBackgroundColor=clrBlack;
 extern double P07_12_EngineActionMarkerOffsetPips=20.0;
 // [07.13] EngineActionMarkerStackStepPips
 extern double P07_13_EngineActionMarkerStackStepPips=20.0; double EngineActionMarkerOffsetPoints=100.0;
-input string INPUT_GROUP_COUNTERFACTUAL_TELEMETRY="=== 07A COUNTERFACTUAL PATH TELEMETRY ===";
-// [07A.01] EnableCounterfactualPathTelemetry
-extern bool P07A_01_EnableCounterfactualPathTelemetry=false;
-// [07A.02] CounterfactualPathSampleSeconds
-extern int P07A_02_CounterfactualPathSampleSeconds=2;
 input string INPUT_GROUP_PANEL="=== 07 MODULAR PANEL / DEBUG ===";
 // [07.14] EnableModularizationPanel
 extern bool P07_14_EnableModularizationPanel=true;
@@ -280,31 +228,6 @@ extern int P07_25_PanelBottomX4=850;
 // [07.26] PanelBackgroundWidth
 extern int P07_26_PanelBackgroundWidth=430;
 input string INPUT_GROUP_PERSISTENCE="=== 08 PERSISTENCE / CHECKPOINT POLICY ===";
-input string INPUT_GROUP_R10V2_BACKTEST="=== 09 R10 v2 / BACKTEST SIMULATION ===";
-// [09.01] EnableR10V2BacktestSimulation
-extern bool P09_01_EnableR10V2BacktestSimulation=false;
-// [09.02] R10V2ReduceRatio
-extern double P09_02_R10V2ReduceRatio=0.125;
-// [09.03] R10V2MinimumLossPerLot
-extern double P09_03_R10V2MinimumLossPerLot=0.0;
-// [09.04] R10V2MaxReductionLots
-extern double P09_04_R10V2MaxReductionLots=0.0;
-// [09.05] R10V2CapitalUtilization
-extern double P09_05_R10V2CapitalUtilization=1.0;
-// [09.06] R10V2MinGrossRelief
-extern double P09_06_R10V2MinGrossRelief=0.01;
-// [09.07] R10V2CooldownSeconds
-extern int P09_07_R10V2CooldownSeconds=30;
-// [09.08] R10V2EnableBalancedReduction
-extern bool P09_08_R10V2EnableBalancedReduction=true;
-// [09.09] R10V2EnablePositionAdjustment
-extern bool P09_09_R10V2EnablePositionAdjustment=true;
-// [09.10] R10V2EnableDirectionalReduction
-extern bool P09_10_R10V2EnableDirectionalReduction=false;
-// [09.11] R10V2EnableMode — explicit master switch; OFF is mandatory default
-extern int P09_11_R10V2EnableMode=0;
-// [09.12] R10V2PreLiveEnable — explicit pre-live switch; false is mandatory default
-extern bool P09_12_R10V2PreLiveEnable=false;
 // [08.01] PersistenceWorstEquityStep
 extern double P08_01_PersistenceWorstEquityStep=5.00;
 
@@ -341,14 +264,6 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define TradeStartMinute P02B_03_TradeStartMinute
 #define TradeEndHour P02B_04_TradeEndHour
 #define TradeEndMinute P02B_05_TradeEndMinute
-#define EnableR1AdmissionGate P03_01_EnableR1AdmissionGate
-#define EnableR1BrokerGuard P03_02_EnableR1BrokerGuard
-#define EnableR1LotGuard P03_03_EnableR1LotGuard
-#define EnableR1MarginGuard P03_04_EnableR1MarginGuard
-#define EnableR1TradePermissionGuard P03_05_EnableR1TradePermissionGuard
-#define R1BrokerSafetyBufferPoints P03_06_R1BrokerSafetyBufferPoints
-#define R1MinFreeMarginAfterOrder P03_07_R1MinFreeMarginAfterOrder
-#define EnableR1DecisionLog P03_08_EnableR1DecisionLog
 #define EnableGlobalStopTrail P03_09_EnableGlobalStopTrail
 #define GlobalStopTrailCooldownSeconds P03_10_GlobalStopTrailCooldownSeconds
 #define GlobalStopTrailMinStepPoints P03_11_GlobalStopTrailMinStepPoints
@@ -370,11 +285,6 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define R10PairMinProfit P05_09_R10PairMinProfit
 #define R10PairMaxLots P05_10_R10PairMaxLots
 #define R10PairCooldownSeconds P05_11_R10PairCooldownSeconds
-#define EnableR10RecoveryRealization P05_12_EnableR10RecoveryRealization
-#define R10RecoveryMinDebt P05_13_R10RecoveryMinDebt
-#define R10RecoveryProfitTarget P05_14_R10RecoveryProfitTarget
-#define R10RecoveryDebtTargetPercent P05_15_R10RecoveryDebtTargetPercent
-#define R10RecoveryRequireDebtRepaid P05_16_R10RecoveryRequireDebtRepaid
 #define EnableRecoveryStepMultiplier P05_17_EnableRecoveryStepMultiplier
 #define RecoveryStepMultiplier P05_18_RecoveryStepMultiplier
 #define RecoveryStepMax P05_19_RecoveryStepMax
@@ -383,15 +293,6 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define R11BlockGrossExposureLots P05_22_R11BlockGrossExposureLots
 #define R11MinNetToGrossRatio P05_23_R11MinNetToGrossRatio
 #define R11MinRecoveryLotFactor P05_24_R11MinRecoveryLotFactor
-#define EnableAdaptiveProfitGuard P05A_01_EnableAdaptiveProfitGuard
-#define EnableAdaptiveProfitGuardExecution P05A_02_EnableAdaptiveProfitGuardExecution
-#define AdaptiveProfitGuardMinEquity P05A_03_AdaptiveProfitGuardMinEquity
-#define AdaptiveProfitGuardMinGivebackPercent P05A_04_AdaptiveProfitGuardMinGivebackPercent
-#define AdaptiveProfitGuardMinGrossLots P05A_05_AdaptiveProfitGuardMinGrossLots
-#define AdaptiveProfitGuardReduceLots P05A_06_AdaptiveProfitGuardReduceLots
-#define AdaptiveProfitGuardCooldownSeconds P05A_07_AdaptiveProfitGuardCooldownSeconds
-#define AdaptiveProfitGuardMaxDailyLoss P05A_08_AdaptiveProfitGuardMaxDailyLoss
-#define AdaptiveProfitGuardMaxCycleDD P05A_09_AdaptiveProfitGuardMaxCycleDD
 #define EnableR13 P06_01_EnableR13
 #define EnableR13AutoActivation P06_02_EnableR13AutoActivation
 #define EnableR13Trading P06_03_EnableR13Trading
@@ -425,8 +326,6 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define EngineActionMarkerBackgroundColor P07_11_EngineActionMarkerBackgroundColor
 #define EngineActionMarkerOffsetPips P07_12_EngineActionMarkerOffsetPips
 #define EngineActionMarkerStackStepPips P07_13_EngineActionMarkerStackStepPips
-#define EnableCounterfactualPathTelemetry P07A_01_EnableCounterfactualPathTelemetry
-#define CounterfactualPathSampleSeconds P07A_02_CounterfactualPathSampleSeconds
 #define EnableModularizationPanel P07_14_EnableModularizationPanel
 #define EnableModularizationDebug P07_15_EnableModularizationDebug
 #define EnableChartBasketGuides P07_16_EnableChartBasketGuides
@@ -440,15 +339,5 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define PanelBottomX3 P07_24_PanelBottomX3
 #define PanelBottomX4 P07_25_PanelBottomX4
 #define PanelBackgroundWidth P07_26_PanelBackgroundWidth
-#define EnableR10V2BacktestSimulation P09_01_EnableR10V2BacktestSimulation
-#define R10V2ReduceRatio P09_02_R10V2ReduceRatio
-#define R10V2MinimumLossPerLot P09_03_R10V2MinimumLossPerLot
-#define R10V2MaxReductionLots P09_04_R10V2MaxReductionLots
-#define R10V2CapitalUtilization P09_05_R10V2CapitalUtilization
-#define R10V2MinGrossRelief P09_06_R10V2MinGrossRelief
-#define R10V2CooldownSeconds P09_07_R10V2CooldownSeconds
-#define R10V2EnableBalancedReduction P09_08_R10V2EnableBalancedReduction
-#define R10V2EnablePositionAdjustment P09_09_R10V2EnablePositionAdjustment
-#define R10V2EnableDirectionalReduction P09_10_R10V2EnableDirectionalReduction
 #define PersistenceWorstEquityStep P08_01_PersistenceWorstEquityStep
 #endif
