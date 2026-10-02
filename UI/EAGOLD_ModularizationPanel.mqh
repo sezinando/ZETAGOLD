@@ -128,7 +128,7 @@ void EAGOLD_ModPanelUpdate()
    g_panelInitialized=g_modPanelInitialized;
 
    int row=0;
-   EAGOLD_ModPanelBackground(true,EnableModularizationDebug?670:550);
+   EAGOLD_ModPanelBackground(true,EnableModularizationDebug?670:590);
    EAGOLD_ModPanelLabel("TITLE",StringFormat("ZETAGOLD + SENTINEL | v%s | OPERATIONAL PANEL",EAGOLD_VERSION),row++,clrWhite);
    EAGOLD_ModPanelLabel("SEP1","----------------------------------------------",row++,clrDimGray);
    EAGOLD_ModPanelLabel("IDENT",MagicNumber==-1?StringFormat("SYMBOL %-8s   MAGIC %4d   | TODOS",Symbol(),MagicNumber):StringFormat("SYMBOL %-8s   MAGIC %4d",Symbol(),MagicNumber),row++,MagicNumber==-1?clrYellow:clrAqua);
