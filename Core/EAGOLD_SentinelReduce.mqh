@@ -542,9 +542,9 @@ void EAGOLD_SentinelReduceUpdatePanel()
    string s2=(t2>0 ? "T2 #"+IntegerToString(t2)+" "+EAGOLD_SentinelReduceTypeText(t2) : "T2 --");
    string s3=(t3>0 ? "T3 #"+IntegerToString(t3)+" "+EAGOLD_SentinelReduceTypeText(t3) : "T3 --");
 
-   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T1,s1,12,438,t1>0?clrYellow:clrSilver);
-   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T2,s2,12,454,t2>0?clrLime:clrSilver);
-   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T3,s3,12,470,t3>0?clrLime:clrSilver);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T1,s1,12,470,t1>0?clrYellow:clrSilver);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T2,s2,12,487,t2>0?clrLime:clrSilver);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T3,s3,12,504,t3>0?clrLime:clrSilver);
 
    bool ready=(t1>0 || t2>0);
    string buttonText=ready ? "REDUCE SELECIONADO" : "AGUARDANDO SENTINEL_CESTA";
