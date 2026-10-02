@@ -467,6 +467,28 @@ void EAGOLD_SentinelReduceProcessExternalRequest()
       EAGOLD_SentinelReduceExecute();
 }
 
+void EAGOLD_SentinelReduceCreateLabel(string name,string text,int x,int y,color textColor)
+{
+   if(ObjectFind(0,name)<0)
+   {
+      if(!ObjectCreate(0,name,OBJ_LABEL,0,0,0))
+         return;
+   }
+
+   ObjectSetInteger(0,name,OBJPROP_CORNER,CORNER_LEFT_UPPER);
+   ObjectSetInteger(0,name,OBJPROP_XDISTANCE,x);
+   ObjectSetInteger(0,name,OBJPROP_YDISTANCE,y);
+   ObjectSetString(0,name,OBJPROP_TEXT,text);
+   ObjectSetString(0,name,OBJPROP_FONT,"Arial");
+   ObjectSetInteger(0,name,OBJPROP_FONTSIZE,9);
+   ObjectSetInteger(0,name,OBJPROP_COLOR,textColor);
+   ObjectSetInteger(0,name,OBJPROP_SELECTABLE,false);
+   ObjectSetInteger(0,name,OBJPROP_SELECTED,false);
+   ObjectSetInteger(0,name,OBJPROP_HIDDEN,true);
+   ObjectSetInteger(0,name,OBJPROP_BACK,false);
+   ObjectSetInteger(0,name,OBJPROP_ZORDER,1000);
+}
+
 void EAGOLD_SentinelReduceCreateButton()
 {
    if(ObjectFind(0,EAGOLD_SENTINEL_REDUCE_BUTTON)<0)
@@ -505,6 +527,11 @@ void EAGOLD_SentinelReduceUpdatePanel()
 
    EAGOLD_SentinelReduceCreateButton();
 
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T1,"T1 --",12,438,clrWhite);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T2,"T2 --",12,454,clrWhite);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T3,"T3 --",12,470,clrWhite);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_INFO,"REDUCE LOT "+DoubleToString(SentinelReduceLots,DigitsLots)+" | MIN "+DoubleToString(SentinelReduceMinProfit,2),12,486,clrSilver);
+
    int t1=EAGOLD_SentinelReduceGetTicket(1);
    int t2=EAGOLD_SentinelReduceGetTicket(2);
    int t3=EAGOLD_SentinelReduceGetTicket(3);
@@ -513,9 +540,9 @@ void EAGOLD_SentinelReduceUpdatePanel()
    string s2=(t2>0 ? "T2 #"+IntegerToString(t2)+" "+EAGOLD_SentinelReduceTypeText(t2) : "T2 --");
    string s3=(t3>0 ? "T3 #"+IntegerToString(t3)+" "+EAGOLD_SentinelReduceTypeText(t3) : "T3 --");
 
-   ObjectSetString(0,EAGOLD_SENTINEL_REDUCE_T1,OBJPROP_TEXT,s1);
-   ObjectSetString(0,EAGOLD_SENTINEL_REDUCE_T2,OBJPROP_TEXT,s2);
-   ObjectSetString(0,EAGOLD_SENTINEL_REDUCE_T3,OBJPROP_TEXT,s3);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T1,s1,12,438,t1>0?clrYellow:clrSilver);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T2,s2,12,454,t2>0?clrLime:clrSilver);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T3,s3,12,470,t3>0?clrLime:clrSilver);
 
    bool ready=(t1>0 || t2>0);
    string buttonText=ready ? "REDUCE SELECIONADO" : "AGUARDANDO SENTINEL_CESTA";
