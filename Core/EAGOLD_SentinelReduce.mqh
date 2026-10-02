@@ -532,7 +532,7 @@ void EAGOLD_SentinelReduceUpdatePanel()
    EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T1,"T1 --",12,470,clrWhite);
    EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T2,"T2 --",12,487,clrWhite);
    EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T3,"T3 --",12,504,clrWhite);
-   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_INFO,"REDUCE LOT "+DoubleToString(SentinelReduceLots,DigitsLots)+" | MIN "+DoubleToString(SentinelReduceMinProfit,2),12,521,clrSilver);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_INFO,g_sentinelReduceStatus!=""?g_sentinelReduceStatus:"REDUCE LOT "+DoubleToString(SentinelReduceLots,DigitsLots)+" | MIN "+DoubleToString(SentinelReduceMinProfit,2),12,521,g_sentinelReduceStatus!=""?clrAqua:clrSilver);
 
    int t1=EAGOLD_SentinelReduceGetTicket(1);
    int t2=EAGOLD_SentinelReduceGetTicket(2);
