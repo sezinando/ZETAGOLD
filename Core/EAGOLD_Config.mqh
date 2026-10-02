@@ -40,8 +40,7 @@ extern double P02A_05_MiniGrid2=80.0;
 // [02A.07] PendingStepTrail
 extern double P02A_07_PendingStepTrail=50.0;
 // [02A.08] BasketRestartStep
-extern double P02A_08_BasketRestartStep=160.0;
-input string INPUT_GROUP_LIFECYCLE="=== 03 R4 / R5 / R7 LIFECYCLE ==="; input string INPUT_GROUP_GLOBAL_TRAIL="=== 03 GLOBAL STOP TRAIL CONTROL ===";
+extern double P02A_08_BasketRestartStep=160.0; input string INPUT_GROUP_GLOBAL_TRAIL="=== 03 GLOBAL STOP TRAIL CONTROL ===";
 // [03.09] EnableGlobalStopTrail
 extern bool P03_09_EnableGlobalStopTrail=true;
 // [03.10] GlobalStopTrailCooldownSeconds
