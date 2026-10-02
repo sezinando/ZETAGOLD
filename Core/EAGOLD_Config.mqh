@@ -127,6 +127,12 @@ extern int P07_17_ChartBasketGuideOffsetBars=2;
 input string INPUT_GROUP_UI="=== 07 UI / PANEL LAYOUT ===";
 // [07.26] PanelBackgroundWidth
 extern int P07_26_PanelBackgroundWidth=430;
+// [07.27] EnableSentinelReduce
+extern bool P07_27_EnableSentinelReduce=true;
+// [07.28] SentinelReduceLots
+extern double P07_28_SentinelReduceLots=0.02;
+// [07.29] SentinelReduceMinProfit
+extern double P07_29_SentinelReduceMinProfit=20.0;
 
 // -----------------------------------------------------------------------------
 // Indexed input names exposed in the MT4 Inputs window.
@@ -188,4 +194,7 @@ extern int P07_26_PanelBackgroundWidth=430;
 #define EnableChartBasketGuides P07_16_EnableChartBasketGuides
 #define ChartBasketGuideOffsetBars P07_17_ChartBasketGuideOffsetBars
 #define PanelBackgroundWidth P07_26_PanelBackgroundWidth
+#define EnableSentinelReduce P07_27_EnableSentinelReduce
+#define SentinelReduceLots P07_28_SentinelReduceLots
+#define SentinelReduceMinProfit P07_29_SentinelReduceMinProfit
 #endif
