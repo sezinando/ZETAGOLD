@@ -35,7 +35,6 @@ string EAGOLD_ModPanelBRXMode()
    return("HYBRID");
 }
 
-string EAGOLD_ModPanelR13Regime(){return(R13RegimeName(g_r13Observer.regime));}
 
 void EAGOLD_ModPanelLabel(string id,string text,int row,color clr)
 {
@@ -150,10 +149,6 @@ void EAGOLD_ModPanelUpdate()
    EAGOLD_ModPanelLabel("MAXLOTS",StringFormat("MAIOR ACUM. %9s",EAGOLD_ModPanelLots(g_modPanelMaxLots)),row++,clrYellow);
    EAGOLD_ModPanelLabel("DD",StringFormat("DD %11s  %6.2f%%",EAGOLD_ModPanelMoney(currentDD),ddPct),row++,currentDD>0.0?clrYellow:clrLime);
    EAGOLD_ModPanelLabel("SEP4","----------------------------------------------",row++,clrDimGray);
-   bool r13Enabled=(EnableR13 && g_r13Observer.configValid),r13Eligible=g_r13Observer.eligible;
-   EAGOLD_ModPanelLabel("R13A",StringFormat("R13 %-3s   REG %-9s   ELIG %-3s",r13Enabled?"ON":"OFF",EAGOLD_ModPanelR13Regime(),r13Eligible?"YES":"NO"),row++,r13Eligible?clrLime:(r13Enabled?clrAqua:clrSilver));
-   EAGOLD_ModPanelLabel("R13B",StringFormat("R13 ATR %7.1f   RNG %7.1f   DRIFT %7.1f",g_r13Observer.atrPoints,g_r13Observer.rangePoints,g_r13Observer.driftPoints),row++,clrAqua);
-   EAGOLD_ModPanelLabel("R13C",StringFormat("R13 MEXP %5.2f   POS %2d   P/L %9s",g_r13Observer.masterExposureLots,g_r13Observer.satellitePositions,EAGOLD_ModPanelMoney(g_r13Observer.satelliteProfit)),row++,clrSilver);
    EAGOLD_ModPanelLabel("HEDGE",StringFormat("HEDGE     %s",g_r9HedgeActive?"ATIVO":"INATIVO"),row++,g_r9HedgeActive?clrYellow:clrSilver);
    EAGOLD_ModPanelLabel("R11",StringFormat("R11 L%-2d   STEP %s",displayLevel,EAGOLD_ModPanelLots(RecoveryStepForLevel(displayLevel))),row++,EnableRecoveryStepMultiplier?clrAqua:clrSilver);
    EAGOLD_ModPanelLabel("REC",StringFormat("RECOVERY  B%-2d S%-2d L%-2d",RecoveryLevel(OP_BUY),RecoveryLevel(OP_SELL),recoveryLevel),row++,recoveryLevel>0?clrYellow:clrLime);
@@ -174,7 +169,7 @@ void EAGOLD_ModPanelUpdate()
 
 void EAGOLD_ModPanelDelete()
 {
-   string ids[]={"TITLE","SEP1","IDENT","MARKET","SPREAD","SEP2","BUY","SELL","EXPOS","PENDING","SEP3","TOTAL","EQUITY","ACCUM","MIN","MAXPROFIT","LOTS","MAXLOTS","DD","SEP4","R13A","R13B","R13C","HEDGE","R11","REC","SEP5","BRX","TRAIL","TIME","SEP6","DBG1","DBG2","DBG6","DBG7"};
+   string ids[]={"TITLE","SEP1","IDENT","MARKET","SPREAD","SEP2","BUY","SELL","EXPOS","PENDING","SEP3","TOTAL","EQUITY","ACCUM","MIN","MAXPROFIT","LOTS","MAXLOTS","DD","SEP4","HEDGE","R11","REC","SEP5","BRX","TRAIL","TIME","SEP6","DBG1","DBG2","DBG6","DBG7"};
    for(int i=0;i<ArraySize(ids);i++){string name=EAGOLD_MOD_PANEL_PREFIX+ids[i];if(ObjectFind(0,name)>=0)ObjectDelete(0,name);}
    string bg=EAGOLD_MOD_PANEL_PREFIX+"BG";if(ObjectFind(0,bg)>=0)ObjectDelete(0,bg);
 }
