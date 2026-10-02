@@ -3,7 +3,7 @@
 
 void EAGOLD_PanelUpdate(const EAGOLD_Context &ctx,const EAGOLD_BasketState &s)
 {
-   Comment("EAGOLD MODULAR v0.101\n",
+   Comment("EAGOLD MODULAR v0.102\n",
            "BOOT STATUS: OK   R10: ",(ctx.enableR10?"ENABLED":"DISABLED"),
            "   R10 PAIR: ",(ctx.enableR10Pair?"ENABLED":"DISABLED"),"\n",
            "CORE: Context OK | State OK | Orders OK | Execution OK\n",
