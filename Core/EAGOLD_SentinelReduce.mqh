@@ -444,7 +444,7 @@ bool EAGOLD_SentinelReduceExecute()
    return(false);
 }
 
-void EAGOLD_SentinelReduceProcessExternalRequest()
+bool EAGOLD_SentinelReduceProcessExternalRequest()
 {
    string name=EAGOLD_SentinelReduceActionName();
    string fallback=EAGOLD_SentinelReduceGenericActionName();
@@ -457,14 +457,16 @@ void EAGOLD_SentinelReduceProcessExternalRequest()
       action=GlobalVariableGet(fallback);
 
    if(action<=0.00000001)
-      return;
+      return(false);
 
    GlobalVariableDel(name);
    GlobalVariableDel(fallback);
    GlobalVariablesFlush();
 
    if(action==1.0)
-      EAGOLD_SentinelReduceExecute();
+      return(EAGOLD_SentinelReduceExecute());
+
+   return(false);
 }
 
 void EAGOLD_SentinelReduceCreateLabel(string name,string text,int x,int y,color textColor)
@@ -496,7 +498,7 @@ void EAGOLD_SentinelReduceCreateButton()
       ObjectCreate(0,EAGOLD_SENTINEL_REDUCE_BUTTON,OBJ_BUTTON,0,0,0);
       ObjectSetInteger(0,EAGOLD_SENTINEL_REDUCE_BUTTON,OBJPROP_CORNER,CORNER_LEFT_UPPER);
       ObjectSetInteger(0,EAGOLD_SENTINEL_REDUCE_BUTTON,OBJPROP_XDISTANCE,10);
-      ObjectSetInteger(0,EAGOLD_SENTINEL_REDUCE_BUTTON,OBJPROP_YDISTANCE,505);
+      ObjectSetInteger(0,EAGOLD_SENTINEL_REDUCE_BUTTON,OBJPROP_YDISTANCE,540);
       ObjectSetInteger(0,EAGOLD_SENTINEL_REDUCE_BUTTON,OBJPROP_XSIZE,260);
       ObjectSetInteger(0,EAGOLD_SENTINEL_REDUCE_BUTTON,OBJPROP_YSIZE,22);
       ObjectSetInteger(0,EAGOLD_SENTINEL_REDUCE_BUTTON,OBJPROP_FONTSIZE,9);
@@ -527,10 +529,10 @@ void EAGOLD_SentinelReduceUpdatePanel()
 
    EAGOLD_SentinelReduceCreateButton();
 
-   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T1,"T1 --",12,438,clrWhite);
-   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T2,"T2 --",12,454,clrWhite);
-   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T3,"T3 --",12,470,clrWhite);
-   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_INFO,"REDUCE LOT "+DoubleToString(SentinelReduceLots,DigitsLots)+" | MIN "+DoubleToString(SentinelReduceMinProfit,2),12,486,clrSilver);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T1,"T1 --",12,470,clrWhite);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T2,"T2 --",12,487,clrWhite);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_T3,"T3 --",12,504,clrWhite);
+   EAGOLD_SentinelReduceCreateLabel(EAGOLD_SENTINEL_REDUCE_INFO,"REDUCE LOT "+DoubleToString(SentinelReduceLots,DigitsLots)+" | MIN "+DoubleToString(SentinelReduceMinProfit,2),12,521,clrSilver);
 
    int t1=EAGOLD_SentinelReduceGetTicket(1);
    int t2=EAGOLD_SentinelReduceGetTicket(2);
