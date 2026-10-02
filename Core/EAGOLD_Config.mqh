@@ -1,7 +1,6 @@
 #ifndef EAGOLD_CONFIG_MQH
 #define EAGOLD_CONFIG_MQH
 #define EAGOLD_VERSION "0.117"
-#define EAGOLD_R13_DEFAULT_COMMENT "EAGOLD_RECOVERY_SATELLITE"
 #define EAGOLD_EXPIRY_DATE D'2026.12.31 00:00'
 double g_panelMinProfit=0.0; double g_panelMaxProfit=0.0; double g_panelMaxLots=0.0; bool g_panelInitialized=false; bool EAGOLD_TradingAllowed(){return(TimeCurrent()<EAGOLD_EXPIRY_DATE);}
 input string INPUT_GROUP_GENERAL="=== 01 GENERAL / IDENTITY ===";
@@ -101,47 +100,6 @@ extern double P05_22_R11BlockGrossExposureLots=12.00;
 extern double P05_23_R11MinNetToGrossRatio=0.10;
 // [05.24] R11MinRecoveryLotFactor
 extern double P05_24_R11MinRecoveryLotFactor=0.25;
-input string INPUT_GROUP_R13="=== 06 R13 / RECOVERY SATELLITE ===";
-// [06.01] EnableR13
-extern bool P06_01_EnableR13=true;
-// [06.02] EnableR13AutoActivation
-extern bool P06_02_EnableR13AutoActivation=true;
-// [06.03] EnableR13Trading
-extern bool P06_03_EnableR13Trading=true;
-// [06.04] R13ProfitTarget
-extern double P06_04_R13ProfitTarget=5.00;
-// [06.05] R13EntryCooldownSeconds
-extern double P06_05_R13EntryCooldownSeconds=30.0;
-// [06.06] R13CloseWhenMasterFlat
-extern bool P06_06_R13CloseWhenMasterFlat=true;
-// [06.07] EnableR13MasterAdjustment
-extern bool P06_07_EnableR13MasterAdjustment=true;
-// [06.08] R13MasterAdjustmentMaxLots
-extern double P06_08_R13MasterAdjustmentMaxLots=0.20;
-// [06.09] R13MagicNumber
-extern int P06_09_R13MagicNumber=3010;
-// [06.10] R13OrderComment
-extern string P06_10_R13OrderComment=EAGOLD_R13_DEFAULT_COMMENT;
-// [06.11] R13MaxLots
-extern double P06_11_R13MaxLots=0.20;
-// [06.12] R13MaxPositions
-extern int P06_12_R13MaxPositions=3;
-// [06.13] R13MaxDrawdown
-extern double P06_13_R13MaxDrawdown=50.00;
-// [06.14] R13MaxDailyLoss
-extern double P06_14_R13MaxDailyLoss=50.00;
-// [06.15] R13MaxSpread
-extern double P06_15_R13MaxSpread=100.0;
-// [06.16] R13StartHour
-extern int P06_16_R13StartHour=0;
-// [06.17] R13EndHour
-extern int P06_17_R13EndHour=23;
-// [06.18] EnableR13DirectionalComplementarity
-extern bool P06_18_EnableR13DirectionalComplementarity=true;
-// [06.19] R13MinDirectionalImbalance
-extern double P06_19_R13MinDirectionalImbalance=0.01;
-// [06.20] R13RecoveryCapitalFraction
-extern double P06_20_R13RecoveryCapitalFraction=1.00;
 input string INPUT_GROUP_ENGINE_MARKERS="=== 07 ENGINE ACTION MARKERS ===";
 // [07.07] EnableEngineActionMarkers
 extern bool P07_07_EnableEngineActionMarkers=true;
@@ -224,26 +182,6 @@ extern int P07_26_PanelBackgroundWidth=430;
 #define R11BlockGrossExposureLots P05_22_R11BlockGrossExposureLots
 #define R11MinNetToGrossRatio P05_23_R11MinNetToGrossRatio
 #define R11MinRecoveryLotFactor P05_24_R11MinRecoveryLotFactor
-#define EnableR13 P06_01_EnableR13
-#define EnableR13AutoActivation P06_02_EnableR13AutoActivation
-#define EnableR13Trading P06_03_EnableR13Trading
-#define R13ProfitTarget P06_04_R13ProfitTarget
-#define R13EntryCooldownSeconds P06_05_R13EntryCooldownSeconds
-#define R13CloseWhenMasterFlat P06_06_R13CloseWhenMasterFlat
-#define EnableR13MasterAdjustment P06_07_EnableR13MasterAdjustment
-#define R13MasterAdjustmentMaxLots P06_08_R13MasterAdjustmentMaxLots
-#define R13MagicNumber P06_09_R13MagicNumber
-#define R13OrderComment P06_10_R13OrderComment
-#define R13MaxLots P06_11_R13MaxLots
-#define R13MaxPositions P06_12_R13MaxPositions
-#define R13MaxDrawdown P06_13_R13MaxDrawdown
-#define R13MaxDailyLoss P06_14_R13MaxDailyLoss
-#define R13MaxSpread P06_15_R13MaxSpread
-#define R13StartHour P06_16_R13StartHour
-#define R13EndHour P06_17_R13EndHour
-#define EnableR13DirectionalComplementarity P06_18_EnableR13DirectionalComplementarity
-#define R13MinDirectionalImbalance P06_19_R13MinDirectionalImbalance
-#define R13RecoveryCapitalFraction P06_20_R13RecoveryCapitalFraction
 #define EnableEngineActionMarkers P07_07_EnableEngineActionMarkers
 #define EnableModularizationPanel P07_14_EnableModularizationPanel
 #define EnableModularizationDebug P07_15_EnableModularizationDebug
