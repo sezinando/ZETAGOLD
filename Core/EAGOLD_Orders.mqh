@@ -3,18 +3,6 @@
 
 // EAGOLD order recognition supports explicit Magic and PAR/Symbol modes.
 
-bool IsR13Order(){
-   if(OrderSymbol()!=Symbol())return(false);
-   return(OrderMagicNumber()==R13MagicNumber);
-}
-
-bool IsR13OwnershipConfigurationValid(){
-   if(R13MagicNumber<=0)return(false);
-   if(MagicNumber<=0)return(false);
-   if(R13MagicNumber==MagicNumber)return(false);
-   return(true);
-}
-
 int CountLegacyMagicOrders(){
    int count=0;
    for(int i=OrdersTotal()-1;i>=0;i--){
@@ -29,8 +17,6 @@ bool EAGOLDAllSymbolRecognitionAllowed(){return(EnableLegacyReattach);}
 
 bool EAGOLDValidateOwnershipConfiguration(){
    if(MagicNumber<=0)return(false);
-   if(R13MagicNumber<=0)return(false);
-   if(MagicNumber==R13MagicNumber)return(false);
    if(RequireCleanLegacyOwnership){
       int legacy=CountLegacyMagicOrders();
       if(legacy>0)return(false);
@@ -40,7 +26,6 @@ bool EAGOLDValidateOwnershipConfiguration(){
 
 bool IsEAGOLDOrder(){
    if(OrderSymbol()!=Symbol())return(false);
-   if(OrderMagicNumber()==R13MagicNumber)return(false);
    if(MagicNumber<=0)return(false);
    if(EAGOLDAllSymbolRecognitionAllowed())return(true);
    return(OrderMagicNumber()==MagicNumber);
