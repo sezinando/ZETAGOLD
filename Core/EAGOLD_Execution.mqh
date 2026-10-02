@@ -57,44 +57,6 @@ int SendMarket(int type,double lots,string comment)
    return(ticket);
 }
 
-// Generic reserved-Magic market entry. R13 is outside the Master ownership set.
-int SendMarketByMagic(int type,double lots,string comment,int magic)
-{
-   if(!EAGOLD_NewOrderAdmissionAllowed())return(-1);
-   if(magic<0){Print(EA_NAME," market send blocked: invalid magic.");return(-1);}
-   if(type!=OP_BUY&&type!=OP_SELL)return(-1);
-   RefreshRates();
-   lots=NormalizeLot(lots);
-   if(lots<Lot)return(-1);
-   double price=(type==OP_BUY?Ask:Bid);
-   ResetLastError();
-   int ticket=OrderSend(Symbol(),type,lots,NormalizePrice(price),0,0,0,comment,magic,0,clrNONE);
-   if(ticket<0)Print(EA_NAME," market send failed. type=",type," magic=",magic," error=",GetLastError()," comment=",comment);
-   else Print(EA_NAME," market created. ticket=",ticket," type=",type," lot=",DoubleToString(lots,DigitsLots)," magic=",magic," comment=",comment);
-   return(ticket);
-}
-
-// Generic reserved-Magic close. Used by R13 without crossing Master ownership.
-bool CloseMarketOrderByMagic(int ticket,int magic,double &realized)
-{
-   realized=0.0;
-   if(!OrderSelect(ticket,SELECT_BY_TICKET,MODE_TRADES))return(false);
-   if(OrderSymbol()!=Symbol()||OrderMagicNumber()!=magic)return(false);
-   int type=OrderType();
-   if(type!=OP_BUY&&type!=OP_SELL)return(false);
-   double lots=OrderLots();
-   RefreshRates();
-   double price=(type==OP_BUY?Bid:Ask);
-   ResetLastError();
-   if(!OrderClose(ticket,lots,NormalizePrice(price),0,clrNONE))
-   {
-      Print(EA_NAME," market close failed. ticket=",ticket," magic=",magic," error=",GetLastError());
-      return(false);
-   }
-   if(OrderSelect(ticket,SELECT_BY_TICKET,MODE_HISTORY))realized=OrderProfit()+OrderSwap()+OrderCommission();
-   return(true);
-}
-
 bool CloseMarketOrder(int ticket)
 {
    if(!OrderSelect(ticket,SELECT_BY_TICKET,MODE_TRADES))return(false);
