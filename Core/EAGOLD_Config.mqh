@@ -168,27 +168,8 @@ extern bool P07_16_EnableChartBasketGuides=true;
 // [07.17] ChartBasketGuideOffsetBars
 extern int P07_17_ChartBasketGuideOffsetBars=2;
 input string INPUT_GROUP_UI="=== 07 UI / PANEL LAYOUT ===";
-// [07.18] PanelBackgroundX
-extern int P07_18_PanelBackgroundX=260;
-// [07.19] PanelBackgroundY
-extern int P07_19_PanelBackgroundY=8;
-// [07.20] PanelBackgroundHeight
-extern int P07_20_PanelBackgroundHeight=450;
-// [07.21] PanelBottomY
-extern int P07_21_PanelBottomY=8;
-// [07.22] PanelBottomX1
-extern int P07_22_PanelBottomX1=15;
-// [07.23] PanelBottomX2
-extern int P07_23_PanelBottomX2=190;
-// [07.24] PanelBottomX3
-extern int P07_24_PanelBottomX3=520;
-// [07.25] PanelBottomX4
-extern int P07_25_PanelBottomX4=850;
 // [07.26] PanelBackgroundWidth
 extern int P07_26_PanelBackgroundWidth=430;
-input string INPUT_GROUP_PERSISTENCE="=== 08 PERSISTENCE / CHECKPOINT POLICY ===";
-// [08.01] PersistenceWorstEquityStep
-extern double P08_01_PersistenceWorstEquityStep=5.00;
 
 // -----------------------------------------------------------------------------
 // Indexed input names exposed in the MT4 Inputs window.
@@ -270,5 +251,4 @@ extern double P08_01_PersistenceWorstEquityStep=5.00;
 #define EnableChartBasketGuides P07_16_EnableChartBasketGuides
 #define ChartBasketGuideOffsetBars P07_17_ChartBasketGuideOffsetBars
 #define PanelBackgroundWidth P07_26_PanelBackgroundWidth
-#define PersistenceWorstEquityStep P08_01_PersistenceWorstEquityStep
 #endif
